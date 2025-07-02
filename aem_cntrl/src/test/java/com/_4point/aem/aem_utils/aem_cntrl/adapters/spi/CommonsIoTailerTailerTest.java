@@ -27,7 +27,7 @@ import com._4point.testing.matchers.javalang.ExceptionMatchers;
 class CommonsIoTailerTailerTest {
 	
 	private static final String LOG_MESSAGE_FORMAT_STR = "This is log line #%d.";
-	private static final Tailer.TailerFactory tailerFactory = new CommonsIoTailerTailer.TailerLineStreamFactory();
+	private static final Tailer.TailerFactory tailerFactory = new CommonsIoTailerTailer.TailerFactory();
 
 	enum ExpectedResult {
 		FindsLine, TimesOut;

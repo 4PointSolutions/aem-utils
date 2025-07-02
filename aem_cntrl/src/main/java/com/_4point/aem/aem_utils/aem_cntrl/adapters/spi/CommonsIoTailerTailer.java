@@ -132,7 +132,7 @@ public class CommonsIoTailerTailer implements com._4point.aem.aem_utils.aem_cntr
 		}
 	}
 	
-	public static class TailerLineStreamFactory implements TailerFactory {
+	public static class TailerFactory implements com._4point.aem.aem_utils.aem_cntrl.domain.ports.spi.Tailer.TailerFactory {
 
 		@Override
 		public CommonsIoTailerTailer fromBeginning(Path path) {
