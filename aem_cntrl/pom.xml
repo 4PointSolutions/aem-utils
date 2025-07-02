@@ -11,40 +11,97 @@
 	<groupId>com.4point.aem.aem_utils</groupId>
 	<artifactId>aem_cntrl</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
-	<name>Aem Control</name>
+	<name>AEM Control</name>
 	<description>Command Line Utility for controlling an AEM instance</description>
-	<url />
 	<licenses>
-		<license />
+		<license>
+			<name>The Apache License, Version 2.0</name>
+			<url>https://www.apache.org/licenses/LICENSE-2.0.txt</url>
+		</license>
 	</licenses>
+
+	<organization>
+		<name>4Point Solutions</name>
+		<url>https://www.4point.com</url>
+	</organization>
+
 	<developers>
-		<developer />
+		<developer>
+			<name>4Point Solutions</name>
+			<email>open.source@4point.com</email>
+			<organization>4Point Solutions Ltd.</organization>
+			<organizationUrl>https://www.4point.com</organizationUrl>
+		</developer>
 	</developers>
+
 	<scm>
-		<connection />
-		<developerConnection />
-		<tag />
-		<url />
+		<connection>scm:git:https://github.com/4PointSolutions/aem-installer.git</connection>
+		<developerConnection>scm:git:https://github.com/4PointSolutions/aem-installer.git</developerConnection>
+		<url>https://github.com/4PointSolutions/aem-installer</url>
+	  	<tag>HEAD</tag>
 	</scm>
+
+	<repositories>
+		<repository>
+			<id>github</id>
+			<url>https://maven.pkg.github.com/4PointSolutions/*</url>
+			<snapshots>
+				<enabled>true</enabled>
+			</snapshots>
+		</repository>
+	</repositories>
+
 	<properties>
 		<java.version>21</java.version>
+
+		<!-- Override Spring Boot versions (revisit this when updating Spring Boot parent version) -->
+		<junit-jupiter.version>5.13.1</junit-jupiter.version>
+		
+		<!-- Project Dependencies -->
+		<picocli.version>4.7.7</picocli.version>
+		<commons-io.version>2.19.0</commons-io.version>
+
+		<!-- Testing Dependencies -->
+		<fp-hamcrest-matchers.version>0.0.4-SNAPSHOT</fp-hamcrest-matchers.version>
+		<lorem.version>2.2</lorem.version>
 	</properties>
 	<dependencies>
 	    <!-- Project Dependencies -->
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter</artifactId>
+			<artifactId>spring-boot-starter-web</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>info.picocli</groupId>
 			<artifactId>picocli-spring-boot-starter</artifactId>
-			<version>4.7.7</version>
+			<version>${picocli.version}</version>
 		</dependency>
-
+		<dependency>
+			<groupId>commons-io</groupId>
+			<artifactId>commons-io</artifactId>
+			<version>${commons-io.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.commons</groupId>
+			<artifactId>commons-lang3</artifactId>
+		</dependency>
+		
 		<!-- Testing Dependencies -->
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-test</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>com.4point.testing</groupId>
+			<artifactId>4point-hamcrest-matchers</artifactId>
+			<version>${fp-hamcrest-matchers.version}</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>com.thedeanda</groupId>
+			<artifactId>lorem</artifactId>
+			<version>${lorem.version}</version>
 			<scope>test</scope>
 		</dependency>
 	</dependencies>
