@@ -48,6 +48,32 @@ public class ProcessRunner<O, E> {
 	};
 
 	/**
+	 * Runs a command and waits for it to complete.   
+	 * 
+	 * @param processBuilder the ProcessBuilder to run.  This should be configured with the command and any arguments to be run.
+	 * @param timeout the maximum time to wait for the process to complete.  If this timeout is exceeded, an exception will be thrown.
+	 * @return exit code
+	 */
+	public static int runUntilCompletes(ProcessBuilder processBuilder, Duration timeout) {
+		RunningProcess<Stream<String>, Stream<String>> process = ProcessRunner.<Stream<String>, Stream<String>>builder()
+				.setOutputStreamHandler(s->s)
+				.setErrorStreamHandler(s->s)
+				.build()
+				.run(processBuilder);
+		log.atInfo().log("Running AEM with options");
+		try {
+			Stream<String> stdoutStream = process.stdout().get();
+			CompletableFuture<Void> stdoutFuture = CompletableFuture.runAsync(()->stdoutStream.forEach(s->log.atDebug().log(s)), EXECUTOR_SERVICE);
+			Stream<String> stderrStream = process.stderr().get();
+			CompletableFuture<Void> stderrFuture = CompletableFuture.runAsync(()->stderrStream.forEach(s->log.atDebug().log(s)), EXECUTOR_SERVICE);
+			int result = process.waitForCompletion();
+			return result;
+		} catch (InterruptedException | ExecutionException e) {
+			throw new ProcessRunnerException(e);
+		}
+	}
+	
+	/**
 	 * Runs a command.   
 	 * 
 	 * Note, the stdout and stderr Streams should be retrieved and joined with a terminal operation prior to 

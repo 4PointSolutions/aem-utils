@@ -13,10 +13,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
-import java.util.function.Supplier;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -26,7 +23,6 @@ import org.slf4j.LoggerFactory;
 
 import com._4point.aem.aem_utils.aem_cntrl.domain.ProcessRunner.ListResult;
 import com._4point.aem.aem_utils.aem_cntrl.domain.ProcessRunner.ProcessRunnerException;
-import com._4point.aem.aem_utils.aem_cntrl.domain.ProcessRunner.RunningProcess;
 import com._4point.aem.aem_utils.aem_cntrl.domain.ports.spi.Tailer;
 import com._4point.aem.aem_utils.aem_cntrl.domain.ports.spi.Tailer.TailerFactory;
 
@@ -45,7 +41,6 @@ public class AemProcess {
 	// Regex that we look for to know that the AEM Forms Add-on is installed.
 	/* package */ static final String AEM_FORMS_ADD_ON_START_TARGET_REGEX = ".*Installed BMC XMLFormService of type BMC_NATIVE.*";
 
-	private static final ExecutorService EXECUTOR_SERVICE = Executors.newVirtualThreadPerTaskExecutor();
 	private static final Path RUN_START = OperatingSystem.getOs().runStart();
 	private static final Path RUN_STOP = OperatingSystem.getOs().runStop();
 	private static final Path QUICKSTART_DIR = Path.of("crx-quickstart");
@@ -62,27 +57,6 @@ public class AemProcess {
 		this.tailerFactory = tailerFactory;
 	}
 
-	private static int runUntilCompletes(Supplier<ProcessBuilder> processBuilderFactory, Duration timeout) {
-		ProcessBuilder processBuilder = processBuilderFactory.get();
-		
-		RunningProcess<Stream<String>, Stream<String>> process = ProcessRunner.<Stream<String>, Stream<String>>builder()
-				.setOutputStreamHandler(s->s)
-				.setErrorStreamHandler(s->s)
-				.build()
-				.run(processBuilder);
-		log.atInfo().log("Running AEM with options");
-		try {
-			Stream<String> stdoutStream = process.stdout().get();
-			CompletableFuture<Void> stdoutFuture = CompletableFuture.runAsync(()->stdoutStream.forEach(s->log.atDebug().log(s)), EXECUTOR_SERVICE);
-			Stream<String> stderrStream = process.stderr().get();
-			CompletableFuture<Void> stderrFuture = CompletableFuture.runAsync(()->stderrStream.forEach(s->log.atDebug().log(s)), EXECUTOR_SERVICE);
-			int result = process.waitForCompletion();
-			return result;
-		} catch (InterruptedException | ExecutionException e) {
-			throw new AemProcessException(e);
-		}
-	}
-	
 	private String runUntilLogContains(String targetRegEx, Duration timeout, String...options) throws AemProcessException {		
 		return runUntilLogContains(targetRegEx, timeout, null, options); // no action to perform
 	}
@@ -224,11 +198,6 @@ public class AemProcess {
 					 .findAny();
 	}
 	
-	private static InterruptedException createException(String targetRegEx, String stderr) {
-		log.atError().addArgument(stderr).log("Aem stderr is:\n{}");
-		return new InterruptedException("AEM Terminated unexpectedly before regex (%s) was found.".formatted(targetRegEx));
-	}
-
 	private static void sleepForSeconds(int numSecs) {
 		try {
 			Thread.sleep(Duration.ofSeconds(numSecs));
@@ -267,8 +236,7 @@ public class AemProcess {
 		}
 
 		public AemProcess unpackQuickstart(TailerFactory tailerFactory)  {
-			Supplier<ProcessBuilder> processBuilderFactory = ()->setupQuickstartProcessBuilder("-unpack");
-			int exitCode = runUntilCompletes(processBuilderFactory, Duration.ofMinutes(3));
+			int exitCode = ProcessRunner.runUntilCompletes(setupQuickstartProcessBuilder("-unpack"), Duration.ofMinutes(3));
 			log.atDebug().addArgument(exitCode).log("Unpacking exit code = {}.");
 			createBatFiles();
 			return new AemProcess(aemQuickstartDir, tailerFactory);
