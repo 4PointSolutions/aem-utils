@@ -1,19 +1,32 @@
 package com._4point.aem.aem_utils.aem_cntrl;
 
+import java.net.http.HttpClient;
+
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.ExitCodeGenerator;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.WebApplicationType;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.builder.SpringApplicationBuilder;
+import org.springframework.context.annotation.Bean;
+import org.springframework.http.client.JdkClientHttpRequestFactory;
 
+import com._4point.aem.aem_utils.aem_cntrl.adapters.ipi.JacksonJsonData;
+import com._4point.aem.aem_utils.aem_cntrl.adapters.spi.CommonsIoTailerTailer;
+import com._4point.aem.aem_utils.aem_cntrl.adapters.spi.SpringRestClientRestClient;
 import com._4point.aem.aem_utils.aem_cntrl.commands.AemCntrlCommandLine;
+import com._4point.aem.aem_utils.aem_cntrl.domain.AemInstallerImpl;
+import com._4point.aem.aem_utils.aem_cntrl.domain.ports.api.AemInstaller;
+import com._4point.aem.aem_utils.aem_cntrl.domain.ports.ipi.JsonData;
+import com._4point.aem.aem_utils.aem_cntrl.domain.ports.spi.RestClient;
+import com._4point.aem.aem_utils.aem_cntrl.domain.ports.spi.Tailer.TailerFactory;
 
 import picocli.CommandLine;
 import picocli.CommandLine.IFactory;
 
 @SpringBootApplication
 public class AemCntrlApplication implements CommandLineRunner, ExitCodeGenerator {
+	public static final String APP_CONFIG_PEFIX = "aemcntrl";
 
 	private final IFactory factory;
 	private final AemCntrlCommandLine aemCntrlCommandLine;
@@ -40,4 +53,28 @@ public class AemCntrlApplication implements CommandLineRunner, ExitCodeGenerator
 		// let picocli parse command line args and run the business logic
         exitCode = new CommandLine(aemCntrlCommandLine, factory).execute(args);
     }
+	
+	@Bean
+	RestClient restClient() {
+		String target = "http://localhost:4502";
+		String user = "admin";
+		String password = "admin";
+		HttpClient httpClient = HttpClient.newBuilder().followRedirects(HttpClient.Redirect.NORMAL).build();	// Configure client to follow redirects since AEM uses them a lot.
+		return SpringRestClientRestClient.create(target, user, password, org.springframework.web.client.RestClient.builder().requestFactory(new JdkClientHttpRequestFactory(httpClient)));
+	}
+	
+	@Bean
+	JsonData.JsonDataFactory jsonDataFactory() {
+		return JacksonJsonData::from;
+	}
+
+	@Bean
+	TailerFactory tailerFactory() {
+		return new CommonsIoTailerTailer.TailerFactory();
+	}
+	
+	@Bean
+	AemInstaller aemInstaller(RestClient restClient, JsonData.JsonDataFactory jsonDataFactory, TailerFactory tailerFactory) {
+		return new AemInstallerImpl(restClient, jsonDataFactory, tailerFactory);
+	}
 }
