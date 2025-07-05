@@ -7,7 +7,7 @@ This should include:
 
 * the AEM GA Quickstart jar and license.properties
 * the service pack files (service pack and forms-addon)
-* the aem-installer jar
+* the aem_cntrl jar
 * (optionally) the fluent forms jars
 * (optionally) an application.properties if you want to override any settings (like the trace level)
 
