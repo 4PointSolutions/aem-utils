@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.stream.Stream;
 
 import org.apache.commons.lang3.SystemUtils;
 import org.junit.jupiter.api.Disabled;
@@ -13,7 +14,9 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
+import com._4point.aem.aem_utils.aem_cntrl.adapters.ipi.JavaLangProcessRunner;
 import com._4point.aem.aem_utils.aem_cntrl.adapters.spi.CommonsIoTailerTailer;
+import com._4point.aem.aem_utils.aem_cntrl.domain.ports.ipi.ProcessRunner;
 import com._4point.aem.aem_utils.aem_cntrl.domain.ports.spi.Tailer.TailerFactory;
 
 @Disabled("The AemProcessTest tests are designed to be run manually, not as part of the automated test suite.  Comment out this line to run the individual tests manually.")
@@ -25,19 +28,24 @@ class AemProcessTest {
 	private static final Path AEM_FILES_LOC = Path.of("/Adobe", "AEM_65_SP23");		// Windows location
 	private static final Path SAMPLE_AEM_QUICKSTART_PATH = Path.of("AEM_6.5_Quickstart.jar"); // AEM 6.5 SP19-23
 	private static final JavaVersion AEM_JAVA_VERSION = JavaVersion.VERSION_11; // AEM 6.5 ORIG requires Java 11
+	private static final ProcessRunner PROCESS_RUNNER = JavaLangProcessRunner.<Stream<String>, Stream<String>>builder()
+																			 .setOutputStreamHandler(s->s)
+																			 .setErrorStreamHandler(s->s)
+																			 .build();
+
 //	private static final Path AEM_FILES_LOC = Path.of("/Adobe", "AEM_65_LTS");		// Windows location
 //	private static final Path SAMPLE_AEM_QUICKSTART_PATH = Path.of("cq-quickstart-6.6.0.jar"); // AEM 6.5 LTS
 //	private static final JavaVersion AEM_JAVA_VERSION = JavaVersion.VERSION_21; // AEM 6.5 LTS requires Java 21
 	
 	
 	
-	private final AemProcess underTest = new AemProcess(AEM_FILES_LOC.resolve(AEM_FILES_LOC), TAILER_FACTORY);
+	private final AemProcess underTest = new AemProcess(AEM_FILES_LOC.resolve(AEM_FILES_LOC), TAILER_FACTORY, PROCESS_RUNNER);
 
 	@Disabled("Disabled because it's already been unpacked")
 	@Test
 	void testUnpackQuickstart() throws Exception {
 		assertFalse(Files.exists(AEM_FILES_LOC.resolve("crx-quickstart")));
-		AemProcess aemProcess = new AemProcess.UninitializedAemInstance(AEM_FILES_LOC.resolve(SAMPLE_AEM_QUICKSTART_PATH), AEM_JAVA_VERSION).unpackQuickstart(TAILER_FACTORY);
+		AemProcess aemProcess = new AemProcess.UninitializedAemInstance(AEM_FILES_LOC.resolve(SAMPLE_AEM_QUICKSTART_PATH), AEM_JAVA_VERSION, PROCESS_RUNNER).unpackQuickstart(TAILER_FACTORY);
 		assertTrue(Files.exists(AEM_FILES_LOC.resolve("crx-quickstart")));
 		assertTrue(Files.exists(AEM_FILES_LOC.resolve(SystemUtils.IS_OS_WINDOWS ? "runStart.bat" : "runStart")));
 		assertTrue(Files.exists(AEM_FILES_LOC.resolve(SystemUtils.IS_OS_WINDOWS ? "runStop.bat" : "runStop")));

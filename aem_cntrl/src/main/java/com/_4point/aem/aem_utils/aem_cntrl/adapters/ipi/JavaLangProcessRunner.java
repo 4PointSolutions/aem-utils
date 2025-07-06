@@ -1,9 +1,10 @@
-package com._4point.aem.aem_utils.aem_cntrl.domain;
+package com._4point.aem.aem_utils.aem_cntrl.adapters.ipi;
 
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.io.UncheckedIOException;
+import java.nio.file.Path;
 import java.time.Duration;
 import java.util.List;
 import java.util.Optional;
@@ -15,12 +16,12 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 import java.util.function.Supplier;
-import java.util.stream.Collectors;
-import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com._4point.aem.aem_utils.aem_cntrl.domain.ports.ipi.ProcessRunner;
 
 /**
  * Class for running system commands.  It handles creation of threads for handling the inputs and outputs.  The
@@ -32,18 +33,18 @@ import org.slf4j.LoggerFactory;
  * @param <O> The result of the stdout handler.
  * @param <E> The result of the stderr handler.
  */
-public class ProcessRunner<O, E> {
-	private static final Logger log = LoggerFactory.getLogger(ProcessRunner.class);
+public class JavaLangProcessRunner<O, E> implements ProcessRunner {
+	private static final Logger log = LoggerFactory.getLogger(JavaLangProcessRunner.class);
 	private static final ExecutorService EXECUTOR_SERVICE = Executors.newVirtualThreadPerTaskExecutor();
 
 	private final Function<Stream<String>, O> outputStreamHandler; 
 	private final Function<Stream<String>, E> errorStreamHandler;
 	private final Supplier<Stream<String>> inputStreamHandler;
 	
-	public ProcessRunner(Function<Stream<String>, O> outputStreamHandler,
+	public JavaLangProcessRunner(Function<Stream<String>, O> outputStreamHandler,
 			Function<Stream<String>, E> errorStreamHandler, Supplier<Stream<String>> inputStreamHandler) {
-		this.outputStreamHandler = outputStreamHandler != null ? outputStreamHandler : ProcessRunner::consumeStream;
-		this.errorStreamHandler = errorStreamHandler != null ? errorStreamHandler : ProcessRunner::consumeStream;
+		this.outputStreamHandler = outputStreamHandler != null ? outputStreamHandler : JavaLangProcessRunner::consumeStream;
+		this.errorStreamHandler = errorStreamHandler != null ? errorStreamHandler : JavaLangProcessRunner::consumeStream;
 		this.inputStreamHandler = inputStreamHandler != null ? inputStreamHandler : ()->Stream.empty();
 	};
 
@@ -54,12 +55,13 @@ public class ProcessRunner<O, E> {
 	 * @param timeout the maximum time to wait for the process to complete.  If this timeout is exceeded, an exception will be thrown.
 	 * @return exit code
 	 */
-	public static int runUntilCompletes(ProcessBuilder processBuilder, Duration timeout) {
-		RunningProcess<Stream<String>, Stream<String>> process = ProcessRunner.<Stream<String>, Stream<String>>builder()
+	@Override
+	public int runUntilCompletes(String command[], Path dir, Duration timeout) {
+		RunningProcess<Stream<String>, Stream<String>> process = JavaLangProcessRunner.<Stream<String>, Stream<String>>builder()
 				.setOutputStreamHandler(s->s)
 				.setErrorStreamHandler(s->s)
 				.build()
-				.run(processBuilder);
+				.run(command, dir);
 		log.atInfo().log("Running AEM with options");
 		try {
 			Stream<String> stdoutStream = process.stdout().get();
@@ -86,9 +88,9 @@ public class ProcessRunner<O, E> {
 	 * @param command Command to be run
 	 * @return Result object containing CompletableFutures for all the outputs from the process.
 	 */
-	public RunningProcess<O,E> run(ProcessBuilder command) {
+	public RunningProcess<O,E> run(String command[], Path dir) {
 		try {
-			Process process = command.start();
+			Process process = new ProcessBuilder(command).directory(dir.toFile()).start();
 			
 			@SuppressWarnings("unused")
 			CompletableFuture<Void> stdin = CompletableFuture.runAsync(()->copyFrom(inputStreamHandler, process.getOutputStream()), EXECUTOR_SERVICE);
@@ -221,23 +223,6 @@ public class ProcessRunner<O, E> {
 	/**
 	 * Runs a command and accumulates the output (stdot and stderr) into List<String> objects.
 	 * 
-	 * Note, the command must not read from stdin.  If it does, this method will hang because the process will be waiting for input 
-	 * on stdin that never arrives.  Use runtoListResult(ProcessBuilder command, Supplier<Stream<String>> inputSupplier) instead.
-	 * 
-	 * Since this stores the output within an in-memory list, a large output could take up a lot of memory. If this is 
-	 * unacceptable, use run() instead.
-	 * 
-	 * @param command command to be executed
-	 * @return CompletableFutur containing ListResult object.  ListResult contains the exit code, stdout and stderr outputs.  
-	 * @throws ProcessRunnerException
-	 */
-	public static CompletableFuture<ListResult> runtoListResult(ProcessBuilder command) throws ProcessRunnerException {
-		return runtoListResult(command, ()->Stream.empty());
-	}	
-
-	/**
-	 * Runs a command and accumulates the output (stdot and stderr) into List<String> objects.
-	 * 
 	 * Note, this mothod supports commands that reas from stdin.  
 	 * 
 	 * Since this stores the output within an in-memory list, a large output could take up a lot of memory. If this is 
@@ -248,9 +233,11 @@ public class ProcessRunner<O, E> {
 	 * @return CompletableFutur containing ListResult object.  ListResult contains the exit code, stdout and stderr outputs.  
 	 * @throws ProcessRunnerException
 	 */
-	public static CompletableFuture<ListResult> runtoListResult(ProcessBuilder command, Supplier<Stream<String>> inputSupplier) throws ProcessRunnerException {
+	@Override
+	public CompletableFuture<ListResult> runtoListResult(String command[], Path dir, Supplier<Stream<String>> inputSupplier) throws ProcessRunnerException {
+		ProcessBuilder processBuilder = new ProcessBuilder(command).directory(dir.toFile());
 		try {
-			Process process = command.start();
+			Process process = processBuilder.start();
 			CompletableFuture<Void> stdin = CompletableFuture.runAsync(()->copyFrom(inputSupplier, process.getOutputStream()));
 			CompletableFuture<List<String>> stdout = CompletableFuture.supplyAsync(()->process.inputReader().lines().toList());
 			CompletableFuture<List<String>> stderror = CompletableFuture.supplyAsync(()->process.errorReader().lines().toList());
@@ -276,29 +263,6 @@ public class ProcessRunner<O, E> {
 		}
 	}
 	
-	/**
-	 * Result of "asList" methods.
-	 */
-	public static record ListResult(int exitCode, List<String> stdout, List<String> stderr) {
-
-		// This is just a convenience method to make the code in runProcess() a little cleaner.
-		public ListResult(int exitCode, List<String> stdout, List<String> stderr, Void stdin) {
-			this(exitCode, stdout, stderr);	// throw away the stdin value.
-		}
-		
-		public String stdoutAsString() {
-			return listAsString(stdout);
-		}
-		
-		public String stderrAsString() {
-			return listAsString(stderr);
-		}
-		
-		private String listAsString(List<String> strings) {
-			return strings.stream().collect(Collectors.joining("\n"));
-		}
-	}
-
 	/**
 	 * A Builder that creates a ProcessRunner instance.
 	 * 
@@ -359,33 +323,11 @@ public class ProcessRunner<O, E> {
 		 * 
 		 * @return the ProcessRunner, ready to be run.
 		 */
-		public ProcessRunner<O, E> build() {
-			return new ProcessRunner<>( 
+		public JavaLangProcessRunner<O, E> build() {
+			return new JavaLangProcessRunner<>( 
 						outputStreamHandler, 
 						errorStreamHandler, 
 						inputStreamHandler);
-		}
-	}
-	
-	/**
-	 * Checked Exceptions that occur while running are captured and wrapped in the ProcessRunnderException object.
-	 */
-	@SuppressWarnings("serial")
-	public static class ProcessRunnerException extends RuntimeException {
-
-		public ProcessRunnerException() {
-		}
-
-		public ProcessRunnerException(String message, Throwable cause) {
-			super(message, cause);
-		}
-
-		public ProcessRunnerException(String message) {
-			super(message);
-		}
-
-		public ProcessRunnerException(Throwable cause) {
-			super(cause);
 		}
 	}
 }

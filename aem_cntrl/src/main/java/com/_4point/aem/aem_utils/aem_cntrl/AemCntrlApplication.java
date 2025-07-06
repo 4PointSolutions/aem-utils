@@ -1,6 +1,7 @@
 package com._4point.aem.aem_utils.aem_cntrl;
 
 import java.net.http.HttpClient;
+import java.util.stream.Stream;
 
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.ExitCodeGenerator;
@@ -12,12 +13,14 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.http.client.JdkClientHttpRequestFactory;
 
 import com._4point.aem.aem_utils.aem_cntrl.adapters.ipi.JacksonJsonData;
+import com._4point.aem.aem_utils.aem_cntrl.adapters.ipi.JavaLangProcessRunner;
 import com._4point.aem.aem_utils.aem_cntrl.adapters.spi.CommonsIoTailerTailer;
 import com._4point.aem.aem_utils.aem_cntrl.adapters.spi.SpringRestClientRestClient;
 import com._4point.aem.aem_utils.aem_cntrl.commands.AemCntrlCommandLine;
 import com._4point.aem.aem_utils.aem_cntrl.domain.AemInstallerImpl;
 import com._4point.aem.aem_utils.aem_cntrl.domain.ports.api.AemInstaller;
 import com._4point.aem.aem_utils.aem_cntrl.domain.ports.ipi.JsonData;
+import com._4point.aem.aem_utils.aem_cntrl.domain.ports.ipi.ProcessRunner;
 import com._4point.aem.aem_utils.aem_cntrl.domain.ports.spi.RestClient;
 import com._4point.aem.aem_utils.aem_cntrl.domain.ports.spi.Tailer.TailerFactory;
 
@@ -74,7 +77,15 @@ public class AemCntrlApplication implements CommandLineRunner, ExitCodeGenerator
 	}
 	
 	@Bean
-	AemInstaller aemInstaller(RestClient restClient, JsonData.JsonDataFactory jsonDataFactory, TailerFactory tailerFactory) {
-		return new AemInstallerImpl(restClient, jsonDataFactory, tailerFactory);
+	ProcessRunner processRunner() {
+		return JavaLangProcessRunner.<Stream<String>, Stream<String>>builder()
+				.setOutputStreamHandler(s->s)
+				.setErrorStreamHandler(s->s)
+				.build();
+	}
+	
+	@Bean
+	AemInstaller aemInstaller(RestClient restClient, JsonData.JsonDataFactory jsonDataFactory, TailerFactory tailerFactory, ProcessRunner processRunner) {
+		return new AemInstallerImpl(restClient, jsonDataFactory, tailerFactory, processRunner);
 	}
 }

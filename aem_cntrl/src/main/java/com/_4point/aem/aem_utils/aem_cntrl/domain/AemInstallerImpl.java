@@ -13,6 +13,7 @@ import com._4point.aem.aem_utils.aem_cntrl.domain.AemFiles.SlingProperties;
 import com._4point.aem.aem_utils.aem_cntrl.domain.FluentFormsFiles.FluentFormsFileset;
 import com._4point.aem.aem_utils.aem_cntrl.domain.ports.api.AemInstaller;
 import com._4point.aem.aem_utils.aem_cntrl.domain.ports.ipi.JsonData.JsonDataFactory;
+import com._4point.aem.aem_utils.aem_cntrl.domain.ports.ipi.ProcessRunner;
 import com._4point.aem.aem_utils.aem_cntrl.domain.ports.spi.RestClient;
 import com._4point.aem.aem_utils.aem_cntrl.domain.ports.spi.Tailer.TailerFactory;
 
@@ -23,11 +24,13 @@ public class AemInstallerImpl implements AemInstaller {
 	private final RestClient restClient;
 	private final JsonDataFactory jsonDataFactory;
 	private final TailerFactory tailerFactory;
+	private final ProcessRunner processRunner;
 
-	public AemInstallerImpl(RestClient restClient, JsonDataFactory jsonDataFactory, TailerFactory tailerFactory) {
+	public AemInstallerImpl(RestClient restClient, JsonDataFactory jsonDataFactory, TailerFactory tailerFactory, ProcessRunner processRunner) {
 		this.restClient = restClient;
 		this.jsonDataFactory = jsonDataFactory;
 		this.tailerFactory = tailerFactory;
+		this.processRunner = processRunner;
 	}
 
 	/**
@@ -66,7 +69,7 @@ public class AemInstallerImpl implements AemInstaller {
 		log.atInfo().log("Copying License file");
 		aemFiles.copyLicensePropertiesToTarget(aemDir);
 		
-		AemProcess aemQuickstart = new AemProcess.UninitializedAemInstance(quickstart, aemVersionInfo.aemJavaVersion()).unpackQuickstart(tailerFactory);
+		AemProcess aemQuickstart = new AemProcess.UninitializedAemInstance(quickstart, aemVersionInfo.aemJavaVersion(), processRunner).unpackQuickstart(tailerFactory);
 		
 		log.atInfo().log("Running AEM to initialize AEM");
 		aemQuickstart.startQuickstartInitializeAem();

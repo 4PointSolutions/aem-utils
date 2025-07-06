@@ -21,8 +21,9 @@ import java.util.stream.Stream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com._4point.aem.aem_utils.aem_cntrl.domain.ProcessRunner.ListResult;
-import com._4point.aem.aem_utils.aem_cntrl.domain.ProcessRunner.ProcessRunnerException;
+import com._4point.aem.aem_utils.aem_cntrl.domain.ports.ipi.ProcessRunner;
+import com._4point.aem.aem_utils.aem_cntrl.domain.ports.ipi.ProcessRunner.ListResult;
+import com._4point.aem.aem_utils.aem_cntrl.domain.ports.ipi.ProcessRunner.ProcessRunnerException;
 import com._4point.aem.aem_utils.aem_cntrl.domain.ports.spi.Tailer;
 import com._4point.aem.aem_utils.aem_cntrl.domain.ports.spi.Tailer.TailerFactory;
 
@@ -51,10 +52,12 @@ public class AemProcess {
 	
 	private final Path aemQuickstartDir;
 	private final TailerFactory tailerFactory;
+	private final ProcessRunner processRunner;
 	
-	public AemProcess(Path aemQuickstartDir, TailerFactory tailerFactory) {
+	public AemProcess(Path aemQuickstartDir, TailerFactory tailerFactory, ProcessRunner processRunner) {
 		this.aemQuickstartDir = aemQuickstartDir;
 		this.tailerFactory = tailerFactory;
+		this.processRunner = processRunner;
 	}
 
 	private String runUntilLogContains(String targetRegEx, Duration timeout, String...options) throws AemProcessException {		
@@ -85,10 +88,8 @@ public class AemProcess {
 	}
 
 	private CompletableFuture<ListResult> startAem() throws InterruptedException, ExecutionException {
-		ProcessBuilder processBuilder = new ProcessBuilder(aemQuickstartDir.resolve(RUN_START).toString())
-											.directory(aemQuickstartDir.toFile());
 		log.atInfo().log("Running AEM");
-		return ProcessRunner.runtoListResult(processBuilder);
+		return processRunner.runtoListResult(new String[] {aemQuickstartDir.resolve(RUN_START).toString()}, aemQuickstartDir);
 //		if (process.exitCode() != 0) {
 //			log.atError().addArgument(()->process.stdoutAsString()).log("Error occurred during AEM startup [STDOUT] {}");
 //			log.atError().addArgument(()->process.stderrAsString()).log("Error occurred during AEM startup [STDERR] {}");
@@ -99,10 +100,8 @@ public class AemProcess {
 	}
 
 	private CompletableFuture<ListResult> stopAem() throws InterruptedException, ExecutionException {
-		ProcessBuilder processBuilder = new ProcessBuilder(aemQuickstartDir.resolve(RUN_STOP).toString())
-											.directory(aemQuickstartDir.toFile());
 		log.atInfo().log("Stopping AEM at callers request.");
-		return ProcessRunner.runtoListResult(processBuilder);
+		return processRunner.runtoListResult(new String[] {aemQuickstartDir.resolve(RUN_STOP).toString()}, aemQuickstartDir);
 	}
 
 	private void handleResult(ListResult process, String operation) {
@@ -221,12 +220,14 @@ public class AemProcess {
 		private final Path aemQuickstartFilename;
 		private final Path aemQuickstartDir;
 		private final JavaVersion aemJavaVersion;
+		private final ProcessRunner processRunner;
 
 		
-		public UninitializedAemInstance(Path aemQuickstartPath, JavaVersion aemJavaVersion) {
+		public UninitializedAemInstance(Path aemQuickstartPath, JavaVersion aemJavaVersion, ProcessRunner processRunner) {
 			this.aemQuickstartFilename = aemQuickstartPath.getFileName();
 			this.aemQuickstartDir = aemQuickstartPath.getParent();
 			this.aemJavaVersion = aemJavaVersion;
+			this.processRunner = processRunner;
 			if (Files.exists(aemQuickstartDir.resolve(QUICKSTART_DIR))) {
 				throw new IllegalArgumentException("Directory (%s) already contains initialized AEM instance.".formatted(aemQuickstartDir.toString()));
 			}
@@ -236,26 +237,21 @@ public class AemProcess {
 		}
 
 		public AemProcess unpackQuickstart(TailerFactory tailerFactory)  {
-			int exitCode = ProcessRunner.runUntilCompletes(setupQuickstartProcessBuilder("-unpack"), Duration.ofMinutes(3));
+			int exitCode = processRunner.runUntilCompletes(setupQuickstartProcessBuilder("-unpack"), aemQuickstartDir, Duration.ofMinutes(3));
 			log.atDebug().addArgument(exitCode).log("Unpacking exit code = {}.");
 			createBatFiles();
-			return new AemProcess(aemQuickstartDir, tailerFactory);
+			return new AemProcess(aemQuickstartDir, tailerFactory, processRunner);
 		}
 
-		private ProcessBuilder setupQuickstartProcessBuilder(String... options) {
+		private String[] setupQuickstartProcessBuilder(String... options) {
 			String[] baseCommand = {"run", "--java=" + aemJavaVersion.getVersionString(), "--java-options=-Xmx2g", "-Djava.awt.headless=true", aemQuickstartFilename.toString() };
 			String[] command = Stream.concat(Arrays.stream(baseCommand), Arrays.stream(options)).toArray(String[]::new);
-			ProcessBuilder processBuilder = new ProcessBuilder(OperatingSystem.getOs().jbangCommand(command))
-													.directory(aemQuickstartDir.toFile());
-			return processBuilder;
+			return OperatingSystem.getOs().jbangCommand(command);
 		}
 
 		private String getJavaEnv() {
-			ProcessBuilder processBuilder = new ProcessBuilder(OperatingSystem.getOs().jbangCommand("jdk", "java-env", aemJavaVersion.getVersionString()))
-													.directory(aemQuickstartDir.toFile());
-
 			try {
-				ListResult result = ProcessRunner.runtoListResult(processBuilder).get();
+				ListResult result = processRunner.runtoListResult(OperatingSystem.getOs().jbangCommand("jdk", "java-env", aemJavaVersion.getVersionString()), aemQuickstartDir).get();
 				return result.stdout().stream().collect(Collectors.joining("\n"));
 			} catch (ProcessRunnerException | InterruptedException | ExecutionException e) {
 				throw new AemProcessException(e);
