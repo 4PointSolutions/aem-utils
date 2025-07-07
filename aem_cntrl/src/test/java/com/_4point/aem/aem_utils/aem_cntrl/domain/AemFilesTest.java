@@ -29,7 +29,7 @@ import com._4point.aem.aem_utils.aem_cntrl.domain.AemFiles.SlingProperties;
 import com._4point.testing.matchers.javalang.ExceptionMatchers;
 
 class AemFilesTest {
-	private static final Path ExPECTED_AEM_INSTALL_LOC = Path.of("AEM_65_SP19");
+	private static final Path EXPECTED_AEM_INSTALL_LOC = Path.of("AEM_65_SP19");
 	private static final Path SAMPLE_AEM_ORIG_QUICKSTART_PATH = Path.of("AEM_6.5_Quickstart.jar");
 	private static final Path SAMPLE_AEM_LTS_QUICKSTART_PATH = Path.of("cq-quickstart-6.6.0.jar");
 	private static final Path SAMPLE_AEM_SERVICE_PACK_PATH = Path.of("aem-service-pkg-6.5.19.0.zip");
@@ -41,7 +41,7 @@ class AemFilesTest {
 
 	@Test
 	void testCreateAemDir(@TempDir Path rootDir) {
-		Path expectedResult = rootDir.resolve(ExPECTED_AEM_INSTALL_LOC);
+		Path expectedResult = rootDir.resolve(EXPECTED_AEM_INSTALL_LOC);
 		Path result = AemFiles.aemDir(rootDir, EXPECTED_AEM_VERSION);
 		assertAll(
 				()->assertEquals(expectedResult, result)
