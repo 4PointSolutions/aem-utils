@@ -1,6 +1,7 @@
 package com._4point.aem.aem_utils.aem_cntrl.domain;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static com._4point.aem.aem_utils.aem_cntrl.domain.MockInstallFiles.*;
 import static org.hamcrest.MatcherAssert.assertThat; 
 import static org.hamcrest.Matchers.*;
 
@@ -13,7 +14,6 @@ import java.nio.file.StandardOpenOption;
 import java.util.List;
 import java.util.Optional;
 
-import org.apache.commons.lang3.SystemUtils;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.EnabledOnOs;
 import org.junit.jupiter.api.condition.OS;
@@ -30,14 +30,10 @@ import com._4point.testing.matchers.javalang.ExceptionMatchers;
 
 class AemFilesTest {
 	private static final Path EXPECTED_AEM_INSTALL_LOC = Path.of("AEM_65_SP19");
-	private static final Path SAMPLE_AEM_ORIG_QUICKSTART_PATH = Path.of("AEM_6.5_Quickstart.jar");
-	private static final Path SAMPLE_AEM_LTS_QUICKSTART_PATH = Path.of("cq-quickstart-6.6.0.jar");
-	private static final Path SAMPLE_AEM_SERVICE_PACK_PATH = Path.of("aem-service-pkg-6.5.19.0.zip");
-	private static final Path SAMPLE_AEM_FORMS_ADDON_PATH = Path.of("adobe-aemfd-" + getAbbrev() + "-pkg-6.0.1120.zip");
-	private static final Path SAMPLE_LICENSE_PROPERTIES_PATH = Path.of("license.properties");
 	private static final AemVersion EXPECTED_AEM_VERSION = new AemVersion(6, 5, 19, AemBaseRelease.AEM65_ORIG.aemJavaVersion);
+
 	@SuppressWarnings("unused")
-	private static final List<Path> AEM_BASE_VERSION_PATHS = List.of(SAMPLE_AEM_ORIG_QUICKSTART_PATH, SAMPLE_AEM_LTS_QUICKSTART_PATH);
+	private static final List<MockInstallFiles> AEM_BASE_VERSION_PATHS = List.of(SAMPLE_AEM_ORIG_QUICKSTART_PATH, SAMPLE_AEM_LTS_QUICKSTART_PATH);
 
 	@Test
 	void testCreateAemDir(@TempDir Path rootDir) {
@@ -60,9 +56,9 @@ class AemFilesTest {
 	void testFindAemServicePacks(@TempDir Path rootDir) throws Exception {
 		List<Path> result1 = AemFiles.AemServicePack.findFiles(rootDir);
 		
-		createTestFile(rootDir, SAMPLE_AEM_ORIG_QUICKSTART_PATH);
-		Path testFilePath = createTestFile(rootDir, SAMPLE_AEM_SERVICE_PACK_PATH);
-		createTestFile(rootDir, SAMPLE_AEM_FORMS_ADDON_PATH);
+		SAMPLE_AEM_ORIG_QUICKSTART_PATH.createMockFile(rootDir);
+		Path testFilePath = SAMPLE_AEM_SERVICE_PACK_PATH.createMockFile(rootDir);
+		SAMPLE_AEM_FORMS_ADDON_PATH.createMockFile(rootDir);
 		
 		List<Path> result2 = AemFiles.AemServicePack.findFiles(rootDir);
 		
@@ -73,20 +69,14 @@ class AemFilesTest {
 				);
 	}
 
-	private Path createTestFile(Path rootDir, Path filePath) throws IOException {
-		Path testFilePath = rootDir.resolve(filePath);
-		Files.createFile(testFilePath);
-		return testFilePath;
-	}
-
 	@ParameterizedTest
 	@FieldSource("AEM_BASE_VERSION_PATHS")
-	void testFindAemQuickstarts(Path quickstartPath, @TempDir Path rootDir) throws Exception {
+	void testFindAemQuickstarts(MockInstallFiles quickstart, @TempDir Path rootDir) throws Exception {
 		List<Path> result1 = AemFiles.AemQuickstart.findFiles(rootDir);
 		
-		Path testFilePath = createTestFile(rootDir, quickstartPath);
-		createTestFile(rootDir, SAMPLE_AEM_SERVICE_PACK_PATH);
-		createTestFile(rootDir, SAMPLE_AEM_FORMS_ADDON_PATH);
+		Path testFilePath = quickstart.createMockFile(rootDir);
+		SAMPLE_AEM_SERVICE_PACK_PATH.createMockFile(rootDir);
+		SAMPLE_AEM_FORMS_ADDON_PATH.createMockFile(rootDir);
 		
 		List<Path> result2 = AemFiles.AemQuickstart.findFiles(rootDir);
 		
@@ -101,9 +91,9 @@ class AemFilesTest {
 	void testFindAemFormsAddOns(@TempDir Path rootDir) throws Exception {
 		List<Path> result1 = AemFiles.AemFormsAddOn.findFiles(rootDir);
 		
-		createTestFile(rootDir, SAMPLE_AEM_ORIG_QUICKSTART_PATH);
-		createTestFile(rootDir, SAMPLE_AEM_SERVICE_PACK_PATH);
-		Path testFilePath = createTestFile(rootDir, SAMPLE_AEM_FORMS_ADDON_PATH);
+		SAMPLE_AEM_ORIG_QUICKSTART_PATH.createMockFile(rootDir);
+		SAMPLE_AEM_SERVICE_PACK_PATH.createMockFile(rootDir);
+		Path testFilePath = SAMPLE_AEM_FORMS_ADDON_PATH.createMockFile(rootDir);
 		
 		List<Path> result2 = AemFiles.AemFormsAddOn.findFiles(rootDir);
 		
@@ -118,10 +108,10 @@ class AemFilesTest {
 	void testFindAemLicenseProperties(@TempDir Path rootDir) throws Exception {
 		Optional<Path> result1 = AemFiles.LicenseProperties.findFile(rootDir);
 		
-		createTestFile(rootDir, SAMPLE_AEM_ORIG_QUICKSTART_PATH);
-		createTestFile(rootDir, SAMPLE_AEM_SERVICE_PACK_PATH);
-		createTestFile(rootDir, SAMPLE_AEM_FORMS_ADDON_PATH);
-		Path testFilePath = createTestFile(rootDir, SAMPLE_LICENSE_PROPERTIES_PATH);
+		SAMPLE_AEM_ORIG_QUICKSTART_PATH.createMockFile(rootDir);
+		SAMPLE_AEM_SERVICE_PACK_PATH.createMockFile(rootDir);
+		SAMPLE_AEM_FORMS_ADDON_PATH.createMockFile(rootDir);
+		Path testFilePath = SAMPLE_LICENSE_PROPERTIES_PATH.createMockFile(rootDir);
 		
 		Optional<Path> result2 = AemFiles.LicenseProperties.findFile(rootDir);
 		
@@ -135,9 +125,9 @@ class AemFilesTest {
 	@Test
 	void testThereCanBeOnlyOne_Pass_OnlyOne(@TempDir Path rootDir) throws Exception {
 		String description = "Forms Add On";
-		createTestFile(rootDir, SAMPLE_AEM_ORIG_QUICKSTART_PATH);
-		createTestFile(rootDir, SAMPLE_AEM_SERVICE_PACK_PATH);
-		Path testFilePath = createTestFile(rootDir, SAMPLE_AEM_FORMS_ADDON_PATH);
+		SAMPLE_AEM_ORIG_QUICKSTART_PATH.createMockFile(rootDir);
+		SAMPLE_AEM_SERVICE_PACK_PATH.createMockFile(rootDir);
+		Path testFilePath = SAMPLE_AEM_FORMS_ADDON_PATH.createMockFile(rootDir);
 
 		assertEquals(testFilePath, AemFiles.thereCanBeOnlyOne(AemFiles.AemFormsAddOn.findFiles(rootDir), description));
 	}
@@ -152,8 +142,8 @@ class AemFilesTest {
 	@Test
 	void testThereCanBeOnlyOne_Fail_MoreThanOne(@TempDir Path rootDir) throws Exception {
 		String description = "Forms Add On";
-		createTestFile(rootDir, Path.of("adobe-aemfd-" + getAbbrev() + "-pkg-6.0.9999.zip"));
-		createTestFile(rootDir, SAMPLE_AEM_FORMS_ADDON_PATH);
+		SAMPLE_AEM_FORMS_ADDON_PATH.createMockFile(rootDir);
+		SECOND_AEM_FOMRS_ADDON_PATH.createMockFile(rootDir);
 		
 		IllegalStateException ex = assertThrows(IllegalStateException.class, ()->AemFiles.thereCanBeOnlyOne(AemFiles.AemFormsAddOn.findFiles(rootDir), description));
 		assertThat(ex, ExceptionMatchers.exceptionMsgContainsAll(description, "Found multiple", "should only be one"));
@@ -161,9 +151,9 @@ class AemFilesTest {
 
 	@Test
 	void testLocateAemFiles(@TempDir Path rootDir) throws Exception {
-		Path testQuickstartFilePath = createTestFile(rootDir, SAMPLE_AEM_ORIG_QUICKSTART_PATH);
-		Path testServicePackFilePath = createTestFile(rootDir, SAMPLE_AEM_SERVICE_PACK_PATH);
-		Path testFormsAddonFilePath = createTestFile(rootDir, SAMPLE_AEM_FORMS_ADDON_PATH);
+		Path testQuickstartFilePath = SAMPLE_AEM_ORIG_QUICKSTART_PATH.createMockFile(rootDir);
+		Path testServicePackFilePath = SAMPLE_AEM_SERVICE_PACK_PATH.createMockFile(rootDir);
+		Path testFormsAddonFilePath = SAMPLE_AEM_FORMS_ADDON_PATH.createMockFile(rootDir);
 		
 		AemFileset result = AemFiles.locateAemFiles(rootDir);
 		AemVersion aemVersion = result.aemVersion();
@@ -178,9 +168,9 @@ class AemFilesTest {
 	
 	@Test
 	void testLocateAemFiles_NoServicePack(@TempDir Path rootDir) throws Exception {
-		Path testQuickstartFilePath = createTestFile(rootDir, SAMPLE_AEM_ORIG_QUICKSTART_PATH);
-		// Omitted: Path testServicePackFilePath = createTestFile(rootDir, SAMPLE_AEM_SERVICE_PACK_PATH);
-		Path testFormsAddonFilePath = createTestFile(rootDir, SAMPLE_AEM_FORMS_ADDON_PATH);
+		Path testQuickstartFilePath = SAMPLE_AEM_ORIG_QUICKSTART_PATH.createMockFile(rootDir);
+		// Omitted: Path testServicePackFilePath = SAMPLE_AEM_SERVICE_PACK_PATH.createTestFile(rootDir);
+		Path testFormsAddonFilePath = SAMPLE_AEM_FORMS_ADDON_PATH.createMockFile(rootDir);
 		
 		AemFileset result = AemFiles.locateAemFiles(rootDir);
 		AemVersion aemVersion = result.aemVersion();
@@ -258,19 +248,6 @@ class AemFilesTest {
 				()->assertEquals(expectedMinorVersion,versionInfo.minorVersion()),
 				()->assertEquals(expectedBuildNum,versionInfo.buildNum())
 				);
-	}
-	
-	private static String getAbbrev() {
-		if (SystemUtils.IS_OS_WINDOWS) {
-			return "win";
-		} else if (SystemUtils.IS_OS_LINUX) {
-			return "linux";
-		} else if (SystemUtils.IS_OS_MAC) {
-			return "macos";
-		} else {
-			throw new IllegalStateException("Unsupported Operating System (%s)".formatted(SystemUtils.OS_NAME));
-		}
-
 	}
 	
 	@Test
