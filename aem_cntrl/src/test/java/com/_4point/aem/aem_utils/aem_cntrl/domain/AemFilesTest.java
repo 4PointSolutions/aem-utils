@@ -10,7 +10,6 @@ import java.io.IOException;
 import java.io.StringReader;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.StandardOpenOption;
 import java.util.List;
 import java.util.Optional;
 
@@ -253,19 +252,8 @@ class AemFilesTest {
 	@Test
 	void testUpdateSlingProperties(@TempDir Path tempDir) throws Exception {
 		// Given
-		String sampleSlingProperties = 
-				"""
-				#Overlay properties for configuration
-				#Wed Apr 02 09:40:35 EDT 2025
-				sling.bootdelegation.sun=sun.*,com.sun.*
-				org.osgi.framework.system.capabilities.extra=${org.apache.sling.launcher.system.capabilities.extra}
-				sling.framework.install.startlevel=1
-				""";
-		Path configDir = tempDir.resolve("conf");
-		Files.createDirectory(configDir);
-		Path slingPropertiesPath = configDir.resolve("sling.properties");
-		Files.writeString(slingPropertiesPath, sampleSlingProperties, StandardOpenOption.CREATE_NEW);
-
+		MockAemFiles.SLING_PROPERTIES.createMockFile(tempDir);
+		
 		String expectedAdditionalProperties = 
 				"""
 				sling.bootdelegation.class.com.rsa.jsafe.provider.JsafeJCE=com.rsa.*
@@ -275,8 +263,8 @@ class AemFilesTest {
 		SlingProperties.under(tempDir).orElseThrow().updateSlingProperties();;
 
 		// Then 
-		List<String> expectedResult = stringToListOfLines(sampleSlingProperties + expectedAdditionalProperties);
-		List<String> actualResult = Files.readAllLines(slingPropertiesPath);
+		List<String> expectedResult = stringToListOfLines(MockAemFiles.SLING_PROPERTIES.contents() + expectedAdditionalProperties);
+		List<String> actualResult = Files.readAllLines(tempDir.resolve(MockAemFiles.SLING_PROPERTIES.filename()));
 		assertEquals(expectedResult, actualResult);
 	}
 
