@@ -151,24 +151,16 @@ public class AemProcess {
 	public String startQuickstartInstallServicePack()  {
 		String result = runUntilLogContains(AEM_SP_START_TARGET_REGEX, Duration.ofMinutes(10));
 		// The string we are looking for is the end of the install process but we want to give things another few seconds to calm down.
-		// Once we have found it, wait another minute.
-		try {
-			Thread.sleep(Duration.ofSeconds(15));
-			return result;
-		} catch (InterruptedException e) {
-			throw new AemProcessException(e);
-		}
+		// Once we have found it, wait 15 seconds.
+		sleepForSeconds(15, "Letting AEM finish installing Service Pack");
+		return result;
 	}
 
 	public String startQuickstartInstallFormsAddOn()  {
 		String searchString = runUntilLogContains(AEM_FORMS_ADD_ON_START_TARGET_REGEX, Duration.ofMinutes(20));
 		// The string we are looking for is *near* the end of the install process but not at the end.
 		// Once we have found it, wait another minute.
-		try {
-			Thread.sleep(Duration.ofMinutes(1));
-		} catch (InterruptedException e) {
-			throw new AemProcessException(e);
-		}
+		sleepForSeconds(60, "Letting AEM finish installing Forms Add-on");
 		return searchString;
 	}
 
@@ -181,7 +173,7 @@ public class AemProcess {
 			var result = CompletableFuture.supplyAsync(()->lookForLine(stream, regex))
 										  .completeOnTimeout(Optional.empty(), timeout.toMillis(), TimeUnit.MILLISECONDS)
 										  .join();
-			sleepForSeconds(2);	// Give things some time to settle down before we shut everything down. 2 seconds should be enough
+			sleepForSeconds(2, "Letting AEM finish");	// Give things some time to settle down before we shut everything down. 2 seconds should be enough
 			return result;
 		} catch (Exception e) {
 			throw new AemProcessException(e);
@@ -197,13 +189,16 @@ public class AemProcess {
 					 .findAny();
 	}
 	
-	private static void sleepForSeconds(int numSecs) {
+	private static void sleepForSeconds(int numSecs, String reason) {
 		try {
+			log.atInfo().addArgument(reason).addArgument(numSecs).log("{}, sleeping for {} seconds.");
 			Thread.sleep(Duration.ofSeconds(numSecs));
 		} catch (InterruptedException e) {
 			log.atError().setCause(e).log("Sleep of %s seconds was interrupted.".formatted(numSecs));
+			throw new AemProcessException(e);
 		}
 	}
+	
 	private Path logFile() {
 		return aemQuickstartDir.resolve(LOG_FILE);
 	}

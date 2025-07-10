@@ -16,7 +16,7 @@ import com._4point.testing.matchers.javalang.ExceptionMatchers;
 
 class AemConfigSettingsTest {
 
-	private static final String TEST_JSON1 = 
+	static final String TEST_JSON1 = 
 			"""
 			{
 			    "pid": "com.adobe.forms.admin.impl.LCFormsAdminServiceImpl",

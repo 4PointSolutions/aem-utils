@@ -31,9 +31,9 @@ public enum MockAemFiles {
 		this.contents = contents;
 	}
 	
-	public Path createMockFile(Path aemDir) throws IOException {
-		createParentDir(aemDir, filename.getParent());
-		return copyContentsToFile(aemDir.resolve(filename), contents);
+	public Path createMockFile(Path aemQuickstartDir) throws IOException {
+		createParentDir(aemQuickstartDir, filename.getParent());
+		return copyContentsToFile(aemQuickstartDir.resolve(filename), contents);
 	}
 
 	public Path filename() {
@@ -49,9 +49,9 @@ public enum MockAemFiles {
 		return testFilePath;
 	}
 
-	private static Path createParentDir(Path aemDir, Path parent) throws IOException {
+	private static Path createParentDir(Path aemQuickstartDir, Path parent) throws IOException {
 		if (parent != null) {
-			Path parentDir = aemDir.resolve(parent);
+			Path parentDir = aemQuickstartDir.resolve(parent);
 			if (!Files.exists(parentDir)) {
 				Files.createDirectories(parentDir);
 			}
