@@ -57,10 +57,10 @@ class CommonsIoTailerTailerTest {
 	@EnumSource
 	void testStream_findsLine(TestScenario scenario, @TempDir Path tempDir) throws Exception {
 		boolean debug = true;
-		if (debug) {
-			System.out.println("Running test for scenario: %s".formatted(scenario.toString()));
-		}
 		String targetLine = LOG_MESSAGE_FORMAT_STR.formatted(scenario.targetLine);
+		if (debug) {
+			System.out.println("Running test for scenario: %s, looking for '%s'".formatted(scenario.toString(), targetLine));
+		}
 		switch(scenario.expectedResult) {
 			case FindsLine -> {
 				String result = runTest(targetLine, tempDir.resolve("logfile"), debug, scenario.factory);
@@ -84,7 +84,11 @@ class CommonsIoTailerTailerTest {
 			
 			try(Tailer tailer = factory.apply(logFile)) {
 				String resultLine = CompletableFuture.supplyAsync(
-						()->tailer.stream()
+						()->{
+					  		if (debug) {
+					  			System.out.println("[%s] Looking for '%s' in log".formatted(Thread.currentThread().getName(), targetLine));
+					  		}
+							return tailer.stream()
 								  .map(s->{
 									  		if (debug) {
 									  			System.out.println("[%s] Found '%s' in log".formatted(Thread.currentThread().getName(), s));
@@ -93,7 +97,8 @@ class CommonsIoTailerTailerTest {
 								          })
 								  .filter(s->s.equals(targetLine))
 								  .findFirst()
-								  .orElseThrow()
+								  .orElseThrow();
+						}
 					).orTimeout(5, TimeUnit.SECONDS).join();
 				return resultLine;
 			}		
