@@ -21,6 +21,8 @@ jobs:
         cache: 'maven'
         server-id: github # Value of the distributionManagement/repository/id field of the pom.xml
         settings-path: ${{ github.workspace }} # location for the settings.xml file
+    - name: Setup JBang
+      uses: jbangdev/setup-jbang@main
 
     - name: Build Aem_Cntrl with Maven
       run: mvn -B install -s $GITHUB_WORKSPACE/settings.xml --file aem_cntrl
