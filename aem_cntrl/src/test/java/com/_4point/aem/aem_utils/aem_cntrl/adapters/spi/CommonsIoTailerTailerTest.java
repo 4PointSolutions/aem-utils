@@ -73,7 +73,9 @@ class CommonsIoTailerTailerTest {
 			}
 		}
 //		Files.lines(logFile).forEach(System.out::println);
-		
+		if (debug) {
+			System.out.println("Test successful for scenario: %s".formatted(scenario.toString()));
+		}
 	}
 
 	private String runTest(String targetLine, Path logFile, boolean debug, Function<Path, Tailer> factory) throws InterruptedException, Exception {
