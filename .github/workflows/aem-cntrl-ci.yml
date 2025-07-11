@@ -1,0 +1,36 @@
+name: AEM Cntrl CI
+
+on: 
+  push:
+    paths:
+    - 'aem_cntrl/**'
+    - '.github/workflows/aem-cntrl-ci.yml'
+  workflow_dispatch:
+    
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+    - name: Set up JDK 21 for Shared Runner
+      uses: actions/setup-java@v4
+      with:
+        distribution: 'oracle'
+        java-version: '21'
+        cache: 'maven'
+        server-id: github # Value of the distributionManagement/repository/id field of the pom.xml
+        settings-path: ${{ github.workspace }} # location for the settings.xml file
+
+    - name: Build Aem_Cntrl with Maven
+      run: mvn -B install -s $GITHUB_WORKSPACE/settings.xml --file aem_cntrl
+      env:
+        GITHUB_TOKEN: ${{ github.token }}
+
+#    - name: Deploy Aem_Cntrl with Maven
+#      if: github.ref == 'refs/heads/master' || github.ref == 'refs/tags/*' # Only run on main branch or tags
+#      run: mvn -B deploy -s $GITHUB_WORKSPACE/settings.xml --file aem_cntrl
+#      env:
+#        GITHUB_TOKEN: ${{ github.token }}
+
+  
