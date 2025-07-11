@@ -56,15 +56,19 @@ class CommonsIoTailerTailerTest {
 	@ParameterizedTest
 	@EnumSource
 	void testStream_findsLine(TestScenario scenario, @TempDir Path tempDir) throws Exception {
+		boolean debug = true;
+		if (debug) {
+			System.out.println("Running test for scenario: %s".formatted(scenario.toString()));
+		}
 		String targetLine = LOG_MESSAGE_FORMAT_STR.formatted(scenario.targetLine);
 		switch(scenario.expectedResult) {
 			case FindsLine -> {
-				String result = runTest(targetLine, tempDir.resolve("logfile"), true, scenario.factory);
+				String result = runTest(targetLine, tempDir.resolve("logfile"), debug, scenario.factory);
 				assertNotNull(result);
 				assertEquals(targetLine, result);
 				}
 			case TimesOut -> {
-				CompletionException ex = assertThrows(CompletionException.class, ()->runTest(targetLine, tempDir.resolve("logfile"), false, scenario.factory));
+				CompletionException ex = assertThrows(CompletionException.class, ()->runTest(targetLine, tempDir.resolve("logfile"), debug, scenario.factory));
 				assertThat(ex, ExceptionMatchers.hasCauseMatching(instanceOf(TimeoutException.class)));
 			}
 		}
