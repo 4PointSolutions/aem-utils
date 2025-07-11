@@ -15,6 +15,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.stream.Stream;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.condition.OS;
 import org.junit.jupiter.api.function.Executable;
 import org.junit.jupiter.api.io.TempDir;
 import org.mockito.Answers;
@@ -104,12 +105,12 @@ class AemInstallerImpl_SociableTest {
 		//   Check that AEM has been run the requisite number of times
 		//     Unpack the quickstart jar
 		verify(processRunnerMock).runUntilCompletes(
-				eq(new String[] {"CMD.exe", "/C", "jbang", "run", "--java=11", "--java-options=-Xmx2g", "-Djava.awt.headless=true", "AEM_6.5_Quickstart.jar", "-unpack"}),
+				eq(jbangCommand("run", "--java=11", "--java-options=-Xmx2g", "-Djava.awt.headless=true", "AEM_6.5_Quickstart.jar", "-unpack")),
 				eq(aemDir),
 				eq(Duration.ofMinutes(3))
 				);
 		//      Get the Java environment settings so that we can create the scaffolding files (runStart, runStop)
-		verify(processRunnerMock).runtoListResult(eq(new String[] {"CMD.exe", "/C", "jbang", "jdk", "java-env", Integer.toString(aemInstallType.javaVersion())}), eq(aemDir));
+		verify(processRunnerMock).runtoListResult(eq(jbangCommand("jdk", "java-env", Integer.toString(aemInstallType.javaVersion()))), eq(aemDir));
 		//      Start and stop AEM 4 times:
 		//        1) Initial install of AEM
 		//		  2) Install Service Pack
@@ -122,6 +123,12 @@ class AemInstallerImpl_SociableTest {
 		//   Verify that the POST was made to update protected mode
 	}
 
+	private static String[] jbangCommand(String... args) {
+		return Stream.concat((OS.WINDOWS.isCurrentOs() ? Stream.of("CMD.exe", "/C", "jbang") : Stream.of("jbang")), Stream.of(args))
+					 .map(arg->arg.contains(" ") ? "\"" + arg + "\"" : arg)
+					 .toArray(String[]::new);
+	}
+	
 	private Executable verifyExists(Path aemDir, MockInstallFiles installFile) {
 		Path expectedLocation = aemDir.resolve(installFile.expectedLocation());
 		return ()->assertTrue(Files.exists(expectedLocation), "File expected at '" + expectedLocation.toString() + "' but it does not exist.");
