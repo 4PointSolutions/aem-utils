@@ -12,6 +12,7 @@ import java.time.Duration;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -98,7 +99,8 @@ class CommonsIoTailerTailerTest {
 								  .filter(s->s.equals(targetLine))
 								  .findFirst()
 								  .orElseThrow();
-						}
+						},
+					Executors.newVirtualThreadPerTaskExecutor()
 					).orTimeout(5, TimeUnit.SECONDS).join();
 				return resultLine;
 			}		
