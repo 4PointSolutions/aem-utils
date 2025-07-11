@@ -59,7 +59,7 @@ class CommonsIoTailerTailerTest {
 		String targetLine = LOG_MESSAGE_FORMAT_STR.formatted(scenario.targetLine);
 		switch(scenario.expectedResult) {
 			case FindsLine -> {
-				String result = runTest(targetLine, tempDir.resolve("logfile"), false, scenario.factory);
+				String result = runTest(targetLine, tempDir.resolve("logfile"), true, scenario.factory);
 				assertNotNull(result);
 				assertEquals(targetLine, result);
 				}
