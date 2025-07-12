@@ -15,10 +15,10 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import org.springframework.http.client.JdkClientHttpRequestFactory;
 
-import com._4point.aem.aem_utils.aem_cntrl.adapters.ipi.JacksonJsonData;
 import com._4point.aem.aem_utils.aem_cntrl.adapters.ipi.JavaLangProcessRunner;
 import com._4point.aem.aem_utils.aem_cntrl.adapters.spi.CommonsIoTailerTailer;
 import com._4point.aem.aem_utils.aem_cntrl.adapters.spi.RestClientAemConfigManager;
+import com._4point.aem.aem_utils.aem_cntrl.adapters.spi.adapters.JacksonJsonData;
 import com._4point.aem.aem_utils.aem_cntrl.adapters.spi.adapters.SpringRestClientRestClient;
 import com._4point.aem.aem_utils.aem_cntrl.adapters.spi.ports.RestClient;
 import com._4point.aem.aem_utils.aem_cntrl.domain.ports.ipi.ProcessRunner;

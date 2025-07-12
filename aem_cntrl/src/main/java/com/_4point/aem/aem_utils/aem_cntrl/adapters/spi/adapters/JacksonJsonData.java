@@ -1,4 +1,4 @@
-package com._4point.aem.aem_utils.aem_cntrl.adapters.ipi;
+package com._4point.aem.aem_utils.aem_cntrl.adapters.spi.adapters;
 
 import java.util.Iterator;
 import java.util.List;
@@ -8,7 +8,7 @@ import java.util.function.Supplier;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
-import com._4point.aem.aem_utils.aem_cntrl.domain.ports.ipi.JsonData;
+import com._4point.aem.aem_utils.aem_cntrl.adapters.spi.ports.JsonData;
 import com.fasterxml.jackson.core.JsonPointer;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;

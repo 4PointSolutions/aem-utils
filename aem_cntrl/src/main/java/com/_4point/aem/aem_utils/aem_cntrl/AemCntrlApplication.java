@@ -12,16 +12,16 @@ import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.http.client.JdkClientHttpRequestFactory;
 
-import com._4point.aem.aem_utils.aem_cntrl.adapters.ipi.JacksonJsonData;
 import com._4point.aem.aem_utils.aem_cntrl.adapters.ipi.JavaLangProcessRunner;
 import com._4point.aem.aem_utils.aem_cntrl.adapters.spi.CommonsIoTailerTailer;
 import com._4point.aem.aem_utils.aem_cntrl.adapters.spi.RestClientAemConfigManager;
+import com._4point.aem.aem_utils.aem_cntrl.adapters.spi.adapters.JacksonJsonData;
 import com._4point.aem.aem_utils.aem_cntrl.adapters.spi.adapters.SpringRestClientRestClient;
+import com._4point.aem.aem_utils.aem_cntrl.adapters.spi.ports.JsonData;
 import com._4point.aem.aem_utils.aem_cntrl.adapters.spi.ports.RestClient;
 import com._4point.aem.aem_utils.aem_cntrl.commands.AemCntrlCommandLine;
 import com._4point.aem.aem_utils.aem_cntrl.domain.AemInstallerImpl;
 import com._4point.aem.aem_utils.aem_cntrl.domain.ports.api.AemInstaller;
-import com._4point.aem.aem_utils.aem_cntrl.domain.ports.ipi.JsonData;
 import com._4point.aem.aem_utils.aem_cntrl.domain.ports.ipi.ProcessRunner;
 import com._4point.aem.aem_utils.aem_cntrl.domain.ports.spi.AemConfigManager;
 import com._4point.aem.aem_utils.aem_cntrl.domain.ports.spi.Tailer.TailerFactory;
