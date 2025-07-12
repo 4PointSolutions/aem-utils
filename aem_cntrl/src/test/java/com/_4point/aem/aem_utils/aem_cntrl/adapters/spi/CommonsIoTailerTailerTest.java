@@ -57,7 +57,7 @@ class CommonsIoTailerTailerTest {
 	@ParameterizedTest
 	@EnumSource
 	void testStream_findsLine(TestScenario scenario, @TempDir Path tempDir) throws Exception {
-		boolean debug = true;
+		boolean debug = false; // Set to true to enable debug output
 		String targetLine = LOG_MESSAGE_FORMAT_STR.formatted(scenario.targetLine);
 		if (debug) {
 			System.out.println("Running test for scenario: %s, looking for '%s'".formatted(scenario.toString(), targetLine));
