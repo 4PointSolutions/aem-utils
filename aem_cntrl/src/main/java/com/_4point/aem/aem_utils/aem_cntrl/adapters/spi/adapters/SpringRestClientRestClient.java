@@ -1,4 +1,4 @@
-package com._4point.aem.aem_utils.aem_cntrl.adapters.spi;
+package com._4point.aem.aem_utils.aem_cntrl.adapters.spi.adapters;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -24,8 +24,8 @@ import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestClient.RequestHeadersSpec;
 import org.springframework.web.util.UriBuilder;
 
-import com._4point.aem.aem_utils.aem_cntrl.domain.ports.spi.RestClient;
-import com._4point.aem.aem_utils.aem_cntrl.domain.ports.spi.RestClient.MultipartPayload.Builder;
+import com._4point.aem.aem_utils.aem_cntrl.adapters.spi.ports.RestClient;
+import com._4point.aem.aem_utils.aem_cntrl.adapters.spi.ports.RestClient.MultipartPayload.Builder;
 
 
 public class SpringRestClientRestClient implements RestClient {

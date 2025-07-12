@@ -1,4 +1,4 @@
-package com._4point.aem.aem_utils.aem_cntrl.domain;
+package com._4point.aem.aem_utils.aem_cntrl.adapters.spi;
 
 import java.io.IOException;
 import java.util.Map.Entry;
@@ -6,29 +6,33 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import com._4point.aem.aem_utils.aem_cntrl.domain.ports.ipi.JsonData.JsonDataFactory;
-import com._4point.aem.aem_utils.aem_cntrl.domain.ports.spi.RestClient;
-import com._4point.aem.aem_utils.aem_cntrl.domain.ports.spi.RestClient.ContentType;
-import com._4point.aem.aem_utils.aem_cntrl.domain.ports.spi.RestClient.MultipartPayload.Builder;
-import com._4point.aem.aem_utils.aem_cntrl.domain.ports.spi.RestClient.Response;
-import com._4point.aem.aem_utils.aem_cntrl.domain.ports.spi.RestClient.RestClientException;
+import com._4point.aem.aem_utils.aem_cntrl.adapters.spi.ports.RestClient;
+import com._4point.aem.aem_utils.aem_cntrl.adapters.spi.ports.JsonData.JsonDataFactory;
+import com._4point.aem.aem_utils.aem_cntrl.adapters.spi.ports.RestClient.ContentType;
+import com._4point.aem.aem_utils.aem_cntrl.adapters.spi.ports.RestClient.Response;
+import com._4point.aem.aem_utils.aem_cntrl.adapters.spi.ports.RestClient.RestClientException;
+import com._4point.aem.aem_utils.aem_cntrl.adapters.spi.ports.RestClient.MultipartPayload.Builder;
+import com._4point.aem.aem_utils.aem_cntrl.domain.MobileFormsSettings;
+import com._4point.aem.aem_utils.aem_cntrl.domain.ports.spi.AemConfigManager;
 
 
-public class AemConfigManager {
+public class RestClientAemConfigManager implements AemConfigManager {
 	private static final String CONFIG_BASE_PATH = "/system/console/configMgr/";
 	
 	private final RestClient restClient;
 	private final JsonDataFactory jsonDataFactory;
 
-	public AemConfigManager(RestClient restClient, JsonDataFactory jsonDataFactory) {
+	public RestClientAemConfigManager(RestClient restClient, JsonDataFactory jsonDataFactory) {
 		this.restClient = restClient;
 		this.jsonDataFactory = jsonDataFactory;
 	}
 
+	@Override
 	public MobileFormsSettings mobileFormsSettings() {
 			return new MobileFormsSettings.Factory(jsonDataFactory).create(retrieveConfigSettings(MobileFormsSettings.PID));
 	}
 
+	@Override
 	public void mobileFormsSettings(MobileFormsSettings settings) throws AemConfigManagerException {
 		postConfigSettings(settings.pid(), settings.properties());
 	}

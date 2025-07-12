@@ -24,11 +24,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
+import com._4point.aem.aem_utils.aem_cntrl.adapters.spi.ports.RestClient;
+import com._4point.aem.aem_utils.aem_cntrl.adapters.spi.ports.RestClient.ContentType;
 import com._4point.aem.aem_utils.aem_cntrl.domain.ports.api.AemInstaller;
 import com._4point.aem.aem_utils.aem_cntrl.domain.ports.ipi.ProcessRunner;
-import com._4point.aem.aem_utils.aem_cntrl.domain.ports.spi.RestClient;
 import com._4point.aem.aem_utils.aem_cntrl.domain.ports.spi.Tailer;
-import com._4point.aem.aem_utils.aem_cntrl.domain.ports.spi.RestClient.ContentType;
 import com._4point.aem.aem_utils.aem_cntrl.domain.ports.spi.Tailer.TailerFactory;
 
 @SpringBootTest()

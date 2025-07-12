@@ -1,9 +1,10 @@
 package com._4point.aem.aem_utils.aem_cntrl.domain;
 
 import java.util.Map.Entry;
-import java.util.Set;
 
-import com._4point.aem.aem_utils.aem_cntrl.domain.ports.ipi.JsonData.JsonDataFactory;
+import com._4point.aem.aem_utils.aem_cntrl.adapters.spi.ports.JsonData.JsonDataFactory;
+
+import java.util.Set;
 
 
 /**

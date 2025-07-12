@@ -15,12 +15,14 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import org.springframework.http.client.JdkClientHttpRequestFactory;
 
-import com._4point.aem.aem_utils.aem_cntrl.adapters.ipi.JacksonJsonData;
 import com._4point.aem.aem_utils.aem_cntrl.adapters.ipi.JavaLangProcessRunner;
 import com._4point.aem.aem_utils.aem_cntrl.adapters.spi.CommonsIoTailerTailer;
-import com._4point.aem.aem_utils.aem_cntrl.adapters.spi.SpringRestClientRestClient;
+import com._4point.aem.aem_utils.aem_cntrl.adapters.spi.RestClientAemConfigManager;
+import com._4point.aem.aem_utils.aem_cntrl.adapters.spi.adapters.JacksonJsonData;
+import com._4point.aem.aem_utils.aem_cntrl.adapters.spi.adapters.SpringRestClientRestClient;
+import com._4point.aem.aem_utils.aem_cntrl.adapters.spi.ports.RestClient;
 import com._4point.aem.aem_utils.aem_cntrl.domain.ports.ipi.ProcessRunner;
-import com._4point.aem.aem_utils.aem_cntrl.domain.ports.spi.RestClient;
+import com._4point.aem.aem_utils.aem_cntrl.domain.ports.spi.AemConfigManager;
 import com._4point.aem.aem_utils.aem_cntrl.domain.ports.spi.Tailer.TailerFactory;
 
 
@@ -40,9 +42,10 @@ class AemInstallerImplTest {
 	private final ProcessRunner processRunner = JavaLangProcessRunner.<Stream<String>, Stream<String>>builder()
 																	 .setOutputStreamHandler(s->s)
 																	 .setErrorStreamHandler(s->s)
-																	 .build(); 
+																	 .build();
+	private final AemConfigManager aemConfigManager = new RestClientAemConfigManager(restClient, JacksonJsonData::from);
 	
-	private final AemInstallerImpl underTest = new AemInstallerImpl(restClient, JacksonJsonData::from, tailerFactory, processRunner);
+	private final AemInstallerImpl underTest = new AemInstallerImpl(tailerFactory, processRunner, aemConfigManager);
 
 	// Performs install to a temp directory.
 	@Test

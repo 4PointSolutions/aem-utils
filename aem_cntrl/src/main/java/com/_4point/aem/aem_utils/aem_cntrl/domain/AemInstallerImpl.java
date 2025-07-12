@@ -12,25 +12,22 @@ import com._4point.aem.aem_utils.aem_cntrl.domain.AemFiles.AemVersion;
 import com._4point.aem.aem_utils.aem_cntrl.domain.AemFiles.SlingProperties;
 import com._4point.aem.aem_utils.aem_cntrl.domain.FluentFormsFiles.FluentFormsFileset;
 import com._4point.aem.aem_utils.aem_cntrl.domain.ports.api.AemInstaller;
-import com._4point.aem.aem_utils.aem_cntrl.domain.ports.ipi.JsonData.JsonDataFactory;
 import com._4point.aem.aem_utils.aem_cntrl.domain.ports.ipi.ProcessRunner;
-import com._4point.aem.aem_utils.aem_cntrl.domain.ports.spi.RestClient;
+import com._4point.aem.aem_utils.aem_cntrl.domain.ports.spi.AemConfigManager;
 import com._4point.aem.aem_utils.aem_cntrl.domain.ports.spi.Tailer.TailerFactory;
 
 
 public class AemInstallerImpl implements AemInstaller {
 	private static final Logger log = LoggerFactory.getLogger(AemInstallerImpl.class);
 
-	private final RestClient restClient;
-	private final JsonDataFactory jsonDataFactory;
 	private final TailerFactory tailerFactory;
 	private final ProcessRunner processRunner;
+	private final AemConfigManager aemConfigManager;
 
-	public AemInstallerImpl(RestClient restClient, JsonDataFactory jsonDataFactory, TailerFactory tailerFactory, ProcessRunner processRunner) {
-		this.restClient = restClient;
-		this.jsonDataFactory = jsonDataFactory;
+	public AemInstallerImpl(TailerFactory tailerFactory, ProcessRunner processRunner, AemConfigManager aemConfigManager) {
 		this.tailerFactory = tailerFactory;
 		this.processRunner = processRunner;
+		this.aemConfigManager = aemConfigManager;
 	}
 
 	/**
@@ -107,8 +104,6 @@ public class AemInstallerImpl implements AemInstaller {
 		        	    .updateSlingProperties();
 
 			
-		AemConfigManager aemConfigManager = new AemConfigManager(restClient, jsonDataFactory);
-
 		aemQuickstart.startQuickstartPerformAction(()->enableProtectedMode(aemConfigManager));
 		
 		// Maybe allow options to increase timeouts (jacorb and apache aries)

@@ -1,4 +1,4 @@
-package com._4point.aem.aem_utils.aem_cntrl.domain.ports.spi;
+package com._4point.aem.aem_utils.aem_cntrl.adapters.spi.ports;
 
 import java.io.Closeable;
 import java.io.InputStream;

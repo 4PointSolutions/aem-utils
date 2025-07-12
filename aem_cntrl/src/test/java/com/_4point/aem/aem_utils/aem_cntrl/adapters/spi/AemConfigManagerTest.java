@@ -1,4 +1,4 @@
-package com._4point.aem.aem_utils.aem_cntrl.domain;
+package com._4point.aem.aem_utils.aem_cntrl.adapters.spi;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -14,9 +14,13 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import com._4point.aem.aem_utils.aem_cntrl.adapters.ipi.JacksonJsonData;
-import com._4point.aem.aem_utils.aem_cntrl.domain.ports.spi.RestClient;
-import com._4point.aem.aem_utils.aem_cntrl.domain.ports.spi.RestClient.ContentType;
+import com._4point.aem.aem_utils.aem_cntrl.adapters.spi.RestClientAemConfigManager;
+import com._4point.aem.aem_utils.aem_cntrl.adapters.spi.adapters.JacksonJsonData;
+import com._4point.aem.aem_utils.aem_cntrl.adapters.spi.ports.RestClient;
+import com._4point.aem.aem_utils.aem_cntrl.adapters.spi.ports.RestClient.ContentType;
+import com._4point.aem.aem_utils.aem_cntrl.domain.MobileFormsSettings;
+import com._4point.aem.aem_utils.aem_cntrl.domain.MobileFormsSettings.Factory;
+import com._4point.aem.aem_utils.aem_cntrl.domain.ports.spi.AemConfigManager;
 
 
 @ExtendWith(MockitoExtension.class)
@@ -34,7 +38,7 @@ class AemConfigManagerTest {
 	@BeforeEach
 	void setUp() {
 		// Initialize the AemConfigManager with mocked dependencies
-		underTest = new AemConfigManager(mockRestClient, JacksonJsonData::from);
+		underTest = new RestClientAemConfigManager(mockRestClient, JacksonJsonData::from);
 	}
 	
 	@Test

@@ -1,4 +1,4 @@
-package com._4point.aem.aem_utils.aem_cntrl.domain;
+package com._4point.aem.aem_utils.aem_cntrl.adapters.spi;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -14,11 +14,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
 import com._4point.aem.aem_utils.aem_cntrl.AemCntrlApplication;
-import com._4point.aem.aem_utils.aem_cntrl.domain.ports.ipi.JsonData;
-import com._4point.aem.aem_utils.aem_cntrl.domain.ports.spi.RestClient;
-import com._4point.aem.aem_utils.aem_cntrl.domain.ports.spi.RestClient.ContentType;
-import com._4point.aem.aem_utils.aem_cntrl.domain.ports.spi.RestClient.MultipartPayload.Builder;
-import com._4point.aem.aem_utils.aem_cntrl.domain.ports.spi.RestClient.Response;
+import com._4point.aem.aem_utils.aem_cntrl.adapters.spi.RestClientAemConfigManager;
+import com._4point.aem.aem_utils.aem_cntrl.adapters.spi.ports.JsonData;
+import com._4point.aem.aem_utils.aem_cntrl.adapters.spi.ports.RestClient;
+import com._4point.aem.aem_utils.aem_cntrl.adapters.spi.ports.RestClient.ContentType;
+import com._4point.aem.aem_utils.aem_cntrl.adapters.spi.ports.RestClient.Response;
+import com._4point.aem.aem_utils.aem_cntrl.adapters.spi.ports.RestClient.MultipartPayload.Builder;
+import com._4point.aem.aem_utils.aem_cntrl.domain.MobileFormsSettings;
+import com._4point.aem.aem_utils.aem_cntrl.domain.ports.spi.AemConfigManager;
 
 
 
@@ -241,7 +244,7 @@ apply=true&action=ajaxConfigManager
 			""";
 	@Test
 	void testAemConfigManager_SetProtectedMode() {
-		AemConfigManager aemConfigManager = new AemConfigManager(restClient, jsonDataFactory);
+		AemConfigManager aemConfigManager = new RestClientAemConfigManager(restClient, jsonDataFactory);
 		
 		MobileFormsSettings mobileFormsSettings = aemConfigManager.mobileFormsSettings();
 		assertTrue(mobileFormsSettings.embedHttpImages());

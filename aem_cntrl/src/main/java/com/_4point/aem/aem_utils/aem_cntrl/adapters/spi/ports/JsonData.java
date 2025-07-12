@@ -1,4 +1,4 @@
-package com._4point.aem.aem_utils.aem_cntrl.domain.ports.ipi;
+package com._4point.aem.aem_utils.aem_cntrl.adapters.spi.ports;
 
 import java.util.List;
 import java.util.Optional;
