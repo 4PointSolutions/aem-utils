@@ -4,7 +4,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 import org.junit.jupiter.api.Test;
 
-import com._4point.aem.aem_utils.aem_cntrl.adapters.spi.adapters.JacksonJsonData;
+import com._4point.aem.aem_utils.aem_cntrl.adapters.ipi.JacksonJsonData;
 
 
 class MobileFormsSettingsTest {

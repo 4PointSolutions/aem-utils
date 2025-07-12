@@ -6,8 +6,8 @@ import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import com._4point.aem.aem_utils.aem_cntrl.adapters.spi.ports.JsonData;
-import com._4point.aem.aem_utils.aem_cntrl.adapters.spi.ports.JsonData.JsonDataFactory;
+import com._4point.aem.aem_utils.aem_cntrl.domain.ports.ipi.JsonData;
+import com._4point.aem.aem_utils.aem_cntrl.domain.ports.ipi.JsonData.JsonDataFactory;
 
 
 /**

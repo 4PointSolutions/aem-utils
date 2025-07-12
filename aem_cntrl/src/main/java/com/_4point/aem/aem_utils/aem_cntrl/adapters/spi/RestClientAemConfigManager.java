@@ -7,12 +7,12 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import com._4point.aem.aem_utils.aem_cntrl.adapters.spi.ports.RestClient;
-import com._4point.aem.aem_utils.aem_cntrl.adapters.spi.ports.JsonData.JsonDataFactory;
 import com._4point.aem.aem_utils.aem_cntrl.adapters.spi.ports.RestClient.ContentType;
 import com._4point.aem.aem_utils.aem_cntrl.adapters.spi.ports.RestClient.Response;
 import com._4point.aem.aem_utils.aem_cntrl.adapters.spi.ports.RestClient.RestClientException;
 import com._4point.aem.aem_utils.aem_cntrl.adapters.spi.ports.RestClient.MultipartPayload.Builder;
 import com._4point.aem.aem_utils.aem_cntrl.domain.MobileFormsSettings;
+import com._4point.aem.aem_utils.aem_cntrl.domain.ports.ipi.JsonData.JsonDataFactory;
 import com._4point.aem.aem_utils.aem_cntrl.domain.ports.spi.AemConfigManager;
 
 

@@ -15,12 +15,12 @@ import org.springframework.boot.test.context.SpringBootTest;
 
 import com._4point.aem.aem_utils.aem_cntrl.AemCntrlApplication;
 import com._4point.aem.aem_utils.aem_cntrl.adapters.spi.RestClientAemConfigManager;
-import com._4point.aem.aem_utils.aem_cntrl.adapters.spi.ports.JsonData;
 import com._4point.aem.aem_utils.aem_cntrl.adapters.spi.ports.RestClient;
 import com._4point.aem.aem_utils.aem_cntrl.adapters.spi.ports.RestClient.ContentType;
 import com._4point.aem.aem_utils.aem_cntrl.adapters.spi.ports.RestClient.Response;
 import com._4point.aem.aem_utils.aem_cntrl.adapters.spi.ports.RestClient.MultipartPayload.Builder;
 import com._4point.aem.aem_utils.aem_cntrl.domain.MobileFormsSettings;
+import com._4point.aem.aem_utils.aem_cntrl.domain.ports.ipi.JsonData;
 import com._4point.aem.aem_utils.aem_cntrl.domain.ports.spi.AemConfigManager;
 
 

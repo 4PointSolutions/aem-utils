@@ -9,7 +9,7 @@ import java.util.Map;
 
 import org.junit.jupiter.api.Test;
 
-import com._4point.aem.aem_utils.aem_cntrl.adapters.spi.adapters.JacksonJsonData;
+import com._4point.aem.aem_utils.aem_cntrl.adapters.ipi.JacksonJsonData;
 import com._4point.aem.aem_utils.aem_cntrl.domain.AemConfigSettings.AemConfigSettingsException;
 import com._4point.aem.aem_utils.aem_cntrl.domain.AemConfigSettings.AemConfigSettingsFactory;
 import com._4point.testing.matchers.javalang.ExceptionMatchers;
