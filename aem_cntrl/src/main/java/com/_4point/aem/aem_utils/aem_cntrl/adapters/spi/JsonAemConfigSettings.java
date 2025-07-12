@@ -1,4 +1,4 @@
-package com._4point.aem.aem_utils.aem_cntrl.domain;
+package com._4point.aem.aem_utils.aem_cntrl.adapters.spi;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -15,15 +15,15 @@ import com._4point.aem.aem_utils.aem_cntrl.adapters.spi.ports.JsonData.JsonDataF
  * It provides a base implementation that is used by other classes that represent specific setting sets. 
  * 
  */
-public class AemConfigSettings {
+public class JsonAemConfigSettings {
 	private final String pid;
 	private final Map<String, String> properties;
 
-	AemConfigSettings(ParseResult parseResult) {
+	JsonAemConfigSettings(ParseResult parseResult) {
 		this(parseResult.pid(), parseResult.properties());
 	}
 	
-	private AemConfigSettings(String pid, Map<String, String> properties) {
+	private JsonAemConfigSettings(String pid, Map<String, String> properties) {
 		this.pid = pid;
 		this.properties = properties;
 	}
@@ -77,8 +77,8 @@ public class AemConfigSettings {
 			this.jsonDataFactory = jsonDataFactory;
 		}
 
-		public AemConfigSettings create(String json) throws AemConfigSettingsException {
-			return new AemConfigSettings(parseJson(jsonDataFactory.apply(json)));
+		public JsonAemConfigSettings create(String json) throws AemConfigSettingsException {
+			return new JsonAemConfigSettings(parseJson(jsonDataFactory.apply(json)));
 		}
 
 		private static ParseResult parseJson(JsonData jsonData) throws AemConfigSettingsException {

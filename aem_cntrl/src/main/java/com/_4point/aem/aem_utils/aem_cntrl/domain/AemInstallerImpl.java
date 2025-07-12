@@ -14,6 +14,7 @@ import com._4point.aem.aem_utils.aem_cntrl.domain.FluentFormsFiles.FluentFormsFi
 import com._4point.aem.aem_utils.aem_cntrl.domain.ports.api.AemInstaller;
 import com._4point.aem.aem_utils.aem_cntrl.domain.ports.ipi.ProcessRunner;
 import com._4point.aem.aem_utils.aem_cntrl.domain.ports.spi.AemConfigManager;
+import com._4point.aem.aem_utils.aem_cntrl.domain.ports.spi.MobileFormsSettings;
 import com._4point.aem.aem_utils.aem_cntrl.domain.ports.spi.Tailer.TailerFactory;
 
 

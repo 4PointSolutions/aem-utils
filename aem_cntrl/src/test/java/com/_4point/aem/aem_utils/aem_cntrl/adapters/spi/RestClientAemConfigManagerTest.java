@@ -14,17 +14,15 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import com._4point.aem.aem_utils.aem_cntrl.adapters.spi.RestClientAemConfigManager;
 import com._4point.aem.aem_utils.aem_cntrl.adapters.spi.adapters.JacksonJsonData;
 import com._4point.aem.aem_utils.aem_cntrl.adapters.spi.ports.RestClient;
 import com._4point.aem.aem_utils.aem_cntrl.adapters.spi.ports.RestClient.ContentType;
-import com._4point.aem.aem_utils.aem_cntrl.domain.MobileFormsSettings;
-import com._4point.aem.aem_utils.aem_cntrl.domain.MobileFormsSettings.Factory;
 import com._4point.aem.aem_utils.aem_cntrl.domain.ports.spi.AemConfigManager;
+import com._4point.aem.aem_utils.aem_cntrl.domain.ports.spi.MobileFormsSettings;
 
 
 @ExtendWith(MockitoExtension.class)
-class AemConfigManagerTest {
+class RestClientAemConfigManagerTest {
 
 	@Mock(stubOnly = true) RestClient mockRestClient;
 	@Mock(stubOnly = true) RestClient.GetRequest.Builder mockGetBuilder;
@@ -44,7 +42,7 @@ class AemConfigManagerTest {
 	@Test
 	void testMobileFormsSettings() throws Exception {
 		// Given
-		when(mockRestClient.getRequestBuilder("/system/console/configMgr/" + MobileFormsSettings.PID)).thenReturn(mockGetBuilder);
+		when(mockRestClient.getRequestBuilder("/system/console/configMgr/" + JsonMobileFormsSettings.PID)).thenReturn(mockGetBuilder);
 		when(mockGetBuilder.queryParam("post", "true")).thenReturn(mockGetBuilder);
 		when(mockGetBuilder.queryParam("ts", "170")).thenReturn(mockGetBuilder);
 		when(mockGetBuilder.build()).thenReturn(mockGetRequest);
@@ -57,7 +55,7 @@ class AemConfigManagerTest {
 		// Then
 		assertNotNull(result);
 		assertAll(
-				() -> assertEquals(MobileFormsSettings.PID, result.pid()),
+				() -> assertEquals(JsonMobileFormsSettings.PID, result.pid()),
 				() -> assertEquals(8, result.properties().size())
 				);
 	}
@@ -65,7 +63,7 @@ class AemConfigManagerTest {
 	@Test
 	void testMobileFormsSettings_MobileFormsSettings() throws Exception {
 		// Given
-		MobileFormsSettings settings = new MobileFormsSettings.Factory(JacksonJsonData::from).create(SAMPLE_CONFIG_JSON);
+		MobileFormsSettings settings = new JsonMobileFormsSettings.Factory(JacksonJsonData::from).create(SAMPLE_CONFIG_JSON);
 		when(mockRestClient.multipartPayloadBuilder("/system/console/configMgr/" + settings.pid()))
 				.thenReturn(mockPayloadBuilder);
 		when(mockPayloadBuilder.add("apply", "true")).thenReturn(mockPayloadBuilder);

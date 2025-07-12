@@ -1,13 +1,14 @@
-package com._4point.aem.aem_utils.aem_cntrl.domain;
+package com._4point.aem.aem_utils.aem_cntrl.adapters.spi;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 import org.junit.jupiter.api.Test;
 
 import com._4point.aem.aem_utils.aem_cntrl.adapters.spi.adapters.JacksonJsonData;
+import com._4point.aem.aem_utils.aem_cntrl.domain.ports.spi.MobileFormsSettings;
 
 
-class MobileFormsSettingsTest {
+class JsonMobileFormsSettingsTest {
 	private static final String TEST_JSON1 = 
 			"""
 			{
@@ -97,7 +98,7 @@ class MobileFormsSettingsTest {
 			}
 			""";
 
-	private final MobileFormsSettings underTest = new MobileFormsSettings(new AemConfigSettings.AemConfigSettingsFactory(JacksonJsonData::from).create(TEST_JSON1));
+	private final MobileFormsSettings underTest = new JsonMobileFormsSettings(new JsonAemConfigSettings.AemConfigSettingsFactory(JacksonJsonData::from).create(TEST_JSON1));
 	
 	@Test
 	void testCacheStrategy() {

@@ -12,8 +12,8 @@ import com._4point.aem.aem_utils.aem_cntrl.adapters.spi.ports.RestClient.Content
 import com._4point.aem.aem_utils.aem_cntrl.adapters.spi.ports.RestClient.Response;
 import com._4point.aem.aem_utils.aem_cntrl.adapters.spi.ports.RestClient.RestClientException;
 import com._4point.aem.aem_utils.aem_cntrl.adapters.spi.ports.RestClient.MultipartPayload.Builder;
-import com._4point.aem.aem_utils.aem_cntrl.domain.MobileFormsSettings;
 import com._4point.aem.aem_utils.aem_cntrl.domain.ports.spi.AemConfigManager;
+import com._4point.aem.aem_utils.aem_cntrl.domain.ports.spi.MobileFormsSettings;
 
 
 public class RestClientAemConfigManager implements AemConfigManager {
@@ -29,7 +29,7 @@ public class RestClientAemConfigManager implements AemConfigManager {
 
 	@Override
 	public MobileFormsSettings mobileFormsSettings() {
-			return new MobileFormsSettings.Factory(jsonDataFactory).create(retrieveConfigSettings(MobileFormsSettings.PID));
+			return new JsonMobileFormsSettings.Factory(jsonDataFactory).create(retrieveConfigSettings(JsonMobileFormsSettings.PID));
 	}
 
 	@Override

@@ -1,4 +1,4 @@
-package com._4point.aem.aem_utils.aem_cntrl.domain;
+package com._4point.aem.aem_utils.aem_cntrl.adapters.spi;
 
 //import static org.hamcrest.Matchers.*;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -9,12 +9,12 @@ import java.util.Map;
 
 import org.junit.jupiter.api.Test;
 
+import com._4point.aem.aem_utils.aem_cntrl.adapters.spi.JsonAemConfigSettings.AemConfigSettingsException;
+import com._4point.aem.aem_utils.aem_cntrl.adapters.spi.JsonAemConfigSettings.AemConfigSettingsFactory;
 import com._4point.aem.aem_utils.aem_cntrl.adapters.spi.adapters.JacksonJsonData;
-import com._4point.aem.aem_utils.aem_cntrl.domain.AemConfigSettings.AemConfigSettingsException;
-import com._4point.aem.aem_utils.aem_cntrl.domain.AemConfigSettings.AemConfigSettingsFactory;
 import com._4point.testing.matchers.javalang.ExceptionMatchers;
 
-class AemConfigSettingsTest {
+class JsonAemConfigSettingsTest {
 
 	static final String TEST_JSON1 = 
 			"""
@@ -106,7 +106,7 @@ class AemConfigSettingsTest {
 			""";
 	
 	private final AemConfigSettingsFactory factory = new AemConfigSettingsFactory(JacksonJsonData::from);
-	private final AemConfigSettings underTest = factory.create(TEST_JSON1);
+	private final JsonAemConfigSettings underTest = factory.create(TEST_JSON1);
 
 
 	@Test

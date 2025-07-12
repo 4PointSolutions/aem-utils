@@ -4,13 +4,11 @@ import static com._4point.aem.aem_utils.aem_cntrl.domain.MockInstallFiles.*;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Duration;
-import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Stream;
 
@@ -18,16 +16,15 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.OS;
 import org.junit.jupiter.api.function.Executable;
 import org.junit.jupiter.api.io.TempDir;
-import org.mockito.Answers;
 import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
-import com._4point.aem.aem_utils.aem_cntrl.adapters.spi.ports.RestClient;
-import com._4point.aem.aem_utils.aem_cntrl.adapters.spi.ports.RestClient.ContentType;
 import com._4point.aem.aem_utils.aem_cntrl.domain.ports.api.AemInstaller;
 import com._4point.aem.aem_utils.aem_cntrl.domain.ports.ipi.ProcessRunner;
+import com._4point.aem.aem_utils.aem_cntrl.domain.ports.spi.AemConfigManager;
+import com._4point.aem.aem_utils.aem_cntrl.domain.ports.spi.MobileFormsSettings;
 import com._4point.aem.aem_utils.aem_cntrl.domain.ports.spi.Tailer;
 import com._4point.aem.aem_utils.aem_cntrl.domain.ports.spi.Tailer.TailerFactory;
 
@@ -51,13 +48,10 @@ class AemInstallerImpl_SociableTest {
 	
 	
 	@MockitoBean ProcessRunner processRunnerMock;
-	@MockitoBean(answers = Answers.RETURNS_DEEP_STUBS) RestClient restClientMock;
+	@MockitoBean AemConfigManager aemConfigManagerMock;
 	@MockitoBean TailerFactory tailerFactoryMock;
 	@Mock Tailer tailerMock;
-	@Mock RestClient.Response restClientGetResponseMock;
-	@Mock RestClient.Response restClientPostResponseMock;
-	@Mock RestClient.MultipartPayload.Builder restClientPayloadBuilderMock;
-	@Mock RestClient.MultipartPayload restClientPayloadMock;
+	@Mock MobileFormsSettings mobileFormsSettingsMock;
 	
 	@Test
 	void test(@Autowired AemInstaller underTest, @TempDir Path tempDir) throws Exception {
@@ -76,20 +70,10 @@ class AemInstallerImpl_SociableTest {
 		   			   .thenAnswer(i->mockAemInstallation(destDir.resolve(aemInstallType.aemDir()).resolve("crx-quickstart"))) // Mock the Aem installation on the first call
 					   .thenAnswer(i->MOCK_AEM_LOG.lines());
 		
-		when(restClientMock.getRequestBuilder(anyString())
-						   .queryParam("post", "true")
-						   .queryParam("ts", "170")
-						   .build()
-						   .getFromServer(ContentType.APPLICATION_JSON)).thenReturn(Optional.of(restClientGetResponseMock));
-		when(restClientGetResponseMock.data()).thenReturn(new ByteArrayInputStream(AemConfigSettingsTest.TEST_JSON1.getBytes()));
-
-		when(restClientMock.multipartPayloadBuilder(anyString())).thenReturn(restClientPayloadBuilderMock);
-		when(restClientPayloadBuilderMock.add(anyString(), anyString())).thenReturn(restClientPayloadBuilderMock);
-		when(restClientPayloadBuilderMock.build()).thenReturn(restClientPayloadMock);
-		when(restClientPayloadMock.postToServer(ContentType.TEXT_HTML)).thenReturn(Optional.of(restClientPostResponseMock));				   
-						   
-		when(restClientPostResponseMock.data()).thenReturn(new ByteArrayInputStream("Mock HTML".getBytes()));
-				
+		// Mock the setting of protected mode for HTML5 forms
+		when(aemConfigManagerMock.mobileFormsSettings()).thenReturn(mobileFormsSettingsMock);
+		doNothing().when(mobileFormsSettingsMock).protectedMode(true); // Mock the protected mode setting
+		doNothing().when(aemConfigManagerMock).mobileFormsSettings(mobileFormsSettingsMock); 
 		
 		// Run test
 		underTest.installAem(destDir, srcDir);
