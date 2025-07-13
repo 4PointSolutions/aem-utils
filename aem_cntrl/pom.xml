@@ -64,6 +64,7 @@
 		<!-- Testing Dependencies -->
 		<fp-hamcrest-matchers.version>0.0.4-SNAPSHOT</fp-hamcrest-matchers.version>
 		<lorem.version>2.2</lorem.version>
+		<wiremock.version>3.13.1</wiremock.version>
 	</properties>
 	<dependencies>
 	    <!-- Project Dependencies -->
@@ -103,6 +104,12 @@
 			<artifactId>lorem</artifactId>
 			<version>${lorem.version}</version>
 			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.wiremock</groupId>
+			<artifactId>wiremock-standalone</artifactId>
+			<version>${wiremock.version}</version>
+  			<scope>test</scope>
 		</dependency>
 	</dependencies>
 
