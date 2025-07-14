@@ -149,19 +149,11 @@ public class AemProcess {
 	}
 
 	public String startQuickstartInstallServicePack()  {
-		String result = runUntilLogContains(AEM_SP_START_TARGET_REGEX, Duration.ofMinutes(10));
-		// The string we are looking for is the end of the install process but we want to give things another few seconds to calm down.
-		// Once we have found it, wait 15 seconds.
-		sleepForSeconds(15, "Letting AEM finish installing Service Pack");
-		return result;
+		return runUntilLogContains(AEM_SP_START_TARGET_REGEX, Duration.ofMinutes(10));
 	}
 
 	public String startQuickstartInstallFormsAddOn()  {
-		String searchString = runUntilLogContains(AEM_FORMS_ADD_ON_START_TARGET_REGEX, Duration.ofMinutes(20));
-		// The string we are looking for is *near* the end of the install process but not at the end.
-		// Once we have found it, wait another minute.
-		sleepForSeconds(60, "Letting AEM finish installing Forms Add-on");
-		return searchString;
+		return runUntilLogContains(AEM_FORMS_ADD_ON_START_TARGET_REGEX, Duration.ofMinutes(20));
 	}
 
 	public String startQuickstartPerformAction(Runnable action) {
