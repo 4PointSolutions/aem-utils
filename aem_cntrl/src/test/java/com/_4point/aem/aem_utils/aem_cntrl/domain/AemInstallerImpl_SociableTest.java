@@ -12,10 +12,11 @@ import java.time.Duration;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Stream;
 
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.OS;
 import org.junit.jupiter.api.function.Executable;
 import org.junit.jupiter.api.io.TempDir;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.EnumSource;
 import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -53,9 +54,9 @@ class AemInstallerImpl_SociableTest {
 	@Mock Tailer tailerMock;
 	@Mock MobileFormsSettings mobileFormsSettingsMock;
 	
-	@Test
-	void test(@Autowired AemInstaller underTest, @TempDir Path tempDir) throws Exception {
-		AemInstallType aemInstallType = AemInstallType.AEM_ORIG;
+	@ParameterizedTest
+	@EnumSource(AemInstallType.class)
+	void test(AemInstallType aemInstallType, @Autowired AemInstaller underTest, @TempDir Path tempDir) throws Exception {
 		Path srcDir = createDirectory(tempDir, "srcDir");
 		// create fake installation files
 		aemInstallType.createMockFiles(srcDir);
@@ -72,7 +73,7 @@ class AemInstallerImpl_SociableTest {
 		
 		// Mock the setting of protected mode for HTML5 forms
 		when(aemConfigManagerMock.mobileFormsSettings()).thenReturn(mobileFormsSettingsMock);
-		doNothing().when(mobileFormsSettingsMock).protectedMode(true); // Mock the protected mode setting
+		doNothing().when(mobileFormsSettingsMock).protectedMode(true); 
 		doNothing().when(aemConfigManagerMock).mobileFormsSettings(mobileFormsSettingsMock); 
 		
 		// Run test
@@ -88,20 +89,22 @@ class AemInstallerImpl_SociableTest {
 
 		//   Check that AEM has been run the requisite number of times
 		//     Unpack the quickstart jar
+		String quickstartFilename = aemInstallType.files().getFirst().filename().toString();
 		verify(processRunnerMock).runUntilCompletes(
-				eq(jbangCommand("run", "--java=11", "--java-options=-Xmx2g", "-Djava.awt.headless=true", "AEM_6.5_Quickstart.jar", "-unpack")),
+				eq(jbangCommand("run", "--java=" + aemInstallType.javaVersion(), "--java-options=-Xmx2g", "-Djava.awt.headless=true", quickstartFilename, "-unpack")),
 				eq(aemDir),
 				eq(Duration.ofMinutes(3))
 				);
 		//      Get the Java environment settings so that we can create the scaffolding files (runStart, runStop)
 		verify(processRunnerMock).runtoListResult(eq(jbangCommand("jdk", "java-env", Integer.toString(aemInstallType.javaVersion()))), eq(aemDir));
-		//      Start and stop AEM 4 times:
+		//      Start and stop AEM 3 or 4 times (once for each file in install set):
 		//        1) Initial install of AEM
-		//		  2) Install Service Pack
+		//		  2) Install Service Pack (maybe)
 		//		  3) Install Forms Add-on
 		//		  4) Install FluentForms and update AEM Configuration
-		verify(processRunnerMock, times(4)).runtoListResult(eq(new String[] { aemDir.resolve(SCAFFOLD_START_PATH.filename()).toString() }), eq(aemDir)); // 4 times
-		verify(processRunnerMock, times(4)).runtoListResult(eq(new String[] { aemDir.resolve(SCAFFOLD_STOP_PATH.filename()).toString() }), eq(aemDir)); // 4 times
+		int numInstallFiles = aemInstallType.files().size();
+		verify(processRunnerMock, times(numInstallFiles)).runtoListResult(eq(new String[] { aemDir.resolve(SCAFFOLD_START_PATH.filename()).toString() }), eq(aemDir)); // 4 times
+		verify(processRunnerMock, times(numInstallFiles)).runtoListResult(eq(new String[] { aemDir.resolve(SCAFFOLD_STOP_PATH.filename()).toString() }), eq(aemDir)); // 4 times
 		
 		//   Verify Sling.properties was modified
 		//   Verify that the POST was made to update protected mode
