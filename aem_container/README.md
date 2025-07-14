@@ -15,11 +15,19 @@ This should include:
 
 * Commmand to build docker image
 
-`docker buildx build --file aem.dockerfile -t aem:aem65sp21 .`
+`docker buildx build --file aem_65.dockerfile -t aem:aem65sp21 .`
+
+or
+
+`docker buildx build --file aem_lts.dockerfile -t aem:aem65lts .`
 
 * Command to build and run docker container locally
 
 `docker run -i -t -p 4502:4502 --name aem65sp21 aem:aem65sp21`
+
+or
+
+`docker run -i -t -p 4502:4502 --name aem65lts aem:aem65lts`
 
 ### Pushing to GitHub
 
