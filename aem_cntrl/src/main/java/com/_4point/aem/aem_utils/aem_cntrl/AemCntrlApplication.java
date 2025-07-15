@@ -9,6 +9,7 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.WebApplicationType;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.builder.SpringApplicationBuilder;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.http.client.JdkClientHttpRequestFactory;
 
@@ -19,6 +20,7 @@ import com._4point.aem.aem_utils.aem_cntrl.adapters.spi.adapters.JacksonJsonData
 import com._4point.aem.aem_utils.aem_cntrl.adapters.spi.adapters.SpringRestClientRestClient;
 import com._4point.aem.aem_utils.aem_cntrl.adapters.spi.ports.JsonData;
 import com._4point.aem.aem_utils.aem_cntrl.adapters.spi.ports.RestClient;
+import com._4point.aem.aem_utils.aem_cntrl.adapters.spi.ports.RestClient.AemConfiguration;
 import com._4point.aem.aem_utils.aem_cntrl.commands.AemCntrlCommandLine;
 import com._4point.aem.aem_utils.aem_cntrl.domain.AemInstallerImpl;
 import com._4point.aem.aem_utils.aem_cntrl.domain.ports.api.AemInstaller;
@@ -30,6 +32,7 @@ import picocli.CommandLine;
 import picocli.CommandLine.IFactory;
 
 @SpringBootApplication
+@EnableConfigurationProperties(AemCntrlAemConfiguration.class)
 public class AemCntrlApplication implements CommandLineRunner, ExitCodeGenerator {
 	public static final String APP_CONFIG_PEFIX = "aemcntrl";
 
@@ -60,12 +63,14 @@ public class AemCntrlApplication implements CommandLineRunner, ExitCodeGenerator
     }
 	
 	@Bean
-	RestClient restClient() {
-		String target = "http://localhost:4502";
-		String user = "admin";
-		String password = "admin";
+	AemConfiguration aemConfiguration(AemCntrlAemConfiguration aemCntrlAemConfiguration) {
+		return AemCntrlAemConfiguration.aemConfiguration(aemCntrlAemConfiguration);
+	}
+
+	@Bean
+	RestClient restClient(AemConfiguration aemConfiguration) {
 		HttpClient httpClient = HttpClient.newBuilder().followRedirects(HttpClient.Redirect.NORMAL).build();	// Configure client to follow redirects since AEM uses them a lot.
-		return SpringRestClientRestClient.create(target, user, password, org.springframework.web.client.RestClient.builder().requestFactory(new JdkClientHttpRequestFactory(httpClient)));
+		return SpringRestClientRestClient.create(aemConfiguration, org.springframework.web.client.RestClient.builder().requestFactory(new JdkClientHttpRequestFactory(httpClient)));
 	}
 	
 	@Bean

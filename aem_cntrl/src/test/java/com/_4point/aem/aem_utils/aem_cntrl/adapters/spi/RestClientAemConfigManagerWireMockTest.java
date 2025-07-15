@@ -12,6 +12,7 @@ import org.junit.jupiter.params.provider.ValueSource;
 
 import com._4point.aem.aem_utils.aem_cntrl.adapters.spi.adapters.JacksonJsonData;
 import com._4point.aem.aem_utils.aem_cntrl.adapters.spi.adapters.SpringRestClientRestClient;
+import com._4point.aem.aem_utils.aem_cntrl.adapters.spi.ports.RestClient.AemConfiguration;
 import com._4point.aem.aem_utils.aem_cntrl.domain.ports.spi.AemConfigManager;
 import com._4point.aem.aem_utils.aem_cntrl.domain.ports.spi.MobileFormsSettings;
 import com.github.tomakehurst.wiremock.junit5.WireMockRuntimeInfo;
@@ -24,7 +25,14 @@ class RestClientAemConfigManagerWireMockTest {
 
 	@BeforeEach
 	void setup(WireMockRuntimeInfo wmRuntimeInfo) {
-		underTest = new RestClientAemConfigManager(SpringRestClientRestClient.create(wmRuntimeInfo.getHttpBaseUrl(), "", ""), JacksonJsonData::from);
+		AemConfiguration restClientAemConfig = new AemConfiguration.SimpleAemConfiguration(
+				"localhost", // host
+				wmRuntimeInfo.getHttpPort(), 		// port
+				"", 		// no username
+				"", 		// no password
+				false,		// don't useSSL
+				null); 		// No SslConfiguration
+		underTest = new RestClientAemConfigManager(SpringRestClientRestClient.create(restClientAemConfig), JacksonJsonData::from);
 	}
 
 	@ParameterizedTest
