@@ -9,6 +9,7 @@ import java.time.Duration;
 import java.util.List;
 import java.util.OptionalInt;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Executors;
 import java.util.stream.Stream;
 
 import org.junit.jupiter.api.Test;
@@ -201,7 +202,8 @@ class JavaLangProcessRunnerTest {
 																					} catch (InterruptedException e) {
 																						throw new IllegalStateException("Interruption Exception should not be thrown.", e);
 																					}
-																				});	// Process would block however we're going to unblock it.
+																				}, 
+																			  	Executors.newVirtualThreadPerTaskExecutor());	// Process would block however we're going to unblock it.
 		Thread.sleep(Duration.ofSeconds(1));
 		List<String> stdout = result.stdout().join().toList();					// Reading will unblock it.
 		OptionalInt exitResult = runner.join();
