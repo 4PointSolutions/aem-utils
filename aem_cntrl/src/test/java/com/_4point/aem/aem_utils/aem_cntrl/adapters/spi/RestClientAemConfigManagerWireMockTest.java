@@ -12,7 +12,7 @@ import org.junit.jupiter.params.provider.ValueSource;
 
 import com._4point.aem.aem_utils.aem_cntrl.adapters.spi.adapters.JacksonJsonData;
 import com._4point.aem.aem_utils.aem_cntrl.adapters.spi.adapters.SpringRestClientRestClient;
-import com._4point.aem.aem_utils.aem_cntrl.adapters.spi.ports.RestClient.AemConfiguration;
+import com._4point.aem.aem_utils.aem_cntrl.adapters.spi.ports.AemConfiguration;
 import com._4point.aem.aem_utils.aem_cntrl.domain.ports.spi.AemConfigManager;
 import com._4point.aem.aem_utils.aem_cntrl.domain.ports.spi.MobileFormsSettings;
 import com.github.tomakehurst.wiremock.junit5.WireMockRuntimeInfo;
@@ -32,7 +32,7 @@ class RestClientAemConfigManagerWireMockTest {
 				"", 		// no password
 				false,		// don't useSSL
 				null); 		// No SslConfiguration
-		underTest = new RestClientAemConfigManager(SpringRestClientRestClient.create(restClientAemConfig), JacksonJsonData::from);
+		underTest = new RestClientAemConfigManager(SpringRestClientRestClient.create(restClientAemConfig.url(), restClientAemConfig.user(), restClientAemConfig.password()), JacksonJsonData::from);
 	}
 
 	@ParameterizedTest

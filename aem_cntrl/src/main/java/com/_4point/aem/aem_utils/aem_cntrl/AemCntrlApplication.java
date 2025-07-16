@@ -18,9 +18,9 @@ import com._4point.aem.aem_utils.aem_cntrl.adapters.spi.CommonsIoTailerTailer;
 import com._4point.aem.aem_utils.aem_cntrl.adapters.spi.RestClientAemConfigManager;
 import com._4point.aem.aem_utils.aem_cntrl.adapters.spi.adapters.JacksonJsonData;
 import com._4point.aem.aem_utils.aem_cntrl.adapters.spi.adapters.SpringRestClientRestClient;
+import com._4point.aem.aem_utils.aem_cntrl.adapters.spi.ports.AemConfiguration;
 import com._4point.aem.aem_utils.aem_cntrl.adapters.spi.ports.JsonData;
 import com._4point.aem.aem_utils.aem_cntrl.adapters.spi.ports.RestClient;
-import com._4point.aem.aem_utils.aem_cntrl.adapters.spi.ports.RestClient.AemConfiguration;
 import com._4point.aem.aem_utils.aem_cntrl.commands.AemCntrlCommandLine;
 import com._4point.aem.aem_utils.aem_cntrl.domain.AemInstallerImpl;
 import com._4point.aem.aem_utils.aem_cntrl.domain.ports.api.AemInstaller;
@@ -70,7 +70,7 @@ public class AemCntrlApplication implements CommandLineRunner, ExitCodeGenerator
 	@Bean
 	RestClient restClient(AemConfiguration aemConfiguration) {
 		HttpClient httpClient = HttpClient.newBuilder().followRedirects(HttpClient.Redirect.NORMAL).build();	// Configure client to follow redirects since AEM uses them a lot.
-		return SpringRestClientRestClient.create(aemConfiguration, org.springframework.web.client.RestClient.builder().requestFactory(new JdkClientHttpRequestFactory(httpClient)));
+		return SpringRestClientRestClient.create(aemConfiguration.url(), aemConfiguration.user(), aemConfiguration.password(), org.springframework.web.client.RestClient.builder().requestFactory(new JdkClientHttpRequestFactory(httpClient)));
 	}
 	
 	@Bean

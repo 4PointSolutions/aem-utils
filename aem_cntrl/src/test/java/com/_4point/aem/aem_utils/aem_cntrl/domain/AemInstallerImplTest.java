@@ -20,8 +20,8 @@ import com._4point.aem.aem_utils.aem_cntrl.adapters.spi.CommonsIoTailerTailer;
 import com._4point.aem.aem_utils.aem_cntrl.adapters.spi.RestClientAemConfigManager;
 import com._4point.aem.aem_utils.aem_cntrl.adapters.spi.adapters.JacksonJsonData;
 import com._4point.aem.aem_utils.aem_cntrl.adapters.spi.adapters.SpringRestClientRestClient;
+import com._4point.aem.aem_utils.aem_cntrl.adapters.spi.ports.AemConfiguration;
 import com._4point.aem.aem_utils.aem_cntrl.adapters.spi.ports.RestClient;
-import com._4point.aem.aem_utils.aem_cntrl.adapters.spi.ports.RestClient.AemConfiguration;
 import com._4point.aem.aem_utils.aem_cntrl.domain.ports.ipi.ProcessRunner;
 import com._4point.aem.aem_utils.aem_cntrl.domain.ports.spi.AemConfigManager;
 import com._4point.aem.aem_utils.aem_cntrl.domain.ports.spi.Tailer.TailerFactory;
@@ -46,7 +46,7 @@ class AemInstallerImplTest {
 			null); 		// No SslConfiguration
 
 	private final HttpClient httpClient = HttpClient.newBuilder().followRedirects(HttpClient.Redirect.NORMAL).build();	// Configure client to follow redirects since AEM uses them a lot.
-	private final RestClient restClient = SpringRestClientRestClient.create(AEM_CONFIG, org.springframework.web.client.RestClient.builder().requestFactory(new JdkClientHttpRequestFactory(httpClient)));
+	private final RestClient restClient = SpringRestClientRestClient.create(AEM_CONFIG.url(), AEM_CONFIG.user(), AEM_CONFIG.password(), org.springframework.web.client.RestClient.builder().requestFactory(new JdkClientHttpRequestFactory(httpClient)));
 	private final TailerFactory tailerFactory = new CommonsIoTailerTailer.TailerFactory();
 	private final ProcessRunner processRunner = JavaLangProcessRunner.<Stream<String>, Stream<String>>builder()
 																	 .setOutputStreamHandler(s->s)

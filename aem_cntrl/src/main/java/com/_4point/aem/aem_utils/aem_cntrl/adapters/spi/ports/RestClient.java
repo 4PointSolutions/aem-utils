@@ -201,31 +201,7 @@ public interface RestClient {
 		
 	}
 
-	public interface AemConfiguration {
-		String servername();
-		Integer port();
-		String user();
-		String password();
-		Boolean useSsl();
-		SslConfiguration sslConfiguration();
-
-		default public String url() {
-			return "http" + (useSsl() ? "s" : "") + "://" + servername() + (port() != 80 ? ":" + port() : "") + "/";
-		}
-
-		public interface SslConfiguration {}	// Tagging interface for SSL configuration
-		
-		public record SimpleAemConfiguration(
-				String servername,
-				Integer port,
-				String user,
-				String password,
-				Boolean useSsl,
-				SslConfiguration sslConfiguration) implements AemConfiguration
-		{}
-	}
-
-    @SuppressWarnings("serial")
+   @SuppressWarnings("serial")
 	public static class RestClientException extends Exception {
 
 		public RestClientException() {

@@ -3,8 +3,9 @@ package com._4point.aem.aem_utils.aem_cntrl;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.bind.DefaultValue;
 
-import com._4point.aem.aem_utils.aem_cntrl.adapters.spi.ports.RestClient.AemConfiguration;
-import com._4point.aem.aem_utils.aem_cntrl.adapters.spi.ports.RestClient.AemConfiguration.SslConfiguration;
+import com._4point.aem.aem_utils.aem_cntrl.adapters.spi.ports.AemConfiguration;
+import com._4point.aem.aem_utils.aem_cntrl.adapters.spi.ports.AemConfiguration.SslConfiguration;
+
 
 
 /**

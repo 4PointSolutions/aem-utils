@@ -30,7 +30,7 @@ import com._4point.aem.aem_utils.aem_cntrl.adapters.spi.ports.RestClient.Multipa
 
 public class SpringRestClientRestClient implements RestClient {
 	private final org.springframework.web.client.RestClient springRestClient;
-	private final String target;	// Used for error messages and logging.
+	private final String target;
 	private final Supplier<String> correlationIdFn;
 	
 	private SpringRestClientRestClient(org.springframework.web.client.RestClient springRestClient, String target, Supplier<String> correlationIdFn) {
@@ -64,21 +64,23 @@ public class SpringRestClientRestClient implements RestClient {
 		return new SpringClientGetRequestBuilder(additionalPath);
 	}
 	
-	public static RestClient create(AemConfiguration aemConfig) {
-		return create(aemConfig, org.springframework.web.client.RestClient.builder());
+	public static RestClient create(String target, String user, String password) {
+		return create(target, user, password, org.springframework.web.client.RestClient.builder());
 	}
 
-	public static RestClient create(AemConfiguration aemConfig, org.springframework.web.client.RestClient.Builder builder) {
-		return new SpringRestClientRestClient(createSpringRestClient(aemConfig, builder), aemConfig.url(), null);
+	public static RestClient create(String target, String user, String password, org.springframework.web.client.RestClient.Builder builder) {
+		return new SpringRestClientRestClient(createSpringRestClient(target, user, password, builder), target, null);
 	}
 
 	private static org.springframework.web.client.RestClient createSpringRestClient(
-			AemConfiguration aemConfig,
+			String target,
+			String user,
+			String password,
 			org.springframework.web.client.RestClient.Builder builder
 			) {
-		ClientHttpRequestInterceptor basicAuth = new BasicAuthenticationInterceptor(aemConfig.user(), aemConfig.password());
+		ClientHttpRequestInterceptor basicAuth = new BasicAuthenticationInterceptor(user, password);
 
-		return builder.baseUrl(aemConfig.url())
+		return builder.baseUrl(target)
 					  .requestInterceptor(basicAuth)
 					  .build();
 	}
