@@ -8,10 +8,12 @@ import org.springframework.boot.ExitCodeGenerator;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.WebApplicationType;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.autoconfigure.web.client.RestClientSsl;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.http.client.JdkClientHttpRequestFactory;
+import org.springframework.web.client.RestClient.Builder;
 
 import com._4point.aem.aem_utils.aem_cntrl.adapters.ipi.JavaLangProcessRunner;
 import com._4point.aem.aem_utils.aem_cntrl.adapters.spi.CommonsIoTailerTailer;
@@ -19,6 +21,7 @@ import com._4point.aem.aem_utils.aem_cntrl.adapters.spi.RestClientAemConfigManag
 import com._4point.aem.aem_utils.aem_cntrl.adapters.spi.adapters.JacksonJsonData;
 import com._4point.aem.aem_utils.aem_cntrl.adapters.spi.adapters.SpringRestClientRestClient;
 import com._4point.aem.aem_utils.aem_cntrl.adapters.spi.ports.AemConfiguration;
+import com._4point.aem.aem_utils.aem_cntrl.adapters.spi.ports.AemConfiguration.SslConfiguration;
 import com._4point.aem.aem_utils.aem_cntrl.adapters.spi.ports.JsonData;
 import com._4point.aem.aem_utils.aem_cntrl.adapters.spi.ports.RestClient;
 import com._4point.aem.aem_utils.aem_cntrl.commands.AemCntrlCommandLine;
@@ -68,11 +71,24 @@ public class AemCntrlApplication implements CommandLineRunner, ExitCodeGenerator
 	}
 
 	@Bean
-	RestClient restClient(AemConfiguration aemConfiguration) {
+	RestClient restClient(AemConfiguration aemConfiguration, RestClientSsl restClientSsl) {
 		HttpClient httpClient = HttpClient.newBuilder().followRedirects(HttpClient.Redirect.NORMAL).build();	// Configure client to follow redirects since AEM uses them a lot.
-		return SpringRestClientRestClient.create(aemConfiguration.url(), aemConfiguration.user(), aemConfiguration.password(), org.springframework.web.client.RestClient.builder().requestFactory(new JdkClientHttpRequestFactory(httpClient)));
+		Builder restClientBuilder = org.springframework.web.client.RestClient.builder().requestFactory(new JdkClientHttpRequestFactory(httpClient));
+		return SpringRestClientRestClient.create(
+												aemConfiguration.url(), 
+												aemConfiguration.user(), 
+												aemConfiguration.password(), 
+												aemConfiguration.useSslConfiguration() ? useSslBundle(restClientBuilder, aemConfiguration.sslConfiguration().get(), restClientSsl) : restClientBuilder
+				 								);
 	}
 	
+	private static Builder useSslBundle(Builder restClientBuilder, SslConfiguration sslConfiguration, RestClientSsl restClientSsl) {
+		if (sslConfiguration instanceof AemCntrlAemConfiguration.AemCntrlSslConfiguration sslConfig) {
+			return restClientBuilder.apply(restClientSsl.fromBundle(sslConfig.sslBundle()));
+		}
+		throw new IllegalStateException("Unknown SSL Configuration Type: " + sslConfiguration.getClass().getName());
+	}
+
 	@Bean
 	JsonData.JsonDataFactory jsonDataFactory() {
 		return JacksonJsonData::from;

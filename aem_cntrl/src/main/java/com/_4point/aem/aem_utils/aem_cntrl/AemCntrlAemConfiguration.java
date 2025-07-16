@@ -1,5 +1,7 @@
 package com._4point.aem.aem_utils.aem_cntrl;
 
+import java.util.Optional;
+
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.bind.DefaultValue;
 
@@ -28,7 +30,7 @@ public record AemCntrlAemConfiguration(
 	@DefaultValue("aem") String sslBundle			// "aem.sslBundle"	- Spring SSL Bundle for trust store
 	) {
 	
-	private record AemCntrlSslConfiguration(String sslBundle) implements SslConfiguration {}
+	record AemCntrlSslConfiguration(String sslBundle) implements SslConfiguration {}
 	
 	public static AemConfiguration aemConfiguration(AemCntrlAemConfiguration aemConfig) {
 		return new AemConfiguration.SimpleAemConfiguration(aemConfig.servername(), 
@@ -36,7 +38,14 @@ public record AemCntrlAemConfiguration(
 														   aemConfig.user(), 
 														   aemConfig.password(), 
 														   aemConfig.useSsl(),
-														   new AemCntrlSslConfiguration(aemConfig.sslBundle())
+														   sslConfiguration(aemConfig.sslBundle())
 														   );
+		
+        }
+
+	private static Optional<SslConfiguration> sslConfiguration(String sslBundleName) {
+            return sslBundleName == null || sslBundleName.isBlank()
+                    ? Optional.empty()
+                    : Optional.of(new AemCntrlSslConfiguration(sslBundleName));
 	}
 }
