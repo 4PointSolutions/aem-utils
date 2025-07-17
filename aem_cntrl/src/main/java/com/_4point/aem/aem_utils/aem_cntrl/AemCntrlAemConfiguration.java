@@ -20,7 +20,7 @@ import com._4point.aem.aem_utils.aem_cntrl.adapters.spi.ports.AemConfiguration.S
  * @param useSsl	boolean indicating whether to connect using SSL or not. (Defaults to false)
  *
  */
-@ConfigurationProperties("aemcntrl.aem")
+@ConfigurationProperties(AemCntrlApplication.APP_CONFIG_PREFIX + ".aem")
 public record AemCntrlAemConfiguration(
 	@DefaultValue("localhost") String servername,	// "aem.servername"
 	@DefaultValue("4502") Integer port,				// "aem.port"

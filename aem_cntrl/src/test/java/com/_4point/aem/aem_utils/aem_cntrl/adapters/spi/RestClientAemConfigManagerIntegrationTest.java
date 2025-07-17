@@ -25,7 +25,7 @@ import com._4point.aem.aem_utils.aem_cntrl.domain.ports.spi.MobileFormsSettings;
 
 
 @Disabled("These tests are disabled because they require a running AEM instance.  They are not run as part of the build, but can be run manually if desired.")
-@SpringBootTest(properties = AemCntrlApplication.APP_CONFIG_PEFIX + ".run_installer=false", classes = AemCntrlApplication.class)
+@SpringBootTest(properties = AemCntrlApplication.APP_CONFIG_PREFIX + ".run_installer=false", classes = AemCntrlApplication.class)
 class RestClientAemConfigManagerIntegrationTest {
 	private record Property(String name, String value) {
 		static Property of(String name, String value) {

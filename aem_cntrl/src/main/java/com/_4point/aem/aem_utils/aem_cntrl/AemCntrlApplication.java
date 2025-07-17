@@ -37,7 +37,7 @@ import picocli.CommandLine.IFactory;
 @SpringBootApplication
 @EnableConfigurationProperties(AemCntrlAemConfiguration.class)
 public class AemCntrlApplication implements CommandLineRunner, ExitCodeGenerator {
-	public static final String APP_CONFIG_PEFIX = "aemcntrl";
+	public static final String APP_CONFIG_PREFIX = "aemcntrl";
 
 	private final IFactory factory;
 	private final AemCntrlCommandLine aemCntrlCommandLine;
