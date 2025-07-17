@@ -64,7 +64,7 @@ public enum MockInstallFiles {
 		return testFilePath;
 	}
 	
-	enum AemInstallType {
+	public enum AemInstallType {
 		// Original version of AEM 6.5 with service pack and forms addon.
 		AEM_ORIG( 11, "AEM_65_SP19",
 				SAMPLE_AEM_ORIG_QUICKSTART_PATH,
