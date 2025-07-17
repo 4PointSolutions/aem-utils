@@ -12,9 +12,9 @@ abstract class InstallationFiles {
 
 	protected static Path thereCanBeOnlyOne(List<Path> paths, String description) {
 		if (paths.size() > 1) {
-			throw new IllegalStateException("Found multiple %s files when there should only be one.".formatted(description));
+			throw new InstallationFileException("Found multiple %s files when there should only be one.".formatted(description));
 		} else if (paths.size() < 1) {
-			throw new IllegalStateException("Found no %s file when there should be one.".formatted(description));
+			throw new InstallationFileException("Found no %s file when there should be one.".formatted(description));
 		} else {
 			return paths.getFirst();
 		}
@@ -22,7 +22,7 @@ abstract class InstallationFiles {
 
 	protected static Optional<Path> thereCanBeMaybeOne(List<Path> paths, String description) {
 		if (paths.size() > 1) {
-			throw new IllegalStateException("Found multiple %s files when there should at most be one.".formatted(description));
+			throw new InstallationFileException("Found multiple %s files when there should at most be one.".formatted(description));
 		} else if (paths.size() < 1) {
 			return Optional.empty();
 		} else {
@@ -54,6 +54,25 @@ abstract class InstallationFiles {
 			return target;
 		} catch (IOException e) {
 			throw new UncheckedIOException(e);
+		}
+	}
+	
+	@SuppressWarnings("serial")
+	public static class InstallationFileException extends IllegalStateException {
+
+		public InstallationFileException() {
+		}
+
+		public InstallationFileException(String message, Throwable cause) {
+			super(message, cause);
+		}
+
+		public InstallationFileException(String s) {
+			super(s);
+		}
+
+		public InstallationFileException(Throwable cause) {
+			super(cause);
 		}
 	}
 }

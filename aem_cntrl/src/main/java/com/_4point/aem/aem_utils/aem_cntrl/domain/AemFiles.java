@@ -57,10 +57,14 @@ public class AemFiles extends InstallationFiles {
 	}
 
 	public static AemFileset locateAemFiles(Path dir) {
-		return new AemFileset(thereCanBeOnlyOne(AemQuickstart.findFiles(dir), "AEM Quickstart"), 
-							  thereCanBeMaybeOne(AemServicePack.findFiles(dir), "AEM Service Pack"), 
-							  thereCanBeOnlyOne(AemFormsAddOn.findFiles(dir), "AEM Forms Add-on"),
-							  LicenseProperties.findFile(dir));
+		try {
+			return new AemFileset(thereCanBeOnlyOne(AemQuickstart.findFiles(dir), "AEM Quickstart"), 
+								  thereCanBeMaybeOne(AemServicePack.findFiles(dir), "AEM Service Pack"), 
+								  thereCanBeOnlyOne(AemFormsAddOn.findFiles(dir), "AEM Forms Add-on"),
+								  LicenseProperties.findFile(dir));
+		} catch (InstallationFileException e) {
+			throw new IllegalStateException("Error locating AEM files in directory: %s".formatted(dir.toAbsolutePath().toString()), e);
+		}
 	}
 
 	public static void validateVersionInfo(AemQuickstart.VersionInfo quickstartVersionInfo,
