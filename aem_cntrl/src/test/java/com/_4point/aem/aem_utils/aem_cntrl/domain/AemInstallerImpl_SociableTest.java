@@ -121,7 +121,7 @@ class AemInstallerImpl_SociableTest {
 		return ()->assertTrue(Files.exists(expectedLocation), "File expected at '" + expectedLocation.toString() + "' but it does not exist.");
 	}
 	
-	private Stream<String> mockAemInstallation(Path aemQuickstartDir) {
+	private static Stream<String> mockAemInstallation(Path aemQuickstartDir) {
 		// When we're invoked for the initial install, AEM creates a bunch of files 
 		// The only one we update during the AEM installation is the sling.properties file.
 		// So this creates that file so that the AEM installation can proceed. 
@@ -138,6 +138,4 @@ class AemInstallerImpl_SociableTest {
 		Files.createDirectory(newDir);
 		return newDir;
 	}
-
-	
 }
