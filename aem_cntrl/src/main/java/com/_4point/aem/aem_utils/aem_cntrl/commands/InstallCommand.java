@@ -5,8 +5,8 @@ import static java.util.Objects.*;
 import java.nio.file.Path;
 import java.util.concurrent.Callable;
 
-import com._4point.aem.aem_utils.aem_cntrl.domain.OperatingSystem;
 import com._4point.aem.aem_utils.aem_cntrl.domain.ports.api.AemInstaller;
+import com._4point.aem.aem_utils.aem_cntrl.domain.ports.api.Defaults;
 
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
@@ -21,19 +21,16 @@ public class InstallCommand implements Callable<Integer> {
 	Path destDir;
 
 	private final AemInstaller aemInstaller;
+	private final Defaults defaults;
 	
-	public InstallCommand(AemInstaller aemInstaller) {
+	public InstallCommand(AemInstaller aemInstaller, Defaults defaults) {
 		this.aemInstaller = aemInstaller;
+		this.defaults = defaults;
 	}
 
 	@Override
 	public Integer call() throws Exception {
-		aemInstaller.installAem(requireNonNullElseGet(destDir, ()->defaultDestDir()), requireNonNullElseGet(srcDir, ()->Path.of("")));
+		aemInstaller.installAem(requireNonNullElseGet(destDir, defaults::aemDir), requireNonNullElseGet(srcDir, ()->Path.of("")));
 		return 0;
 	}
-
-	private static Path defaultDestDir() {
-		return OperatingSystem.isWindows() ? Path.of("\\Adobe") : Path.of("/opt/adobe");
-	}
-
 }

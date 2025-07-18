@@ -26,7 +26,9 @@ import com._4point.aem.aem_utils.aem_cntrl.adapters.spi.ports.JsonData;
 import com._4point.aem.aem_utils.aem_cntrl.adapters.spi.ports.RestClient;
 import com._4point.aem.aem_utils.aem_cntrl.commands.AemCntrlCommandLine;
 import com._4point.aem.aem_utils.aem_cntrl.domain.AemInstallerImpl;
+import com._4point.aem.aem_utils.aem_cntrl.domain.DefaultsImpl;
 import com._4point.aem.aem_utils.aem_cntrl.domain.ports.api.AemInstaller;
+import com._4point.aem.aem_utils.aem_cntrl.domain.ports.api.Defaults;
 import com._4point.aem.aem_utils.aem_cntrl.domain.ports.ipi.ProcessRunner;
 import com._4point.aem.aem_utils.aem_cntrl.domain.ports.spi.AemConfigManager;
 import com._4point.aem.aem_utils.aem_cntrl.domain.ports.spi.Tailer.TailerFactory;
@@ -115,5 +117,10 @@ public class AemCntrlApplication implements CommandLineRunner, ExitCodeGenerator
 	@Bean
 	AemInstaller aemInstaller(TailerFactory tailerFactory, ProcessRunner processRunner, AemConfigManager aemConfigManager) {
 		return new AemInstallerImpl(tailerFactory, processRunner, aemConfigManager);
+	}
+	
+	@Bean
+	Defaults defaults() {
+		return new DefaultsImpl();
 	}
 }

@@ -16,20 +16,20 @@ class InstallCommandTests {
 	@SpringBootTest(args = {"install"})
 	static class InstallCommandNoArgsTest {
 	
-		@MockitoBean AemInstaller aemInstaller;
+		@MockitoBean AemInstaller aemInstallerMock;
 	
 		@EnabledOnOs(OS.WINDOWS)
 		@Test
 		void testInstall_NoArgs_Windows() throws Exception {
-			doNothing().when(aemInstaller).installAem(any(Path.class), any(Path.class));
-			verify(aemInstaller, times(1)).installAem(eq(Path.of("\\Adobe")), eq(Path.of("")));
+			doNothing().when(aemInstallerMock).installAem(any(Path.class), any(Path.class));
+			verify(aemInstallerMock, times(1)).installAem(eq(Path.of("\\Adobe")), eq(Path.of("")));
 		}
 	
 		@EnabledOnOs(OS.LINUX)
 		@Test
 		void testInstall_NoArgs_Linux() throws Exception {
-			doNothing().when(aemInstaller).installAem(any(Path.class), any(Path.class));
-			verify(aemInstaller, times(1)).installAem(eq(Path.of("/opt", "adobe")), eq(Path.of("")));
+			doNothing().when(aemInstallerMock).installAem(any(Path.class), any(Path.class));
+			verify(aemInstallerMock, times(1)).installAem(eq(Path.of("/opt", "adobe")), eq(Path.of("")));
 		}
 	}	
 

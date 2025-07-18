@@ -160,7 +160,7 @@ public class AemProcess {
 		return runUntilLogContains(AEM_START_TARGET_REGEX, Duration.ofMinutes(5), action);
 	}
 	
-	private Optional<String> monitorLogFile(Path logFile, String regex, Duration timeout) {
+	public Optional<String> monitorLogFile(Path logFile, String regex, Duration timeout) {
 		try(Tailer tailer = tailerFactory.fromEnd(logFile); Stream<String> stream = tailer.stream()) {
 			var result = CompletableFuture.supplyAsync(()->lookForLine(stream, regex))
 										  .completeOnTimeout(Optional.empty(), timeout.toMillis(), TimeUnit.MILLISECONDS)
