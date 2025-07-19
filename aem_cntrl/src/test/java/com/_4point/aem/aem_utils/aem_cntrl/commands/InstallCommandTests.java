@@ -39,7 +39,7 @@ class InstallCommandTests {
 		@MockitoBean AemInstaller aemInstaller;
 
 		@Test
-		void testInstall_NoArgs_Windows() throws Exception {
+		void testInstall_DestArg() throws Exception {
 			doNothing().when(aemInstaller).installAem(any(Path.class), any(Path.class));
 			verify(aemInstaller, times(1)).installAem(eq(Path.of("DestDir")), eq(Path.of("")));
 		}
@@ -51,7 +51,7 @@ class InstallCommandTests {
 		@MockitoBean AemInstaller aemInstaller;
 
 		@Test
-		void testInstall_NoArgs_Windows() throws Exception {
+		void testInstall_SourceArg() throws Exception {
 			doNothing().when(aemInstaller).installAem(any(Path.class), any(Path.class));
 			verify(aemInstaller, times(1)).installAem(eq(Path.of("\\Adobe")), eq(Path.of("SrcDir")));
 		}
@@ -63,9 +63,42 @@ class InstallCommandTests {
 		@MockitoBean AemInstaller aemInstaller;
 
 		@Test
-		void testInstall_NoArgs_Windows() throws Exception {
+		void testInstall_AllArgs() throws Exception {
 			doNothing().when(aemInstaller).installAem(any(Path.class), any(Path.class));
 			verify(aemInstaller, times(1)).installAem(eq(Path.of("DestDir")), eq(Path.of("SrcDir")));
+		}
+	}
+
+	@SpringBootTest(args = {"install", "-s" })
+	static class InstallCommandMissingSrcDirTest {
+
+		@MockitoBean AemInstaller aemInstaller;
+
+		@Test
+		void testInstall_MissingSrcDir() throws Exception {
+			verifyNoInteractions(aemInstaller);
+		}
+	}
+
+	@SpringBootTest(args = {"install", "-d" })
+	static class InstallCommandMissingDestDirTest {
+
+		@MockitoBean AemInstaller aemInstaller;
+
+		@Test
+		void testInstall_MissingDestDir() throws Exception {
+			verifyNoInteractions(aemInstaller);
+		}
+	}
+
+	@SpringBootTest(args = {"install", "DestDir" })
+	static class InstallCommandBadArgumentTest {
+
+		@MockitoBean AemInstaller aemInstaller;
+
+		@Test
+		void testInstall_BadArguments() throws Exception {
+			verifyNoInteractions(aemInstaller);
 		}
 	}
 }
