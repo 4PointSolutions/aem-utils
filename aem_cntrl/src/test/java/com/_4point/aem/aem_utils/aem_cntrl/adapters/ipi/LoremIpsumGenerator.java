@@ -1,6 +1,6 @@
 //DEPS com.thedeanda:lorem:2.2
 
-package com._4point.aem.aem_utils.aem_cntrl.domain;
+package com._4point.aem.aem_utils.aem_cntrl.adapters.ipi;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;

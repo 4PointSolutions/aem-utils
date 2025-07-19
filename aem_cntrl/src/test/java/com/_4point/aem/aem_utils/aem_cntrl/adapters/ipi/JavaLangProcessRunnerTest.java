@@ -25,7 +25,7 @@ import com._4point.aem.aem_utils.aem_cntrl.domain.ports.ipi.ProcessRunner.ListRe
 class JavaLangProcessRunnerTest {
 
 	private static final Path WORKING_DIR = Path.of("src","test","java");
-	private static final String LOREM_IPSUM_LOC = Path.of("com", "_4point", "aem", "aem_utils", "aem_cntrl", "domain", "LoremIpsumGenerator.java").toString();
+	private static final String LOREM_IPSUM_LOC = Path.of("com", "_4point", "aem", "aem_utils", "aem_cntrl", "adapters", "ipi", "LoremIpsumGenerator.java").toString();
 	private static final String[] LOREM_IPSUM_CMD = OperatingSystem.getOs().jbangCommand(LOREM_IPSUM_LOC);
 	private static final String[] LOREM_IPSUM_WITH_INPUT_CMD = OperatingSystem.getOs().jbangCommand(LOREM_IPSUM_LOC, "useInput");
 
@@ -198,7 +198,7 @@ class JavaLangProcessRunnerTest {
 		
 		CompletableFuture<OptionalInt> runner = CompletableFuture.supplyAsync(()->{
 																					try {
-																						return result.terminateAfter(Duration.ofSeconds(2));
+																						return result.terminateAfter(Duration.ofSeconds(3));
 																					} catch (InterruptedException e) {
 																						throw new IllegalStateException("Interruption Exception should not be thrown.", e);
 																					}
