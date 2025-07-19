@@ -12,6 +12,12 @@ import com.thedeanda.lorem.LoremIpsum;
 
 public class LoremIpsumGenerator {
 
+	/**
+	 * Generates enough lorem ipsum text to block a pipe on Windows and writes it to standard output.
+	 * 
+	 * @param args
+	 * @throws Exception
+	 */
 	public static void main(String[] args) throws Exception {
 		List<String> argList = Arrays.asList(args);
 		// If "useInput" provided, then copy input to the output first, before generating lorem ipsum
@@ -23,7 +29,7 @@ public class LoremIpsumGenerator {
 		
 		// Any input has been written, so generate some nonesense that will exceed the pipe limit.
 		Lorem lorem = LoremIpsum.getInstance();
-		String paragraphs = lorem.getParagraphs(39, 40);
+		String paragraphs = lorem.getParagraphs(49, 50);
 		System.out.println(paragraphs);
 		
 		// System.err.println("This should generate a test failure");
