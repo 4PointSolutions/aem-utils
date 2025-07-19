@@ -11,13 +11,13 @@ import com._4point.aem.aem_utils.aem_cntrl.domain.ports.api.Defaults;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
 
-@Command(name = "install")
+@Command(name = "install", description = "Installs an on-prem version of AEM with Service Packs and Forms Add-on.")
 public class InstallCommand implements Callable<Integer> {
 	
-	@Option(names = {"-s", "--srcDir"}, description = "source directory containing the AEM installation files")
+	@Option(names = {"-s", "--srcDir"}, description = "source directory containing the AEM installation files.  Defaults to the current directory if not specified.")
 	Path srcDir;
 	
-	@Option(names = {"-d", "--destDir"}, description = "destination directory for the AEM installation")
+	@Option(names = {"-d", "--destDir"}, description = "destination directory for the AEM installation. For Windows, this is \\Adobe. For Linux, this is /opt/adobe.")
 	Path destDir;
 
 	private final AemInstaller aemInstaller;
