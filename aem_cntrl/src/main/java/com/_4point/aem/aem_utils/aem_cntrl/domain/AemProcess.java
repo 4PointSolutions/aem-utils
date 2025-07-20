@@ -34,13 +34,13 @@ public class AemProcess {
 	// RegEx that we look for to know that AEMM has stopped.
 	// N.B>  These are package private to allow for unit testing of the RegEx expressions.
 	//   Older versions of AEM write commong.logservice, but newer ones write commons.log 
-	/* package */ static final String AEM_STOP_TARGET_REGEX = ".*org\\.apache\\.sling\\.installer\\.core\\.impl\\.OsgiInstallerImpl Apache Sling OSGi Installer Service stopped.*";
+	/* package */ static final Pattern AEM_STOP_TARGET_PATTERN = Pattern.compile(".*org\\.apache\\.sling\\.installer\\.core\\.impl\\.OsgiInstallerImpl Apache Sling OSGi Installer Service stopped.*");
 	// Regex the we look for to know that AEM has started
-	/* package */ static final String AEM_START_TARGET_REGEX = ".*com\\.adobe\\.granite\\.workflow\\.core\\.launcher\\.WorkflowLauncherListener StartupListener\\.startupFinished called.*";
+	/* package */ static final Pattern AEM_START_TARGET_PATTERN = Pattern.compile(".*com\\.adobe\\.granite\\.workflow\\.core\\.launcher\\.WorkflowLauncherListener StartupListener\\.startupFinished called.*");
 	// Regex that we look for to know that the AE< Service Pack is installed
-	/* package */ static final String AEM_SP_START_TARGET_REGEX = ".*com\\.adobe\\.granite\\.installer\\.Updater Content Package AEM-\\d\\.\\d-Service-Pack-\\d+ Installed successfully";
+	/* package */ static final Pattern AEM_SP_START_TARGET_PATTERN = Pattern.compile(".*com\\.adobe\\.granite\\.installer\\.Updater Content Package AEM-\\d\\.\\d-Service-Pack-\\d+ Installed successfully");
 	// Regex that we look for to know that the AEM Forms Add-on is installed.
-	/* package */ static final String AEM_FORMS_ADD_ON_START_TARGET_REGEX = ".*Installed BMC XMLFormService of type BMC_NATIVE.*";
+	/* package */ static final Pattern AEM_FORMS_ADD_ON_START_TARGET_PATTERN = Pattern.compile(".*Installed BMC XMLFormService of type BMC_NATIVE.*");
 
 	private static final Path RUN_START = OperatingSystem.getOs().runStart();
 	private static final Path RUN_STOP = OperatingSystem.getOs().runStop();
@@ -60,16 +60,16 @@ public class AemProcess {
 		this.processRunner = processRunner;
 	}
 
-	private String runUntilLogContains(String targetRegEx, Duration timeout, String...options) throws AemProcessException {		
-		return runUntilLogContains(targetRegEx, timeout, null, options); // no action to perform
+	private String runUntilLogContains(Pattern targetPattern, Duration timeout, String...options) throws AemProcessException {		
+		return runUntilLogContains(targetPattern, timeout, null, options); // no action to perform
 	}
 
-	private String runUntilLogContains(String targetRegEx, Duration timeout, Runnable action, String...options) throws AemProcessException {		
+	private String runUntilLogContains(Pattern targetPattern, Duration timeout, Runnable action, String...options) throws AemProcessException {		
 		try {
 			CompletableFuture<Void> process = startAem().thenAccept(lr->handleResult(lr, "startup"));
 			log.atInfo().log("AEM Started");
 			try {
-				String startResult = monitorLogFile(logFile(), targetRegEx, timeout).orElseThrow(()->new AemProcessException("Failed to find string matching '%s' in log file before timeout (%d secs).".formatted(targetRegEx, timeout.getSeconds())));
+				String startResult = monitorLogFile(logFile(), targetPattern, timeout).orElseThrow(()->new AemProcessException("Failed to find string matching '%s' in log file before timeout (%d secs).".formatted(targetPattern, timeout.getSeconds())));
 				if (action != null) {
 					log.atInfo().log("Performing action after AEM startup.");
 					action.run();
@@ -79,7 +79,7 @@ public class AemProcess {
 				log.atInfo().log("Stopping AEM");
 				stopAem().thenAccept(lr->handleResult(lr, "shutdown"));;
 				// *INFO* [FelixStartLevel] org.apache.sling.commons.logservice BundleEvent STOPPING
-				monitorLogFile(logFile(), AEM_STOP_TARGET_REGEX, timeout).orElseThrow(()->new AemProcessException("Failed to find string matching '%s' in log file before timeout (%d secs).".formatted(targetRegEx, timeout.getSeconds())));
+				monitorLogFile(logFile(), AEM_STOP_TARGET_PATTERN, timeout).orElseThrow(()->new AemProcessException("Failed to find string matching '%s' in log file before timeout (%d secs).".formatted(targetPattern, timeout.getSeconds())));
 				log.atInfo().log("AEM Stopped");
 			}
 		} catch (InterruptedException | ExecutionException e) {
@@ -145,24 +145,24 @@ public class AemProcess {
 //	}
 
 	public String startQuickstartInitializeAem()  {
-		return runUntilLogContains(AEM_START_TARGET_REGEX, Duration.ofMinutes(15));
+		return runUntilLogContains(AEM_START_TARGET_PATTERN, Duration.ofMinutes(15));
 	}
 
 	public String startQuickstartInstallServicePack()  {
-		return runUntilLogContains(AEM_SP_START_TARGET_REGEX, Duration.ofMinutes(10));
+		return runUntilLogContains(AEM_SP_START_TARGET_PATTERN, Duration.ofMinutes(10));
 	}
 
 	public String startQuickstartInstallFormsAddOn()  {
-		return runUntilLogContains(AEM_FORMS_ADD_ON_START_TARGET_REGEX, Duration.ofMinutes(20));
+		return runUntilLogContains(AEM_FORMS_ADD_ON_START_TARGET_PATTERN, Duration.ofMinutes(20));
 	}
 
 	public String startQuickstartPerformAction(Runnable action) {
-		return runUntilLogContains(AEM_START_TARGET_REGEX, Duration.ofMinutes(5), action);
+		return runUntilLogContains(AEM_START_TARGET_PATTERN, Duration.ofMinutes(5), action);
 	}
 	
-	public Optional<String> monitorLogFile(Path logFile, String regex, Duration timeout) {
+	public Optional<String> monitorLogFile(Path logFile, Pattern pattern, Duration timeout) {
 		try(Tailer tailer = tailerFactory.fromEnd(logFile); Stream<String> stream = tailer.stream()) {
-			var result = CompletableFuture.supplyAsync(()->lookForLine(stream, regex))
+			var result = CompletableFuture.supplyAsync(()->lookForLine(stream, pattern))
 										  .completeOnTimeout(Optional.empty(), timeout.toMillis(), TimeUnit.MILLISECONDS)
 										  .join();
 			sleepForSeconds(2, "Letting AEM finish");	// Give things some time to settle down before we shut everything down. 2 seconds should be enough
@@ -172,9 +172,8 @@ public class AemProcess {
 		}
 	}
 
-	private static Optional<String> lookForLine(Stream<String> stream, String regex) {
-		Pattern pattern = Pattern.compile(regex);
-		log.atDebug().addArgument(regex).log("Looking for line containing '{}'.");
+	private static Optional<String> lookForLine(Stream<String> stream, Pattern pattern) {
+		log.atDebug().addArgument(pattern.toString()).log("Looking for line matching regex '{}'.");
 		return stream
 					 .map(AemProcess::logInput)	// Doesn't transform input, just logs it.
 					 .filter(s->pattern.matcher(s).matches())

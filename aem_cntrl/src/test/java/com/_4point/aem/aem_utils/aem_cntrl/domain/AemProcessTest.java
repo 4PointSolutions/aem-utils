@@ -91,7 +91,7 @@ class AemProcessTest {
 				"15.06.2025 09:37:45.478 *INFO* [FelixDispatchQueue] com.adobe.granite.workflow.core.launcher.WorkflowLauncherListener StartupListener.startupFinished called" // AEM 6.5 SP19-23 and 6.5 LTS
 				})
 		void testAemStartTargetPattern(String testString) {
-			assertThat(testString, matchesRegex(AemProcess.AEM_START_TARGET_REGEX));
+			assertThat(testString, matchesRegex(AemProcess.AEM_START_TARGET_PATTERN));
 		}
 
 		@ParameterizedTest
@@ -99,7 +99,7 @@ class AemProcessTest {
 				"15.06.2025 09:41:34.731 *INFO* [FelixStartLevel] org.apache.sling.installer.core.impl.OsgiInstallerImpl Apache Sling OSGi Installer Service stopped." // AEM 6.5 SP19-23 and 6.5 LTS
 				})
 		void testAemStopTargetPattern(String testString) {
-			assertThat(testString, matchesRegex(AemProcess.AEM_STOP_TARGET_REGEX));
+			assertThat(testString, matchesRegex(AemProcess.AEM_STOP_TARGET_PATTERN));
 		}
 
 		@ParameterizedTest
@@ -107,7 +107,7 @@ class AemProcessTest {
 				"15.06.2025 09:32:49.896 *INFO* [Thread-5112] com.adobe.granite.installer.Updater Content Package AEM-6.5-Service-Pack-23 Installed successfully" // AEM 6.5 SP19-23
 				})
 		void testAemServicePackStartTargetPattern(String testString) {
-			assertThat(testString, matchesRegex(AemProcess.AEM_SP_START_TARGET_REGEX));
+			assertThat(testString, matchesRegex(AemProcess.AEM_SP_START_TARGET_PATTERN));
 		}
 
 		@ParameterizedTest
@@ -115,7 +115,7 @@ class AemProcessTest {
 				"15.06.2025 09:40:52.777 *INFO* [OsgiInstallerImpl] org.apache.sling.audit.osgi.installer Installed BMC XMLFormService of type BMC_NATIVE" // AEM 6.5 SP19-23
 				})
 		void testAemFormsAddOnStartTargetPattern(String testString) {
-			assertThat(testString, matchesRegex(AemProcess.AEM_FORMS_ADD_ON_START_TARGET_REGEX));
+			assertThat(testString, matchesRegex(AemProcess.AEM_FORMS_ADD_ON_START_TARGET_PATTERN));
 		}
 
 
