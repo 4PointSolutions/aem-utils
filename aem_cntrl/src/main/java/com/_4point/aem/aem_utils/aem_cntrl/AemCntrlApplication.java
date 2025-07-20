@@ -3,6 +3,8 @@ package com._4point.aem.aem_utils.aem_cntrl;
 import java.net.http.HttpClient;
 import java.util.stream.Stream;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.ExitCodeGenerator;
 import org.springframework.boot.SpringApplication;
@@ -27,8 +29,10 @@ import com._4point.aem.aem_utils.aem_cntrl.adapters.spi.ports.RestClient;
 import com._4point.aem.aem_utils.aem_cntrl.commands.AemCntrlCommandLine;
 import com._4point.aem.aem_utils.aem_cntrl.domain.AemInstallerImpl;
 import com._4point.aem.aem_utils.aem_cntrl.domain.DefaultsImpl;
+import com._4point.aem.aem_utils.aem_cntrl.domain.WaitForLogImpl;
 import com._4point.aem.aem_utils.aem_cntrl.domain.ports.api.AemInstaller;
 import com._4point.aem.aem_utils.aem_cntrl.domain.ports.api.Defaults;
+import com._4point.aem.aem_utils.aem_cntrl.domain.ports.api.WaitForLog;
 import com._4point.aem.aem_utils.aem_cntrl.domain.ports.ipi.ProcessRunner;
 import com._4point.aem.aem_utils.aem_cntrl.domain.ports.spi.AemConfigManager;
 import com._4point.aem.aem_utils.aem_cntrl.domain.ports.spi.Tailer.TailerFactory;
@@ -40,6 +44,8 @@ import picocli.CommandLine.IFactory;
 @EnableConfigurationProperties(AemCntrlAemConfiguration.class)
 public class AemCntrlApplication implements CommandLineRunner, ExitCodeGenerator {
 	public static final String APP_CONFIG_PREFIX = "aemcntrl";
+
+	private static final Logger log = LoggerFactory.getLogger(AemCntrlApplication.class);
 
 	private final IFactory factory;
 	private final AemCntrlCommandLine aemCntrlCommandLine;
@@ -58,6 +64,15 @@ public class AemCntrlApplication implements CommandLineRunner, ExitCodeGenerator
 
 	@Override
 	public int getExitCode() {
+		if (exitCode == CommandLine.ExitCode.OK) {
+			log.debug("AEM Control exited successfully.");
+		} else if (exitCode == CommandLine.ExitCode.USAGE) {
+			log.warn("AEM Control exited with usage error.  Please check the command line arguments.");
+		} else if (exitCode == CommandLine.ExitCode.SOFTWARE) {
+			log.error("AEM Control exited with a software error.  Please check the logs for more details.");
+		} else {
+			log.error("AEM Control exited with an unknown error code: {}", exitCode);
+		}
 		return exitCode;
 	}
 
@@ -65,6 +80,7 @@ public class AemCntrlApplication implements CommandLineRunner, ExitCodeGenerator
 	public void run(String... args) throws Exception {
 		// let picocli parse command line args and run the business logic
         exitCode = new CommandLine(aemCntrlCommandLine, factory).execute(args);
+		log.debug("Picocli returned: {}", exitCode);
     }
 	
 	@Bean
@@ -122,5 +138,10 @@ public class AemCntrlApplication implements CommandLineRunner, ExitCodeGenerator
 	@Bean
 	Defaults defaults() {
 		return new DefaultsImpl();
+	}
+	
+	@Bean
+	WaitForLog waitForLog() {
+		return new WaitForLogImpl();
 	}
 }
