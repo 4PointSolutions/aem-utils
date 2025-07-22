@@ -138,11 +138,11 @@ public class AemCntrlApplication implements CommandLineRunner, ExitCodeGenerator
 	
 	@Bean
 	Supplier<Path> defaultAemDirSupplier(AemCntrlAemConfiguration aemCntrlAemConfiguration) {
-		return () ->DefaultsImpl.aemDir();
+		return ()->DefaultsImpl.aemDir();
 	}
 	
 	@Bean
-	WaitForLog waitForLog() {
-		return new WaitForLogImpl();
+	WaitForLog waitForLog(Supplier<Path> defaultAemDirSupplier) {
+		return new WaitForLogImpl(defaultAemDirSupplier);
 	}
 }
