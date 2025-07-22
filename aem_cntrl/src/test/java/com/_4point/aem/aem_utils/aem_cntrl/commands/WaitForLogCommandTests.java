@@ -184,4 +184,17 @@ class WaitForLogCommandTests {
 		}
 	}
 
+	@SpringBootTest(args = {"wflog", "--startup", "--fromEnd", "--fromStart"})
+	static class WaitForLogCommand_BothFromEndAndFromStartTest {
+		
+		@MockitoBean WaitForLog waitForLogMock;
+		@Autowired ExitCodeGenerator exitCodeGenerator;
+
+		@Test
+		void testWaitForLog_BothFromEndANdFromStart() throws Exception {
+			verifyNoInteractions(waitForLogMock);
+			assertEquals(CommandLine.ExitCode.USAGE, exitCodeGenerator.getExitCode(), "Exit code should be USAGE when both --fromEnd and --fromStart are specified.");
+		}
+	}
+
 }

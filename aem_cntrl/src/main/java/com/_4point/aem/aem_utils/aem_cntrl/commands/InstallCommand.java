@@ -4,9 +4,9 @@ import static java.util.Objects.*;
 
 import java.nio.file.Path;
 import java.util.concurrent.Callable;
+import java.util.function.Supplier;
 
 import com._4point.aem.aem_utils.aem_cntrl.domain.ports.api.AemInstaller;
-import com._4point.aem.aem_utils.aem_cntrl.domain.ports.api.Defaults;
 
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
@@ -21,16 +21,16 @@ public class InstallCommand implements Callable<Integer> {
 	Path destDir;
 
 	private final AemInstaller aemInstaller;
-	private final Defaults defaults;
+	private final Supplier<Path> defaultAemDirSupplier;
 	
-	public InstallCommand(AemInstaller aemInstaller, Defaults defaults) {
+	public InstallCommand(AemInstaller aemInstaller, Supplier<Path> defaultAemDirSupplier) {
 		this.aemInstaller = aemInstaller;
-		this.defaults = defaults;
+		this.defaultAemDirSupplier = defaultAemDirSupplier;
 	}
 
 	@Override
 	public Integer call() throws Exception {
-		aemInstaller.installAem(requireNonNullElseGet(destDir, defaults::aemDir), requireNonNullElseGet(srcDir, ()->Path.of("")));
+		aemInstaller.installAem(requireNonNullElseGet(destDir, defaultAemDirSupplier), requireNonNullElseGet(srcDir, ()->Path.of("")));
 		return 0;
 	}
 }

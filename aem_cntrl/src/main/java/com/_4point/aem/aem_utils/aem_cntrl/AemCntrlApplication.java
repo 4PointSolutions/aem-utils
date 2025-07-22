@@ -2,6 +2,7 @@ package com._4point.aem.aem_utils.aem_cntrl;
 
 import java.net.http.HttpClient;
 import java.nio.file.Path;
+import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 import org.slf4j.Logger;
@@ -32,7 +33,6 @@ import com._4point.aem.aem_utils.aem_cntrl.domain.AemInstallerImpl;
 import com._4point.aem.aem_utils.aem_cntrl.domain.DefaultsImpl;
 import com._4point.aem.aem_utils.aem_cntrl.domain.WaitForLogImpl;
 import com._4point.aem.aem_utils.aem_cntrl.domain.ports.api.AemInstaller;
-import com._4point.aem.aem_utils.aem_cntrl.domain.ports.api.Defaults;
 import com._4point.aem.aem_utils.aem_cntrl.domain.ports.api.WaitForLog;
 import com._4point.aem.aem_utils.aem_cntrl.domain.ports.ipi.ProcessRunner;
 import com._4point.aem.aem_utils.aem_cntrl.domain.ports.spi.AemConfigManager;
@@ -137,14 +137,8 @@ public class AemCntrlApplication implements CommandLineRunner, ExitCodeGenerator
 	}
 	
 	@Bean
-	Defaults defaults() {
-		return new Defaults() {
-			
-			@Override
-			public Path aemDir() {
-				return DefaultsImpl.aemDir();
-			}
-		};
+	Supplier<Path> defaultAemDirSupplier(AemCntrlAemConfiguration aemCntrlAemConfiguration) {
+		return () ->DefaultsImpl.aemDir();
 	}
 	
 	@Bean

@@ -31,4 +31,16 @@ public interface WaitForLog {
 	};
 	
 	void waitForLog(RegexArgument regexArgument, Duration timeout, FromOption from, Path aemDir);
+	
+	@SuppressWarnings("serial")
+	public static class WaitForLogException extends RuntimeException {
+
+		public WaitForLogException(String message) {
+			super(message);
+		}
+
+		public WaitForLogException(String message, Throwable cause) {
+			super(message, cause);
+		}
+	}
 }

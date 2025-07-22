@@ -1,11 +1,13 @@
 package com._4point.aem.aem_utils.aem_cntrl.commands;
 
+import static java.util.Objects.*;
+
 import java.nio.file.Path;
 import java.time.Duration;
 import java.util.concurrent.Callable;
+import java.util.function.Supplier;
 import java.util.regex.Pattern;
 
-import com._4point.aem.aem_utils.aem_cntrl.domain.ports.api.Defaults;
 import com._4point.aem.aem_utils.aem_cntrl.domain.ports.api.WaitForLog;
 import com._4point.aem.aem_utils.aem_cntrl.domain.ports.api.WaitForLog.RegexArgument;
 
@@ -40,11 +42,11 @@ public class WaitForLogCommand  implements Callable<Integer> {
     }
 
 	private final WaitForLog waitForLog;
-	private final Defaults defaults;
+	private final Supplier<Path> defaultAemDirSupplier;
 	
-	public WaitForLogCommand(WaitForLog waitForLog, Defaults defaults) {
+	public WaitForLogCommand(WaitForLog waitForLog, Supplier<Path> defaultAemDirSupplier) {
 		this.waitForLog = waitForLog;
-		this.defaults = defaults;
+		this.defaultAemDirSupplier = defaultAemDirSupplier;
 	}
 
 
@@ -56,10 +58,16 @@ public class WaitForLogCommand  implements Callable<Integer> {
 																   				   : WaitForLog.RegexArgument.custom(regexOptions.regEx);
 		waitForLog.waitForLog(
 				regexArgument,
-				timeout == null ? WaitForLog.DEFAULT_DURATION : timeout,
-				fromOptions == null ? WaitForLog.FromOption.END 
-								    : fromOptions.fromStart ? WaitForLog.FromOption.START : WaitForLog.FromOption.END,
-				aemDir == null ? defaults.aemDir() : aemDir);
+				requireNonNullElse(timeout, WaitForLog.DEFAULT_DURATION),	// Default timeout if not specified.
+				mapFromOptions(fromOptions),								// Map to WaitForLog.FromOption, or default if not specified.
+				requireNonNullElseGet(aemDir, defaultAemDirSupplier)		// Default AEM directory if not specified.
+				);
 		return 0;
+	}
+	
+	private static WaitForLog.FromOption mapFromOptions(FromOptions fromOptions) {
+		return fromOptions == null ? WaitForLog.DEFAULT_FROM_OPTION 
+								   : fromOptions.fromStart ? WaitForLog.FromOption.START 
+										   				   : WaitForLog.FromOption.END;
 	}
 }
