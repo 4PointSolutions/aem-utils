@@ -15,8 +15,8 @@ import java.util.regex.Pattern;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class AemFiles extends InstallationFiles {
-	private static final Logger log = LoggerFactory.getLogger(AemFiles.class);
+public class AemInstallationFiles extends InstallationFiles {
+	private static final Logger log = LoggerFactory.getLogger(AemInstallationFiles.class);
 	
 	public record AemFileset(Path quickstart, Optional<Path> servicePack, Path formsAddOn, Optional<Path> licenseProperties) {
 

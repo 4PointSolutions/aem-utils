@@ -21,13 +21,13 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.FieldSource;
 
-import com._4point.aem.aem_utils.aem_cntrl.domain.AemFiles.AemFileset;
-import com._4point.aem.aem_utils.aem_cntrl.domain.AemFiles.AemQuickstart.AemBaseRelease;
-import com._4point.aem.aem_utils.aem_cntrl.domain.AemFiles.AemVersion;
-import com._4point.aem.aem_utils.aem_cntrl.domain.AemFiles.SlingProperties;
+import com._4point.aem.aem_utils.aem_cntrl.domain.AemInstallationFiles.AemFileset;
+import com._4point.aem.aem_utils.aem_cntrl.domain.AemInstallationFiles.AemQuickstart.AemBaseRelease;
+import com._4point.aem.aem_utils.aem_cntrl.domain.AemInstallationFiles.AemVersion;
+import com._4point.aem.aem_utils.aem_cntrl.domain.AemInstallationFiles.SlingProperties;
 import com._4point.testing.matchers.javalang.ExceptionMatchers;
 
-class AemFilesTest {
+class AemInstallationFilesTest {
 	private static final Path EXPECTED_AEM_INSTALL_LOC = Path.of("AEM_65_SP19");
 	private static final AemVersion EXPECTED_AEM_VERSION = new AemVersion(6, 5, 19, AemBaseRelease.AEM65_ORIG.aemJavaVersion);
 
@@ -37,7 +37,7 @@ class AemFilesTest {
 	@Test
 	void testCreateAemDir(@TempDir Path rootDir) {
 		Path expectedResult = rootDir.resolve(EXPECTED_AEM_INSTALL_LOC);
-		Path result = AemFiles.aemDir(rootDir, EXPECTED_AEM_VERSION);
+		Path result = AemInstallationFiles.aemDir(rootDir, EXPECTED_AEM_VERSION);
 		assertAll(
 				()->assertEquals(expectedResult, result)
 				);
@@ -53,13 +53,13 @@ class AemFilesTest {
 
 	@Test
 	void testFindAemServicePacks(@TempDir Path rootDir) throws Exception {
-		List<Path> result1 = AemFiles.AemServicePack.findFiles(rootDir);
+		List<Path> result1 = AemInstallationFiles.AemServicePack.findFiles(rootDir);
 		
 		SAMPLE_AEM_ORIG_QUICKSTART_PATH.createMockFile(rootDir);
 		Path testFilePath = SAMPLE_AEM_SERVICE_PACK_PATH.createMockFile(rootDir);
 		SAMPLE_AEM_FORMS_ADDON_PATH.createMockFile(rootDir);
 		
-		List<Path> result2 = AemFiles.AemServicePack.findFiles(rootDir);
+		List<Path> result2 = AemInstallationFiles.AemServicePack.findFiles(rootDir);
 		
 		assertAll(
 				()->assertThat("First result should be empty", result1, is(empty())),
@@ -71,13 +71,13 @@ class AemFilesTest {
 	@ParameterizedTest
 	@FieldSource("AEM_BASE_VERSION_PATHS")
 	void testFindAemQuickstarts(MockInstallFiles quickstart, @TempDir Path rootDir) throws Exception {
-		List<Path> result1 = AemFiles.AemQuickstart.findFiles(rootDir);
+		List<Path> result1 = AemInstallationFiles.AemQuickstart.findFiles(rootDir);
 		
 		Path testFilePath = quickstart.createMockFile(rootDir);
 		SAMPLE_AEM_SERVICE_PACK_PATH.createMockFile(rootDir);
 		SAMPLE_AEM_FORMS_ADDON_PATH.createMockFile(rootDir);
 		
-		List<Path> result2 = AemFiles.AemQuickstart.findFiles(rootDir);
+		List<Path> result2 = AemInstallationFiles.AemQuickstart.findFiles(rootDir);
 		
 		assertAll(
 				()->assertThat("First result should be empty", result1, is(empty())),
@@ -88,13 +88,13 @@ class AemFilesTest {
 
 	@Test
 	void testFindAemFormsAddOns(@TempDir Path rootDir) throws Exception {
-		List<Path> result1 = AemFiles.AemFormsAddOn.findFiles(rootDir);
+		List<Path> result1 = AemInstallationFiles.AemFormsAddOn.findFiles(rootDir);
 		
 		SAMPLE_AEM_ORIG_QUICKSTART_PATH.createMockFile(rootDir);
 		SAMPLE_AEM_SERVICE_PACK_PATH.createMockFile(rootDir);
 		Path testFilePath = SAMPLE_AEM_FORMS_ADDON_PATH.createMockFile(rootDir);
 		
-		List<Path> result2 = AemFiles.AemFormsAddOn.findFiles(rootDir);
+		List<Path> result2 = AemInstallationFiles.AemFormsAddOn.findFiles(rootDir);
 		
 		assertAll(
 				()->assertThat("First result should be empty", result1, is(empty())),
@@ -105,14 +105,14 @@ class AemFilesTest {
 
 	@Test
 	void testFindAemLicenseProperties(@TempDir Path rootDir) throws Exception {
-		Optional<Path> result1 = AemFiles.LicenseProperties.findFile(rootDir);
+		Optional<Path> result1 = AemInstallationFiles.LicenseProperties.findFile(rootDir);
 		
 		SAMPLE_AEM_ORIG_QUICKSTART_PATH.createMockFile(rootDir);
 		SAMPLE_AEM_SERVICE_PACK_PATH.createMockFile(rootDir);
 		SAMPLE_AEM_FORMS_ADDON_PATH.createMockFile(rootDir);
 		Path testFilePath = SAMPLE_LICENSE_PROPERTIES_PATH.createMockFile(rootDir);
 		
-		Optional<Path> result2 = AemFiles.LicenseProperties.findFile(rootDir);
+		Optional<Path> result2 = AemInstallationFiles.LicenseProperties.findFile(rootDir);
 		
 		assertAll(
 				()->assertThat("First result should be empty", result1.isEmpty(), is(true)),
@@ -128,13 +128,13 @@ class AemFilesTest {
 		SAMPLE_AEM_SERVICE_PACK_PATH.createMockFile(rootDir);
 		Path testFilePath = SAMPLE_AEM_FORMS_ADDON_PATH.createMockFile(rootDir);
 
-		assertEquals(testFilePath, AemFiles.thereCanBeOnlyOne(AemFiles.AemFormsAddOn.findFiles(rootDir), description));
+		assertEquals(testFilePath, AemInstallationFiles.thereCanBeOnlyOne(AemInstallationFiles.AemFormsAddOn.findFiles(rootDir), description));
 	}
 
 	@Test
 	void testThereCanBeOnlyOne_Fail_Zero(@TempDir Path rootDir) throws Exception {
 		String description = "Forms Add On";
-		IllegalStateException ex = assertThrows(IllegalStateException.class, ()->AemFiles.thereCanBeOnlyOne(AemFiles.AemFormsAddOn.findFiles(rootDir), description));
+		IllegalStateException ex = assertThrows(IllegalStateException.class, ()->AemInstallationFiles.thereCanBeOnlyOne(AemInstallationFiles.AemFormsAddOn.findFiles(rootDir), description));
 		assertThat(ex, ExceptionMatchers.exceptionMsgContainsAll(description, "Found no", "should be one"));
 	}
 
@@ -144,7 +144,7 @@ class AemFilesTest {
 		SAMPLE_AEM_FORMS_ADDON_PATH.createMockFile(rootDir);
 		SECOND_AEM_FOMRS_ADDON_PATH.createMockFile(rootDir);
 		
-		IllegalStateException ex = assertThrows(IllegalStateException.class, ()->AemFiles.thereCanBeOnlyOne(AemFiles.AemFormsAddOn.findFiles(rootDir), description));
+		IllegalStateException ex = assertThrows(IllegalStateException.class, ()->AemInstallationFiles.thereCanBeOnlyOne(AemInstallationFiles.AemFormsAddOn.findFiles(rootDir), description));
 		assertThat(ex, ExceptionMatchers.exceptionMsgContainsAll(description, "Found multiple", "should only be one"));
 	}
 
@@ -154,7 +154,7 @@ class AemFilesTest {
 		Path testServicePackFilePath = SAMPLE_AEM_SERVICE_PACK_PATH.createMockFile(rootDir);
 		Path testFormsAddonFilePath = SAMPLE_AEM_FORMS_ADDON_PATH.createMockFile(rootDir);
 		
-		AemFileset result = AemFiles.locateAemFiles(rootDir);
+		AemFileset result = AemInstallationFiles.locateAemFiles(rootDir);
 		AemVersion aemVersion = result.aemVersion();
 		
 		assertAll(
@@ -171,7 +171,7 @@ class AemFilesTest {
 		// Omitted: Path testServicePackFilePath = SAMPLE_AEM_SERVICE_PACK_PATH.createTestFile(rootDir);
 		Path testFormsAddonFilePath = SAMPLE_AEM_FORMS_ADDON_PATH.createMockFile(rootDir);
 		
-		AemFileset result = AemFiles.locateAemFiles(rootDir);
+		AemFileset result = AemInstallationFiles.locateAemFiles(rootDir);
 		AemVersion aemVersion = result.aemVersion();
 		
 		assertAll(
@@ -190,7 +190,7 @@ class AemFilesTest {
 			cq-quickstart-6.6.0.jar,6,6,AEM65_LTS
 			""")
 	void testAemQuickstartVersionInfo(Path filename, int expectedMajorVersion, int expectedMinorVersion, AemBaseRelease expectedAemBaseRelease) {
-		AemFiles.AemQuickstart.VersionInfo versionInfo = AemFiles.AemQuickstart.versionInfo(filename);
+		AemInstallationFiles.AemQuickstart.VersionInfo versionInfo = AemInstallationFiles.AemQuickstart.versionInfo(filename);
 		assertAll(
 				()->assertEquals(expectedMajorVersion,versionInfo.majorVersion()),
 				()->assertEquals(expectedMinorVersion,versionInfo.minorVersion()),
@@ -205,7 +205,7 @@ class AemFilesTest {
 			aem-service-pkg-7.4.1.57.zip,7,4,1,57
 			""")
 	void testAemServicePackVersionInfo(Path filename, int expectedMajorVersion, int expectedMinorVersion, int expectedServicePack, int expectedPatch) {
-		AemFiles.AemServicePack.VersionInfo versionInfo = AemFiles.AemServicePack.versionInfo(filename);
+		AemInstallationFiles.AemServicePack.VersionInfo versionInfo = AemInstallationFiles.AemServicePack.versionInfo(filename);
 		
 		assertAll(
 				()->assertEquals(expectedMajorVersion,versionInfo.majorVersion()),
@@ -223,7 +223,7 @@ class AemFilesTest {
 			adobe-aemfd-win-pkg-7.4.12345.zip,7,4,12345
 			""")
 	void testAemFormsAddonVersionInfo_Windows(Path filename, int expectedMajorVersion, int expectedMinorVersion, int expectedBuildNum) {
-		AemFiles.AemFormsAddOn.VersionInfo versionInfo = AemFiles.AemFormsAddOn.versionInfo(filename);
+		AemInstallationFiles.AemFormsAddOn.VersionInfo versionInfo = AemInstallationFiles.AemFormsAddOn.versionInfo(filename);
 		
 		assertAll(
 				()->assertEquals(expectedMajorVersion,versionInfo.majorVersion()),
@@ -240,7 +240,7 @@ class AemFilesTest {
 			adobe-aemfd-linux-pkg-7.4.12345.zip,7,4,12345
 			""")
 	void testAemFormsAddonVersionInfo_Linux(Path filename, int expectedMajorVersion, int expectedMinorVersion, int expectedBuildNum) {
-		AemFiles.AemFormsAddOn.VersionInfo versionInfo = AemFiles.AemFormsAddOn.versionInfo(filename);
+		AemInstallationFiles.AemFormsAddOn.VersionInfo versionInfo = AemInstallationFiles.AemFormsAddOn.versionInfo(filename);
 		
 		assertAll(
 				()->assertEquals(expectedMajorVersion,versionInfo.majorVersion()),

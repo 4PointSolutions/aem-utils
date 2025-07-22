@@ -7,9 +7,9 @@ import java.nio.file.Path;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com._4point.aem.aem_utils.aem_cntrl.domain.AemFiles.AemFileset;
-import com._4point.aem.aem_utils.aem_cntrl.domain.AemFiles.AemVersion;
-import com._4point.aem.aem_utils.aem_cntrl.domain.AemFiles.SlingProperties;
+import com._4point.aem.aem_utils.aem_cntrl.domain.AemInstallationFiles.AemFileset;
+import com._4point.aem.aem_utils.aem_cntrl.domain.AemInstallationFiles.AemVersion;
+import com._4point.aem.aem_utils.aem_cntrl.domain.AemInstallationFiles.SlingProperties;
 import com._4point.aem.aem_utils.aem_cntrl.domain.FluentFormsFiles.FluentFormsFileset;
 import com._4point.aem.aem_utils.aem_cntrl.domain.ports.api.AemInstaller;
 import com._4point.aem.aem_utils.aem_cntrl.domain.ports.ipi.ProcessRunner;
@@ -53,9 +53,9 @@ public class AemInstallerImpl implements AemInstaller {
 		//
 		//    The installer should be run as aem_user
 		//
-		AemFileset aemFiles = AemFiles.locateAemFiles(aemFilesLocation);
+		AemFileset aemFiles = AemInstallationFiles.locateAemFiles(aemFilesLocation);
 		AemVersion aemVersionInfo = aemFiles.aemVersion();
-		Path aemDir = AemFiles.aemDir(rootDir, aemVersionInfo);
+		Path aemDir = AemInstallationFiles.aemDir(rootDir, aemVersionInfo);
 		log.atInfo().addArgument(rootDir.toString()).log("Creating Directories under {}.");
 		Files.createDirectories(aemDir);  // Create directory where AEM quickstart will reside
  		
