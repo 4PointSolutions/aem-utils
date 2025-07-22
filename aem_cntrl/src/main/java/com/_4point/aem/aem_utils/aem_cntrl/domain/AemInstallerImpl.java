@@ -7,9 +7,9 @@ import java.nio.file.Path;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com._4point.aem.aem_utils.aem_cntrl.domain.AemFiles.SlingProperties;
 import com._4point.aem.aem_utils.aem_cntrl.domain.AemInstallationFiles.AemFileset;
 import com._4point.aem.aem_utils.aem_cntrl.domain.AemInstallationFiles.AemVersion;
-import com._4point.aem.aem_utils.aem_cntrl.domain.AemInstallationFiles.SlingProperties;
 import com._4point.aem.aem_utils.aem_cntrl.domain.FluentFormsFiles.FluentFormsFileset;
 import com._4point.aem.aem_utils.aem_cntrl.domain.ports.api.AemInstaller;
 import com._4point.aem.aem_utils.aem_cntrl.domain.ports.ipi.ProcessRunner;
@@ -61,19 +61,18 @@ public class AemInstallerImpl implements AemInstaller {
  		
 		// Copy the quickstart.jar
 		log.atInfo().log("Copying Quickstart files");
-		Path quickstart = aemFiles.copyQuickstartToTarget(aemDir);
+		Path quickstartJarPath = aemFiles.copyQuickstartToTarget(aemDir);
 		
 		// Copy license.properties
 		log.atInfo().log("Copying License file");
 		aemFiles.copyLicensePropertiesToTarget(aemDir);
 		
-		AemProcess aemQuickstart = new AemProcess.UninitializedAemInstance(quickstart, aemVersionInfo.aemJavaVersion(), processRunner).unpackQuickstart(tailerFactory);
+		AemProcess aemQuickstart = new AemProcess.UninitializedAemInstance(quickstartJarPath, aemVersionInfo.aemJavaVersion(), processRunner).unpackQuickstart(tailerFactory);
 		
 		log.atInfo().log("Running AEM to initialize AEM");
 		aemQuickstart.startQuickstartInitializeAem();
 		
-		Path crxQuickstartDir = aemDir.resolve("crx-quickstart");
-		Path installDir = crxQuickstartDir.resolve("install");
+		Path installDir = aemDir.resolve(AemFiles.INSTALL_DIR);
 		Files.createDirectories(installDir);  // Create directory where AEM quickstart will reside
 		
 		log.atInfo().log("Copying Service Pack file");
@@ -100,8 +99,8 @@ public class AemInstallerImpl implements AemInstaller {
 		// Update sling.properties with bouncy castle (JSAFE) setting
 		// 
 		log.atInfo().log("Updating sling.properties file");
-		SlingProperties.under(crxQuickstartDir)
-		        	    .orElseThrow(() -> new FileNotFoundException("Unable to locate sling.properties file under " + crxQuickstartDir))
+		SlingProperties.under(aemDir.resolve(AemFiles.CRX_QUICKSTART_DIR))
+		        	    .orElseThrow(() -> new FileNotFoundException("Unable to locate sling.properties file under " + aemDir.resolve(AemFiles.CRX_QUICKSTART_DIR)))
 		        	    .updateSlingProperties();
 
 			

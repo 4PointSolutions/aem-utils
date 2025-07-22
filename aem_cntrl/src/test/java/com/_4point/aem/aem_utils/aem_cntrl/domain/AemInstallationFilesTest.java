@@ -5,10 +5,6 @@ import static com._4point.aem.aem_utils.aem_cntrl.domain.MockInstallFiles.*;
 import static org.hamcrest.MatcherAssert.assertThat; 
 import static org.hamcrest.Matchers.*;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.StringReader;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.Optional;
@@ -24,7 +20,6 @@ import org.junit.jupiter.params.provider.FieldSource;
 import com._4point.aem.aem_utils.aem_cntrl.domain.AemInstallationFiles.AemFileset;
 import com._4point.aem.aem_utils.aem_cntrl.domain.AemInstallationFiles.AemQuickstart.AemBaseRelease;
 import com._4point.aem.aem_utils.aem_cntrl.domain.AemInstallationFiles.AemVersion;
-import com._4point.aem.aem_utils.aem_cntrl.domain.AemInstallationFiles.SlingProperties;
 import com._4point.testing.matchers.javalang.ExceptionMatchers;
 
 class AemInstallationFilesTest {
@@ -248,35 +243,4 @@ class AemInstallationFilesTest {
 				()->assertEquals(expectedBuildNum,versionInfo.buildNum())
 				);
 	}
-	
-	@Test
-	void testUpdateSlingProperties(@TempDir Path tempDir) throws Exception {
-		// Given
-		MockAemFiles.SLING_PROPERTIES.createMockFile(tempDir);
-		
-		String expectedAdditionalProperties = 
-				"""
-				sling.bootdelegation.class.com.rsa.jsafe.provider.JsafeJCE=com.rsa.*
-				""";
-		
-		// When 
-		SlingProperties.under(tempDir).orElseThrow().updateSlingProperties();;
-
-		// Then 
-		List<String> expectedResult = stringToListOfLines(MockAemFiles.SLING_PROPERTIES.contents() + expectedAdditionalProperties);
-		List<String> actualResult = Files.readAllLines(tempDir.resolve(MockAemFiles.SLING_PROPERTIES.filename()));
-		assertEquals(expectedResult, actualResult);
 	}
-
-	@Test
-	void testUpdateSlingProperties_SlingPropertiesDoesNotExist(@TempDir Path tempDir) throws Exception {
-		// When 
-		assertTrue(SlingProperties.under(tempDir).isEmpty());
-	}
-
-	private static List<String> stringToListOfLines(String s) throws IOException {
-		try(StringReader sr = new StringReader(s); BufferedReader br = new BufferedReader(sr)) {
-			return br.lines().toList();
-		}
-	}
-}

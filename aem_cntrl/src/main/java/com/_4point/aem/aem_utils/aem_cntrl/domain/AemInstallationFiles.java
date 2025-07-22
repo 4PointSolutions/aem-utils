@@ -1,11 +1,7 @@
 package com._4point.aem.aem_utils.aem_cntrl.domain;
 
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.UncheckedIOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.regex.MatchResult;
@@ -198,48 +194,6 @@ public class AemInstallationFiles extends InstallationFiles {
 		}
 	}
 
-	public static class SlingProperties extends InstallationFile {
-		private static final Path SLING_PROPERTIES_PATH = Path.of("sling.properties");
-
-		private final Path slingPropertiesFile;
-		
-		private SlingProperties(Path slingPropertiesFile) {
-			this.slingPropertiesFile = slingPropertiesFile;
-		}
-
-		private static Path constructSlingPropertiesPath(Path aemDir) {
-			return aemDir.resolve("conf").resolve(SLING_PROPERTIES_PATH);
-		}
-
-		public void updateSlingProperties() {
-			try {
-				String targetString = "sling.bootdelegation.class.com.rsa.jsafe.provider.JsafeJCE=com.rsa.*";
-				// Read in file, if it doesn't conotain the target string then add it to the end of the file
-				// If it does contain the target string, then do nothing
-				List<String> lines = new ArrayList<>(Files.readAllLines(slingPropertiesFile));	// Since Files.readAllLines() returns an unspecified (either mutable nor immutable) list, we need to create a mutable copy
-				if (lines.stream().anyMatch(l -> l.contains(targetString))) {
-					log.atWarn().log("Sling properties file already contains the target string.");
-					return;
-				}
-				log.atInfo().log("Adding target string to sling properties file.");
-				lines.add(targetString);
-				Files.write(slingPropertiesFile, lines);
-			} catch (IOException e) {
-				throw new UncheckedIOException(e);
-			}
-		}
-		
-		public static Optional<SlingProperties> under(Path crxQuickstartDir) throws FileNotFoundException {
-			Path location = constructSlingPropertiesPath(crxQuickstartDir);
-			if (Files.exists(location)) {
-				return Optional.of(new SlingProperties(location));
-			} else {
-				log.atWarn().log("No sling properties file found at {}", location);
-				return Optional.empty();
-			}
-		}
-	}
-	
 	private static String abbrev() {
 		return switch (OperatingSystem.getOs()) {
 			case WINDOWS -> "win";

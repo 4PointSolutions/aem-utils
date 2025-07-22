@@ -11,10 +11,6 @@ import java.util.stream.Stream;
 import com._4point.aem.aem_utils.aem_cntrl.domain.ports.api.WaitForLog;
 
 public class WaitForLogImpl implements WaitForLog {
-	private static final String CRX_QUICKSTART_DIR_NAME = "crx-quickstart";
-	private static final String LOGS_DIR_NAME = "logs";
-	private static final String LOG_FILE_NAME = "error.log";
-	private static final Path LOG_FILE_PATH = Path.of(CRX_QUICKSTART_DIR_NAME, LOGS_DIR_NAME, LOG_FILE_NAME);
 	
 	enum AemDirType {
 		DEFAULT, 	// Relative to the default AEM directory
@@ -64,7 +60,7 @@ public class WaitForLogImpl implements WaitForLog {
 
 	private void internalWaitForLog(RegexArgument regexArgument, Duration timeout, FromOption from, final Path finalAemDir) {
 		// find the log file
-		Path logFile = finalAemDir.resolve(LOG_FILE_PATH);
+		Path logFile = finalAemDir.resolve(AemFiles.LOG_FILE);
 		
 		
 		System.out.println("Path: " + finalAemDir + ", is " + AemDirType.of(finalAemDir).toString() + ", log file: " + logFile);
@@ -136,6 +132,6 @@ public class WaitForLogImpl implements WaitForLog {
 	}
 	
 	private static boolean isAemDir(Path p) {
-        return Files.isDirectory(p) && Files.exists(p.resolve(CRX_QUICKSTART_DIR_NAME));
+        return Files.isDirectory(p) && Files.exists(p.resolve(AemFiles.CRX_QUICKSTART_DIR));
 	}
 }
