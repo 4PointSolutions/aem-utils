@@ -99,8 +99,8 @@ public class AemInstallerImpl implements AemInstaller {
 		// Update sling.properties with bouncy castle (JSAFE) setting
 		// 
 		log.atInfo().log("Updating sling.properties file");
-		SlingProperties.under(aemDir.resolve(AemFiles.CRX_QUICKSTART_DIR))
-		        	    .orElseThrow(() -> new FileNotFoundException("Unable to locate sling.properties file under " + aemDir.resolve(AemFiles.CRX_QUICKSTART_DIR)))
+		SlingProperties.under(aemDir)
+		        	    .orElseThrow(() -> new FileNotFoundException("Unable to locate sling.properties file under " + aemDir))
 		        	    .updateSlingProperties();
 
 			

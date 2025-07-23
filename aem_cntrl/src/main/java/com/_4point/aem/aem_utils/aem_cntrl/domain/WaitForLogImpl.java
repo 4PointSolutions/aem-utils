@@ -5,10 +5,14 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Duration;
 import java.util.List;
+import java.util.Optional;
 import java.util.function.Supplier;
+import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
+import com._4point.aem.aem_utils.aem_cntrl.domain.AemFiles.LogFile;
 import com._4point.aem.aem_utils.aem_cntrl.domain.ports.api.WaitForLog;
+import com._4point.aem.aem_utils.aem_cntrl.domain.ports.spi.Tailer.TailerFactory;
 
 public class WaitForLogImpl implements WaitForLog {
 	
@@ -37,9 +41,11 @@ public class WaitForLogImpl implements WaitForLog {
 	}
 
 	private final Supplier<Path> defaultAemDirSupplier;
+	private final TailerFactory tailerFactory;
 	
-	public WaitForLogImpl(Supplier<Path> defaultAemDirSupplier) {
+	public WaitForLogImpl(Supplier<Path> defaultAemDirSupplier, TailerFactory tailerFactory) {
 		this.defaultAemDirSupplier = defaultAemDirSupplier;
+		this.tailerFactory = tailerFactory;
 	}
 
 
@@ -60,10 +66,11 @@ public class WaitForLogImpl implements WaitForLog {
 
 	private void internalWaitForLog(RegexArgument regexArgument, Duration timeout, FromOption from, final Path finalAemDir) {
 		// find the log file
-		Path logFile = finalAemDir.resolve(AemFiles.LOG_FILE);
+		LogFile logFile = LogFile.under(finalAemDir, tailerFactory);
 		
 		
 		System.out.println("Path: " + finalAemDir + ", is " + AemDirType.of(finalAemDir).toString() + ", log file: " + logFile);
+		
 		
 //		System.out.println("Path: " + aemDir + ", is absolute:" + aemDir.isAbsolute() + ", absolute path: " + aemDir.toAbsolutePath());
 //		for (Path p : asIterable(aemDir.normalize())) {
@@ -73,8 +80,13 @@ public class WaitForLogImpl implements WaitForLog {
 //		System.out.println("  Root element: " + aemDir.getRoot());
 //		System.out.println("  First element: " + aemDir.subpath(0,1));
 		// 
+		Pattern targetPattern = switch (regexArgument) {
+		case RegexArgument.RegexStartup r -> AemProcess.AEM_START_TARGET_PATTERN;
+		case RegexArgument.RegexShutdown r -> AemProcess.AEM_STOP_TARGET_PATTERN;
+		case RegexArgument.RegexCustom r -> r.regex();
+		};
 		
-		
+		Optional<String> log =logFile.monitorLogFileFromEnd(targetPattern, timeout);
 		
 		throw new UnsupportedOperationException("Method not implemented yet.");
 	}

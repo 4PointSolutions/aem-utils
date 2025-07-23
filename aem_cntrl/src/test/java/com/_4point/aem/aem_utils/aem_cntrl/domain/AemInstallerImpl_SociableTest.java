@@ -68,7 +68,7 @@ class AemInstallerImpl_SociableTest {
 		when(tailerFactoryMock.fromEnd(any()))
 							  .thenReturn(tailerMock);
 		when(tailerMock.stream())
-		   			   .thenAnswer(i->mockAemInstallation(destDir.resolve(aemInstallType.aemDir()).resolve("crx-quickstart"))) // Mock the Aem installation on the first call
+		   			   .thenAnswer(i->mockAemInstallation(destDir.resolve(aemInstallType.aemDir()))) // Mock the Aem installation on the first call
 					   .thenAnswer(i->MOCK_AEM_LOG.lines());
 		
 		// Mock the setting of protected mode for HTML5 forms

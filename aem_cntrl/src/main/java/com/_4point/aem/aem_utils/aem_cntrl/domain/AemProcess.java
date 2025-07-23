@@ -9,11 +9,9 @@ import java.nio.file.attribute.PosixFilePermission;
 import java.time.Duration;
 import java.util.Arrays;
 import java.util.EnumSet;
-import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -21,10 +19,10 @@ import java.util.stream.Stream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com._4point.aem.aem_utils.aem_cntrl.domain.AemFiles.LogFile;
 import com._4point.aem.aem_utils.aem_cntrl.domain.ports.ipi.ProcessRunner;
 import com._4point.aem.aem_utils.aem_cntrl.domain.ports.ipi.ProcessRunner.ListResult;
 import com._4point.aem.aem_utils.aem_cntrl.domain.ports.ipi.ProcessRunner.ProcessRunnerException;
-import com._4point.aem.aem_utils.aem_cntrl.domain.ports.spi.Tailer;
 import com._4point.aem.aem_utils.aem_cntrl.domain.ports.spi.Tailer.TailerFactory;
 
 
@@ -63,8 +61,10 @@ public class AemProcess {
 		try {
 			CompletableFuture<Void> process = startAem().thenAccept(lr->handleResult(lr, "startup"));
 			log.atInfo().log("AEM Started");
+			LogFile logFile = LogFile.under(aemQuickstartDir, tailerFactory);
 			try {
-				String startResult = monitorLogFile(logFile(), targetPattern, timeout).orElseThrow(()->new AemProcessException("Failed to find string matching '%s' in log file before timeout (%d secs).".formatted(targetPattern, timeout.getSeconds())));
+				String startResult = logFile.monitorLogFileFromEnd(targetPattern, timeout).orElseThrow(()->new AemProcessException("Failed to find string matching '%s' in log file before timeout (%d secs).".formatted(targetPattern, timeout.getSeconds())));
+				sleepForSeconds(2, "Letting AEM finish");	// Give things some time to settle down before we shut everything down. 2 seconds should be enough
 				if (action != null) {
 					log.atInfo().log("Performing action after AEM startup.");
 					action.run();
@@ -74,7 +74,7 @@ public class AemProcess {
 				log.atInfo().log("Stopping AEM");
 				stopAem().thenAccept(lr->handleResult(lr, "shutdown"));;
 				// *INFO* [FelixStartLevel] org.apache.sling.commons.logservice BundleEvent STOPPING
-				monitorLogFile(logFile(), AEM_STOP_TARGET_PATTERN, timeout).orElseThrow(()->new AemProcessException("Failed to find string matching '%s' in log file before timeout (%d secs).".formatted(targetPattern, timeout.getSeconds())));
+				logFile.monitorLogFileFromEnd(AEM_STOP_TARGET_PATTERN, timeout).orElseThrow(()->new AemProcessException("Failed to find string matching '%s' in log file before timeout (%d secs).".formatted(targetPattern, timeout.getSeconds())));
 				log.atInfo().log("AEM Stopped");
 			}
 		} catch (InterruptedException | ExecutionException e) {
@@ -155,26 +155,6 @@ public class AemProcess {
 		return runUntilLogContains(AEM_START_TARGET_PATTERN, Duration.ofMinutes(5), action);
 	}
 	
-	public Optional<String> monitorLogFile(Path logFile, Pattern pattern, Duration timeout) {
-		try(Tailer tailer = tailerFactory.fromEnd(logFile); Stream<String> stream = tailer.stream()) {
-			var result = CompletableFuture.supplyAsync(()->lookForLine(stream, pattern))
-										  .completeOnTimeout(Optional.empty(), timeout.toMillis(), TimeUnit.MILLISECONDS)
-										  .join();
-			sleepForSeconds(2, "Letting AEM finish");	// Give things some time to settle down before we shut everything down. 2 seconds should be enough
-			return result;
-		} catch (Exception e) {
-			throw new AemProcessException(e);
-		}
-	}
-
-	private static Optional<String> lookForLine(Stream<String> stream, Pattern pattern) {
-		log.atDebug().addArgument(pattern.toString()).log("Looking for line matching regex '{}'.");
-		return stream
-					 .map(AemProcess::logInput)	// Doesn't transform input, just logs it.
-					 .filter(s->pattern.matcher(s).matches())
-					 .findAny();
-	}
-	
 	private static void sleepForSeconds(int numSecs, String reason) {
 		try {
 			log.atInfo().addArgument(reason).addArgument(numSecs).log("{}, sleeping for {} seconds.");
@@ -183,15 +163,6 @@ public class AemProcess {
 			log.atError().setCause(e).log("Sleep of %s seconds was interrupted.".formatted(numSecs));
 			throw new AemProcessException(e);
 		}
-	}
-	
-	private Path logFile() {
-		return aemQuickstartDir.resolve(AemFiles.LOG_FILE);
-	}
-
-	private static String logInput(String inputLine) {
-		log.atTrace().addArgument(inputLine).log("Found line '{}' in stream.");
-		return inputLine;
 	}
 	
 	// TODO: Create an initializedAemInstance class too (for one that's already been set up)

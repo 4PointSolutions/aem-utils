@@ -142,7 +142,7 @@ public class AemCntrlApplication implements CommandLineRunner, ExitCodeGenerator
 	}
 	
 	@Bean
-	WaitForLog waitForLog(Supplier<Path> defaultAemDirSupplier) {
-		return new WaitForLogImpl(defaultAemDirSupplier);
+	WaitForLog waitForLog(Supplier<Path> defaultAemDirSupplier, TailerFactory tailerFactory) {
+		return new WaitForLogImpl(defaultAemDirSupplier, tailerFactory);
 	}
 }

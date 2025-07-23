@@ -11,7 +11,7 @@ import java.nio.file.StandardOpenOption;
  * 
  */
 public enum MockAemFiles {
-	SLING_PROPERTIES(Path.of("conf", "sling.properties"), MockAemFiles.SAMPLE_SLING_PROPERTIES),
+	SLING_PROPERTIES(Path.of("crx-quickstart", "conf", "sling.properties"), MockAemFiles.SAMPLE_SLING_PROPERTIES),
 	;
 
 	private static final String SAMPLE_SLING_PROPERTIES = 
