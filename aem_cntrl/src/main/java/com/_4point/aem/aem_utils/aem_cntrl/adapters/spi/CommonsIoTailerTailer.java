@@ -135,15 +135,16 @@ public class CommonsIoTailerTailer implements com._4point.aem.aem_utils.aem_cntr
 	public static class TailerFactory implements com._4point.aem.aem_utils.aem_cntrl.domain.ports.spi.Tailer.TailerFactory {
 
 		@Override
-		public CommonsIoTailerTailer fromBeginning(Path path) {
+		public com._4point.aem.aem_utils.aem_cntrl.domain.ports.spi.Tailer from(Path path, FromOption fromOption) {
 			waitTillItExists(path);
-			return new CommonsIoTailerTailer(path, false);
+			return new CommonsIoTailerTailer(path, toBoolean(fromOption));
 		}
-		
-		@Override
-		public CommonsIoTailerTailer fromEnd(Path path) {
-			waitTillItExists(path);
-			return new CommonsIoTailerTailer(path, true);
+
+		private boolean toBoolean(FromOption fromOption) {
+			return switch (fromOption) {
+                case BEGINNING -> false;
+                case END -> true;
+            };
 		}
 	}
 }
