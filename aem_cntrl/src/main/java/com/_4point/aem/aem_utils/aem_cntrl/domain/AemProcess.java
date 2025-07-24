@@ -20,6 +20,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com._4point.aem.aem_utils.aem_cntrl.domain.AemFiles.LogFile;
+import com._4point.aem.aem_utils.aem_cntrl.domain.AemFiles.LogFile.FromOption;
 import com._4point.aem.aem_utils.aem_cntrl.domain.ports.ipi.ProcessRunner;
 import com._4point.aem.aem_utils.aem_cntrl.domain.ports.ipi.ProcessRunner.ListResult;
 import com._4point.aem.aem_utils.aem_cntrl.domain.ports.ipi.ProcessRunner.ProcessRunnerException;
@@ -63,7 +64,7 @@ public class AemProcess {
 			log.atInfo().log("AEM Started");
 			LogFile logFile = LogFile.under(aemQuickstartDir, tailerFactory);
 			try {
-				String startResult = logFile.monitorLogFileFromEnd(targetPattern, timeout).orElseThrow(()->new AemProcessException("Failed to find string matching '%s' in log file before timeout (%d secs).".formatted(targetPattern, timeout.getSeconds())));
+				String startResult = logFile.monitorLogFile(targetPattern, timeout, FromOption.END).orElseThrow(()->new AemProcessException("Failed to find string matching '%s' in log file before timeout (%d secs).".formatted(targetPattern, timeout.getSeconds())));
 				sleepForSeconds(2, "Letting AEM finish");	// Give things some time to settle down before we shut everything down. 2 seconds should be enough
 				if (action != null) {
 					log.atInfo().log("Performing action after AEM startup.");
@@ -74,7 +75,7 @@ public class AemProcess {
 				log.atInfo().log("Stopping AEM");
 				stopAem().thenAccept(lr->handleResult(lr, "shutdown"));;
 				// *INFO* [FelixStartLevel] org.apache.sling.commons.logservice BundleEvent STOPPING
-				logFile.monitorLogFileFromEnd(AEM_STOP_TARGET_PATTERN, timeout).orElseThrow(()->new AemProcessException("Failed to find string matching '%s' in log file before timeout (%d secs).".formatted(targetPattern, timeout.getSeconds())));
+				logFile.monitorLogFile(AEM_STOP_TARGET_PATTERN, timeout, FromOption.END).orElseThrow(()->new AemProcessException("Failed to find string matching '%s' in log file before timeout (%d secs).".formatted(targetPattern, timeout.getSeconds())));
 				log.atInfo().log("AEM Stopped");
 			}
 		} catch (InterruptedException | ExecutionException e) {

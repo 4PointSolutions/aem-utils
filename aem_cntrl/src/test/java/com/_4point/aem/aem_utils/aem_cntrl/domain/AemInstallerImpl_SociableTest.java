@@ -65,7 +65,7 @@ class AemInstallerImpl_SociableTest {
 		// Mock other services
 		when(processRunnerMock.runtoListResult(any(), any()))
 							  .thenReturn(CompletableFuture.completedFuture(new ProcessRunner.ListResult(0, JBANG_ENV_RESPONSE.lines().toList(), null)));
-		when(tailerFactoryMock.fromEnd(any()))
+		when(tailerFactoryMock.from(any(), any()))
 							  .thenReturn(tailerMock);
 		when(tailerMock.stream())
 		   			   .thenAnswer(i->mockAemInstallation(destDir.resolve(aemInstallType.aemDir()))) // Mock the Aem installation on the first call

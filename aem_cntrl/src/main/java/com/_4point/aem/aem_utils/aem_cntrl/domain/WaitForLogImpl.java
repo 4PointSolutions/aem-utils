@@ -55,13 +55,13 @@ public class WaitForLogImpl implements WaitForLog {
 	 * 
 	 * @param regexArgument The regex to match against log entries.
 	 * @param timeout       The maximum time to wait for a matching log entry.
-	 * @param from          The source of the log (e.g., "error", "info").
+	 * @param fromOption          The source of the log (e.g., "error", "info").
 	 * @param aemDir        The directory where AEM logs are stored. If null, the
 	 *                      default AEM directory is used.
 	 */
 	@Override
-	public void waitForLog(RegexArgument regexArgument, Duration timeout, FromOption from, final Path aemDir) {
-		internalWaitForLog(regexArgument, timeout, from, locateAemDir(adjustProvidedAemDirParam(aemDir)));
+	public void waitForLog(RegexArgument regexArgument, Duration timeout, FromOption fromOption, final Path aemDir) {
+		internalWaitForLog(regexArgument, timeout, fromOption, locateAemDir(adjustProvidedAemDirParam(aemDir)));
 	}
 
 	private void internalWaitForLog(RegexArgument regexArgument, Duration timeout, FromOption from, final Path finalAemDir) {
@@ -71,27 +71,29 @@ public class WaitForLogImpl implements WaitForLog {
 		
 		System.out.println("Path: " + finalAemDir + ", is " + AemDirType.of(finalAemDir).toString() + ", log file: " + logFile);
 		
+		Optional<String> log =logFile.monitorLogFile(toPattern(regexArgument), timeout, toLogFileFromOption(from));
 		
-//		System.out.println("Path: " + aemDir + ", is absolute:" + aemDir.isAbsolute() + ", absolute path: " + aemDir.toAbsolutePath());
-//		for (Path p : asIterable(aemDir.normalize())) {
-//			System.out.println("  " + p );
-//		}
-//		System.out.println();
-//		System.out.println("  Root element: " + aemDir.getRoot());
-//		System.out.println("  First element: " + aemDir.subpath(0,1));
-		// 
-		Pattern targetPattern = switch (regexArgument) {
-		case RegexArgument.RegexStartup r -> AemProcess.AEM_START_TARGET_PATTERN;
-		case RegexArgument.RegexShutdown r -> AemProcess.AEM_STOP_TARGET_PATTERN;
-		case RegexArgument.RegexCustom r -> r.regex();
-		};
-		
-		Optional<String> log =logFile.monitorLogFileFromEnd(targetPattern, timeout);
-		
-		throw new UnsupportedOperationException("Method not implemented yet.");
+		if (log.isEmpty()) {
+			throw new WaitForLogException("No log entry matching " + toPattern(regexArgument) + " found in " + logFile + " within " + timeout);
+		}
 	}
 
+	private LogFile.FromOption toLogFileFromOption(FromOption from) {
+		return switch (from) {
+			case START -> LogFile.FromOption.START;
+			case END -> LogFile.FromOption.END;
+		};
+	}
 
+	private Pattern toPattern(RegexArgument regexArgument) {
+		return switch (regexArgument) {
+			case RegexArgument.RegexStartup r -> AemProcess.AEM_START_TARGET_PATTERN;
+			case RegexArgument.RegexShutdown r -> AemProcess.AEM_STOP_TARGET_PATTERN;
+			case RegexArgument.RegexCustom r -> r.regex();
+		};
+	}
+
+	
 
 	/**
 	 * Adjusts the AEM directory based on the type of Path specified. 
@@ -117,10 +119,6 @@ public class WaitForLogImpl implements WaitForLog {
 	private Path locateAemDir(final Path adjustedAemDir) {
 		// If the adjusted AEM directory does not contain crx-quickstart, then locate a child directory that does.
 		return isAemDir(adjustedAemDir) ? adjustedAemDir : locateAemChildDir(adjustedAemDir);
-	}
-	
-	private static Iterable<Path> asIterable(Path p) {
-		return ()->p.iterator();
 	}
 	
 	private static Path locateAemChildDir(Path aemParentDir) {

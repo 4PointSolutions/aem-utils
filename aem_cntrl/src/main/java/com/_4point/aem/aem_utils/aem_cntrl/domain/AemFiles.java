@@ -70,6 +70,21 @@ public class AemFiles {
 	public static class LogFile {
 		private static final Path LOG_FILE_PATH = CRX_QUICKSTART_DIR.resolve("logs").resolve("error.log");
 
+		public enum FromOption {
+			START(TailerFactory.FromOption.BEGINNING), END(TailerFactory.FromOption.END);
+
+			private final TailerFactory.FromOption tailerFactoryFromOption;
+
+			private FromOption(TailerFactory.FromOption tailerFactoryFromOption) {
+				this.tailerFactoryFromOption = tailerFactoryFromOption;
+			}
+
+			private TailerFactory.FromOption tailerFactoryFromOption() {
+				return tailerFactoryFromOption;
+			}
+			
+		}
+		
 		private final Path logFile;
 		private final TailerFactory tailerFactory;
 
@@ -78,15 +93,8 @@ public class AemFiles {
 			this.tailerFactory = tailerFactory;
 		}
 
-		public Optional<String> monitorLogFileFromStart(Pattern pattern, Duration timeout) {
-			try(Tailer tailer = tailerFactory.fromEnd(logFile)) {
-				return monitorLogFile(tailer, pattern, timeout);
-			} catch (Exception e) {
-				throw new LogFileException(e);
-			}
-		}
-		public Optional<String> monitorLogFileFromEnd(Pattern pattern, Duration timeout) {
-			try(Tailer tailer = tailerFactory.fromEnd(logFile)) {
+		public Optional<String> monitorLogFile(Pattern pattern, Duration timeout, FromOption fromOption) {
+			try(Tailer tailer = tailerFactory.from(logFile, fromOption.tailerFactoryFromOption())) {
 				return monitorLogFile(tailer, pattern, timeout);
 			} catch (Exception e) {
 				throw new LogFileException(e);

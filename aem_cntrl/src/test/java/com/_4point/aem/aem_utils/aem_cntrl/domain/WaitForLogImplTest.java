@@ -20,6 +20,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com._4point.aem.aem_utils.aem_cntrl.domain.WaitForLogImpl.AemDirType;
+import com._4point.aem.aem_utils.aem_cntrl.domain.ports.api.WaitForLog.FromOption;
 import com._4point.aem.aem_utils.aem_cntrl.domain.ports.api.WaitForLog.RegexArgument;
 import com._4point.aem.aem_utils.aem_cntrl.domain.ports.spi.Tailer;
 import com._4point.aem.aem_utils.aem_cntrl.domain.ports.spi.Tailer.TailerFactory;
@@ -56,14 +57,17 @@ class WaitForLogImplTest {
 		// Given
 		Path aemDir = createMockAemDir(tempDir);
 		WaitForLogImpl waitForLog = new WaitForLogImpl(() -> aemDir, tailerFactoryMock);
-		when(tailerFactoryMock.fromEnd(any())).thenReturn(tailerMock);
+		when(tailerFactoryMock.from(any(), any())).thenReturn(tailerMock);
 		when(tailerMock.stream()).thenAnswer(i->MOCK_AEM_LOG.lines());
 
 		// When
-		assertThrows(UnsupportedOperationException.class, () -> {
-			waitForLog.waitForLog(RegexArgument.startup(), Duration.ofMinutes(10), null, null);
-		});
+		waitForLog.waitForLog(RegexArgument.startup(), Duration.ofMinutes(10), FromOption.START, null);
 	}
+	
+	// Test the three RegexArgument types (startup, shutdown, custom)
+	// Test for a timeout
+	// Test for FormStart and FromEnd
+	// Test for null aemDir, or provided aemDir
 	
 	private Path createMockAemDir(Path tempDir) throws IOException {
 		Path adobeDir = tempDir.resolve("adobe");
