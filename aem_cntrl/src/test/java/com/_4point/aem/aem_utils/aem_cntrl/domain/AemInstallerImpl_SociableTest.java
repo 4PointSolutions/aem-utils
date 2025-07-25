@@ -22,6 +22,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
+import com._4point.aem.aem_utils.aem_cntrl.domain.Mocks.TailerMocker;
 import com._4point.aem.aem_utils.aem_cntrl.domain.ports.api.AemInstaller;
 import com._4point.aem.aem_utils.aem_cntrl.domain.ports.ipi.ProcessRunner;
 import com._4point.aem.aem_utils.aem_cntrl.domain.ports.spi.AemConfigManager;
@@ -38,15 +39,6 @@ class AemInstallerImpl_SociableTest {
 			rem Copy & paste the above commands in your CMD window or add
 			rem them to your Environment Variables in the System Settings.
 			""";
-
-	// This mock AEN log has all the strings that are ever searched for
-	private static final String MOCK_AEM_LOG = """
-			18.06.2025 09:26:04.989 *INFO* [FelixDispatchQueue] com.adobe.granite.workflow.core.launcher.WorkflowLauncherListener StartupListener.startupFinished called
-			18.06.2025 09:28:04.288 *INFO* [FelixFrameworkWiring] org.apache.sling.installer.core.impl.OsgiInstallerImpl Apache Sling OSGi Installer Service stopped.
-			18.06.2025 09:32:42.198 *INFO* [Thread-2944] com.adobe.granite.installer.Updater Content Package AEM-6.5-Service-Pack-23 Installed successfully
-			18.06.2025 09:38:01.557 *INFO* [OsgiInstallerImpl] org.apache.sling.audit.osgi.installer Installed BMC XMLFormService of type BMC_NATIVE
-			""";
-	
 	
 	@MockitoBean ProcessRunner processRunnerMock;
 	@MockitoBean AemConfigManager aemConfigManagerMock;
@@ -69,7 +61,7 @@ class AemInstallerImpl_SociableTest {
 							  .thenReturn(tailerMock);
 		when(tailerMock.stream())
 		   			   .thenAnswer(i->mockAemInstallation(destDir.resolve(aemInstallType.aemDir()))) // Mock the Aem installation on the first call
-					   .thenAnswer(i->MOCK_AEM_LOG.lines());
+					   .thenAnswer(i->TailerMocker.MOCK_AEM_LOG.lines());
 		
 		// Mock the setting of protected mode for HTML5 forms
 		when(aemConfigManagerMock.mobileFormsSettings()).thenReturn(mobileFormsSettingsMock);
@@ -127,7 +119,7 @@ class AemInstallerImpl_SociableTest {
 		// So this creates that file so that the AEM installation can proceed. 
 		try {
 			MockAemFiles.SLING_PROPERTIES.createMockFile(aemQuickstartDir);
-			return MOCK_AEM_LOG.lines();
+			return TailerMocker.MOCK_AEM_LOG.lines();
 		} catch (IOException e) {
 			throw new UncheckedIOException(e);
 		}
