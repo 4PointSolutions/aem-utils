@@ -9,6 +9,7 @@ import java.util.NoSuchElementException;
 import java.util.Objects;
 import java.util.Spliterators.AbstractSpliterator;
 import java.util.concurrent.BlockingDeque;
+import java.util.concurrent.Executors;
 import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
@@ -35,7 +36,7 @@ public class CommonsIoTailerTailer implements com._4point.aem.aem_utils.aem_cntr
 				   .setPath(path)
 				   .setCharset(StandardCharsets.UTF_8)
 				   .setDelayDuration(TRAILER_DELAY)
-//				   .setExecutorService(Executors.newSingleThreadExecutor(Builder::newDaemonThread))
+				   .setExecutorService(Executors.newVirtualThreadPerTaskExecutor())
 				   .setReOpen(false)
 				   .setStartThread(true)
 //				   .setTailable(tailable)
