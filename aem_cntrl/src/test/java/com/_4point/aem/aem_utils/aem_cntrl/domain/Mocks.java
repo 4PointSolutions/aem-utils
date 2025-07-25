@@ -36,25 +36,35 @@ public class Mocks {
 			programMocksToEmulateAem(tailerFactoryMock, tailerMock);
 		}
 
-		void programMocksToEmulateAemAfterWait(Duration wait) {
-			when(tailerFactoryMock.from(any(), any())).thenReturn(tailerMock);
-			when(tailerMock.stream()).thenAnswer(i->emulateAemLog(wait));			
+		void programMocks(Stream<String> logStream, Duration waitPerLine) {
+			programMocks(tailerFactoryMock, tailerMock, logStream, waitPerLine);
 		}
 
-		private static Stream<String> emulateAemLog(Duration wait) {
-			// TODO: Implement a delay if needed
-			return MOCK_AEM_LOG.lines().filter(s->{
-				try {
-					Thread.sleep(wait);
-				} catch (InterruptedException e) {
-				}
-				return true;
-			});
+		void programMocksToEmulateAemAfterWait(Duration waitPerLine) {
+			programMocksToEmulateAem(tailerFactoryMock, tailerMock, waitPerLine);
+		}
+
+		static void programMocks(TailerFactory tailerFactoryMock, Tailer tailerMock, Stream<String> logStream) {
+			programMocks(tailerFactoryMock, tailerMock, logStream, Duration.ZERO);
+		}
+
+		static void programMocks(TailerFactory tailerFactoryMock, Tailer tailerMock, Stream<String> logStream, Duration waitPerLine) {
+			when(tailerFactoryMock.from(any(), any())).thenReturn(tailerMock);
+			when(tailerMock.stream()).thenAnswer(i -> logStream.filter(s->{
+																				try {
+																					Thread.sleep(waitPerLine);
+																				} catch (InterruptedException e) {
+																				}
+																				return true;
+																			}));
+		}
+
+		static void programMocksToEmulateAem(TailerFactory tailerFactoryMock, Tailer tailerMock, Duration waitPerLine) {
+			programMocks(tailerFactoryMock, tailerMock, MOCK_AEM_LOG.lines(), waitPerLine);
 		}
 
 		static void programMocksToEmulateAem(TailerFactory tailerFactoryMock, Tailer tailerMock) {
-			when(tailerFactoryMock.from(any(), any())).thenReturn(tailerMock);
-			when(tailerMock.stream()).thenAnswer(i->emulateAemLog(Duration.ZERO));
+			programMocksToEmulateAem(tailerFactoryMock, tailerMock, Duration.ZERO);
 		}
 
 		

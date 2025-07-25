@@ -54,6 +54,7 @@ class WaitForLogImplTest {
 	// Test for a timeout
 	// Test for FormStart and FromEnd
 	// Test for null aemDir, or provided aemDir
+	// Test for log line not found
 	
 	private Path createMockAemDir(Path tempDir) throws IOException {
 		Path adobeDir = tempDir.resolve("adobe");
