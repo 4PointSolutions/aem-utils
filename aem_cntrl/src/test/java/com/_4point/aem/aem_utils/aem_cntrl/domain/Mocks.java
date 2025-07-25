@@ -3,6 +3,9 @@ package com._4point.aem.aem_utils.aem_cntrl.domain;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
+import java.time.Duration;
+import java.util.stream.Stream;
+
 import com._4point.aem.aem_utils.aem_cntrl.domain.ports.spi.Tailer;
 import com._4point.aem.aem_utils.aem_cntrl.domain.ports.spi.Tailer.TailerFactory;
 
@@ -17,8 +20,8 @@ public class Mocks {
 				18.06.2025 09:38:01.557 *INFO* [OsgiInstallerImpl] org.apache.sling.audit.osgi.installer Installed BMC XMLFormService of type BMC_NATIVE
 				""";
 		
-		final TailerFactory tailerFactoryMock;
-		final Tailer tailerMock;
+		private final TailerFactory tailerFactoryMock;
+		private final Tailer tailerMock;
 
 		public TailerMocker() {
 			this(mock(TailerFactory.class));
@@ -27,14 +30,34 @@ public class Mocks {
 		public TailerMocker(TailerFactory tailerFactoryMock) {
 			this.tailerFactoryMock = tailerFactoryMock;
 			this.tailerMock = mock(Tailer.class);
-			programMocks(tailerFactoryMock, tailerMock);
 		}
 
-		static void programMocks(TailerFactory tailerFactoryMock, Tailer tailerMock) {
+		void programMocksToEmulateAem() {
+			programMocksToEmulateAem(tailerFactoryMock, tailerMock);
+		}
+
+		void programMocksToEmulateAemAfterWait(Duration wait) {
 			when(tailerFactoryMock.from(any(), any())).thenReturn(tailerMock);
-			when(tailerMock.stream()).thenAnswer(i->MOCK_AEM_LOG.lines());
+			when(tailerMock.stream()).thenAnswer(i->emulateAemLog(wait));			
 		}
 
+		private static Stream<String> emulateAemLog(Duration wait) {
+			// TODO: Implement a delay if needed
+			return MOCK_AEM_LOG.lines().filter(s->{
+				try {
+					Thread.sleep(wait);
+				} catch (InterruptedException e) {
+				}
+				return true;
+			});
+		}
+
+		static void programMocksToEmulateAem(TailerFactory tailerFactoryMock, Tailer tailerMock) {
+			when(tailerFactoryMock.from(any(), any())).thenReturn(tailerMock);
+			when(tailerMock.stream()).thenAnswer(i->emulateAemLog(Duration.ZERO));
+		}
+
+		
 		public TailerFactory tailerFactoryMock() {
 			return tailerFactoryMock;
 		}

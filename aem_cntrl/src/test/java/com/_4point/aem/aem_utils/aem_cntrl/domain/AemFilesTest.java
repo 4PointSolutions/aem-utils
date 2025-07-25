@@ -7,12 +7,18 @@ import java.io.IOException;
 import java.io.StringReader;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.time.Duration;
 import java.util.List;
+import java.util.Optional;
+import java.util.regex.Pattern;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
+import com._4point.aem.aem_utils.aem_cntrl.domain.AemFiles.LogFile;
+import com._4point.aem.aem_utils.aem_cntrl.domain.AemFiles.LogFile.FromOption;
 import com._4point.aem.aem_utils.aem_cntrl.domain.AemFiles.SlingProperties;
+import com._4point.aem.aem_utils.aem_cntrl.domain.Mocks.TailerMocker;
 
 class AemFilesTest {
 
@@ -47,4 +53,36 @@ class AemFilesTest {
 		}
 	}
 
+	@Test
+	void testMonitorLogFile_FindsLine() {
+		// Given
+		TailerMocker tailerMocker = new TailerMocker();
+		tailerMocker.programMocksToEmulateAem();
+		LogFile underTest = LogFile.under(Path.of("aemDir"), tailerMocker.tailerFactoryMock());
+		// When
+		Optional<String> result = underTest.monitorLogFile(Pattern.compile(".*"), Duration.ofSeconds(1), FromOption.END);
+		assertTrue(result.isPresent(), "Expected a result, but got none");
+	}
+
+	@Test
+	void testMonitorLogFile_DoesNotFindLine() {
+		// Given
+		TailerMocker tailerMocker = new TailerMocker();
+		tailerMocker.programMocksToEmulateAem();
+		LogFile underTest = LogFile.under(Path.of("aemDir"), tailerMocker.tailerFactoryMock());
+		// When
+		Optional<String> result = underTest.monitorLogFile(Pattern.compile("Some Text that is not in the log file."), Duration.ofSeconds(1), FromOption.END);
+		assertFalse(result.isPresent(), "Expected no result, but got one");
+	}
+
+	@Test
+	void testMonitorLogFile_TimesOut() {
+		// Given
+		TailerMocker tailerMocker = new TailerMocker();
+		tailerMocker.programMocksToEmulateAemAfterWait(Duration.ofSeconds(2)); // Wait is longer than the timeput below
+		LogFile underTest = LogFile.under(Path.of("aemDir"), tailerMocker.tailerFactoryMock());
+		// When
+		Optional<String> result = underTest.monitorLogFile(Pattern.compile(".*"), Duration.ofSeconds(1), FromOption.END);
+		assertFalse(result.isPresent(), "Expected no result, but got one");
+	}
 }
