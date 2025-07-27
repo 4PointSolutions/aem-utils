@@ -136,6 +136,11 @@ public class AemFiles {
 						 .findAny();
 		}
 
+		@Override
+		public String toString() {
+			return logFile.toString();
+		}
+
 		public static LogFile under(Path aemDir, TailerFactory tailerFactory) {
 			return new LogFile(aemDir.resolve(LOG_FILE_PATH), tailerFactory);
 		}

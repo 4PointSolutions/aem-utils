@@ -2,12 +2,10 @@ package com._4point.aem.aem_utils.aem_cntrl.domain;
 
 import java.nio.file.Path;
 import java.time.Duration;
-import java.util.Optional;
 import java.util.function.BiFunction;
 import java.util.regex.Pattern;
 
 import com._4point.aem.aem_utils.aem_cntrl.domain.AemFiles.AemDir;
-import com._4point.aem.aem_utils.aem_cntrl.domain.AemFiles.AemDir.AemDirType;
 import com._4point.aem.aem_utils.aem_cntrl.domain.AemFiles.LogFile;
 import com._4point.aem.aem_utils.aem_cntrl.domain.ports.api.WaitForLog;
 import com._4point.aem.aem_utils.aem_cntrl.domain.ports.spi.Tailer.TailerFactory;
@@ -36,19 +34,10 @@ public class WaitForLogImpl implements WaitForLog {
 	 */
 	@Override
 	public void waitForLog(RegexArgument regexArgument, Duration timeout, FromOption fromOption, final Path unqualifiedAemDir) {
-		internalWaitForLog(regexArgument, timeout, fromOption, aemDir.toQualified(unqualifiedAemDir));
-	}
-
-	private String internalWaitForLog(RegexArgument regexArgument, Duration timeout, FromOption from, final Path finalAemDir) {
-		// find the log file
-		LogFile logFile = logFileFactory.apply(finalAemDir, tailerFactory);
-		
-		
-		System.out.println("Path: " + finalAemDir + ", is " + AemDirType.of(finalAemDir).toString() + ", log file: " + logFile);
-		
-		Optional<String> log =logFile.monitorLogFile(toPattern(regexArgument), timeout, toLogFileFromOption(from));
-		
-		return log.orElseThrow(() -> new WaitForLogException("No log entry matching " + toPattern(regexArgument) + " found in " + logFile + " within " + timeout));
+		Path finalAemDir = aemDir.toQualified(unqualifiedAemDir);									// find the aem directory
+		LogFile logFile = logFileFactory.apply(finalAemDir, tailerFactory);							// locate the log file and create the log file object
+		logFile.monitorLogFile(toPattern(regexArgument), timeout, toLogFileFromOption(fromOption))	// monitor the log file for a matching entry, throw an exception if not found
+			   .orElseThrow(() -> new WaitForLogException("No log entry matching " + toPattern(regexArgument) + " found in " + logFile.toString() + " within " + timeout));
 	}
 
 	private LogFile.FromOption toLogFileFromOption(FromOption from) {
