@@ -1,53 +1,28 @@
 package com._4point.aem.aem_utils.aem_cntrl.domain;
 
-import java.io.IOException;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Duration;
-import java.util.List;
 import java.util.Optional;
-import java.util.function.Supplier;
+import java.util.function.BiFunction;
 import java.util.regex.Pattern;
-import java.util.stream.Stream;
 
+import com._4point.aem.aem_utils.aem_cntrl.domain.AemFiles.AemDir;
+import com._4point.aem.aem_utils.aem_cntrl.domain.AemFiles.AemDir.AemDirType;
 import com._4point.aem.aem_utils.aem_cntrl.domain.AemFiles.LogFile;
 import com._4point.aem.aem_utils.aem_cntrl.domain.ports.api.WaitForLog;
 import com._4point.aem.aem_utils.aem_cntrl.domain.ports.spi.Tailer.TailerFactory;
 
 public class WaitForLogImpl implements WaitForLog {
 	
-	enum AemDirType {
-		DEFAULT, 	// Relative to the default AEM directory
-		RELATIVE, 	// Relative to the current working directory
-		ABSOLUTE,	// Absolute path
-		NULL, 		// Null
-		;
-		
-		static AemDirType of(Path aemDir) {
-			if (aemDir == null) {
-				return NULL;
-			} else if (aemDir.getRoot() != null) {
-            	return ABSOLUTE;
-            } else if (isRelative(aemDir.subpath(0, 1).toString())) {
-            	return RELATIVE;
-            } else {
-            	return DEFAULT;
-            }
-        }
-		
-		private static boolean isRelative(String firstElement) {
-			return ".".equals(firstElement) || "..".equals(firstElement);
-		}
-	}
-
-	private final Supplier<Path> defaultAemDirSupplier;
+	private final AemDir aemDir;
 	private final TailerFactory tailerFactory;
+	private final BiFunction<Path, TailerFactory, LogFile> logFileFactory;
 	
-	public WaitForLogImpl(Supplier<Path> defaultAemDirSupplier, TailerFactory tailerFactory) {
-		this.defaultAemDirSupplier = defaultAemDirSupplier;
+	public WaitForLogImpl(AemDir aemDir, TailerFactory tailerFactory, BiFunction<Path, TailerFactory, LogFile> logFileFactory) {
+		this.aemDir = aemDir;
 		this.tailerFactory = tailerFactory;
+		this.logFileFactory = logFileFactory;
 	}
-
 
 
 	/**
@@ -60,22 +35,20 @@ public class WaitForLogImpl implements WaitForLog {
 	 *                      default AEM directory is used.
 	 */
 	@Override
-	public void waitForLog(RegexArgument regexArgument, Duration timeout, FromOption fromOption, final Path aemDir) {
-		internalWaitForLog(regexArgument, timeout, fromOption, locateAemDir(adjustProvidedAemDirParam(aemDir)));
+	public void waitForLog(RegexArgument regexArgument, Duration timeout, FromOption fromOption, final Path unqualifiedAemDir) {
+		internalWaitForLog(regexArgument, timeout, fromOption, aemDir.toQualified(unqualifiedAemDir));
 	}
 
-	private void internalWaitForLog(RegexArgument regexArgument, Duration timeout, FromOption from, final Path finalAemDir) {
+	private String internalWaitForLog(RegexArgument regexArgument, Duration timeout, FromOption from, final Path finalAemDir) {
 		// find the log file
-		LogFile logFile = LogFile.under(finalAemDir, tailerFactory);
+		LogFile logFile = logFileFactory.apply(finalAemDir, tailerFactory);
 		
 		
 		System.out.println("Path: " + finalAemDir + ", is " + AemDirType.of(finalAemDir).toString() + ", log file: " + logFile);
 		
 		Optional<String> log =logFile.monitorLogFile(toPattern(regexArgument), timeout, toLogFileFromOption(from));
 		
-		if (log.isEmpty()) {
-			throw new WaitForLogException("No log entry matching " + toPattern(regexArgument) + " found in " + logFile + " within " + timeout);
-		}
+		return log.orElseThrow(() -> new WaitForLogException("No log entry matching " + toPattern(regexArgument) + " found in " + logFile + " within " + timeout));
 	}
 
 	private LogFile.FromOption toLogFileFromOption(FromOption from) {
@@ -95,53 +68,4 @@ public class WaitForLogImpl implements WaitForLog {
 
 	
 
-	/**
-	 * Adjusts the AEM directory based on the type of Path specified. 
-	 *   - If the Path is null, it returns the default AEM directory.
-	 *   - If the Path is a relative path, it resolves it against the default AEM directory.
-	 *   - If the Path is a relative path starting with . or .. , it resolves it against the current directory.
-	 *   - If the Path is an absolute path, it returns the Path as is.
-	 * 
-	 * @param aemDir
-	 * @return
-	 */
-	private Path adjustProvidedAemDirParam(Path aemDir) {
-		// Adjust the AEM directory based on the type of Path specified.
-		AemDirType aemDirType = AemDirType.of(aemDir);
-		if (aemDirType == AemDirType.NULL) {				// Not specified, use the default AEM directory
-			return defaultAemDirSupplier.get();
-		} else if (aemDirType == AemDirType.DEFAULT) {		// Specified as a relative path to the default AEM directory
-			return DefaultsImpl.aemDir().resolve(aemDir);
-		} // else ABSOLUTE or RELATIVE, no change needed
-		return aemDir;
-	}
-
-	private Path locateAemDir(final Path adjustedAemDir) {
-		// If the adjusted AEM directory does not contain crx-quickstart, then locate a child directory that does.
-		return isAemDir(adjustedAemDir) ? adjustedAemDir : locateAemChildDir(adjustedAemDir);
-	}
-	
-	private static Path locateAemChildDir(Path aemParentDir) {
-        try {
-        	List<Path> aemDirs = locateAemDirs(aemParentDir).toList();
-        	if (aemDirs.size() == 0) {
-        		throw new WaitForLogException("No AEM directory found in " + aemParentDir);
-        	} else if (aemDirs.size() > 1) {
-        		throw new WaitForLogException("Too many AEM directories found in " + aemParentDir + ". Please be more specific in your AEM directory specification.");
-        	}
-        	return aemDirs.getFirst();
-        } catch (IOException e) {
-            throw new WaitForLogException("Error locating AEM directories in " + aemParentDir, e);
-        }
-	}
-	
-	private static Stream<Path> locateAemDirs(Path aemParentDir) throws IOException {
-		return Files.list(aemParentDir)
-				.filter(p -> isAemDir(p)) // Filter directories that contain the CRX Quickstart directory)
-				;
-	}
-	
-	private static boolean isAemDir(Path p) {
-        return Files.isDirectory(p) && Files.exists(p.resolve(AemFiles.CRX_QUICKSTART_DIR));
-	}
 }

@@ -29,6 +29,8 @@ import com._4point.aem.aem_utils.aem_cntrl.adapters.spi.ports.AemConfiguration.S
 import com._4point.aem.aem_utils.aem_cntrl.adapters.spi.ports.JsonData;
 import com._4point.aem.aem_utils.aem_cntrl.adapters.spi.ports.RestClient;
 import com._4point.aem.aem_utils.aem_cntrl.commands.AemCntrlCommandLine;
+import com._4point.aem.aem_utils.aem_cntrl.domain.AemFiles.AemDir;
+import com._4point.aem.aem_utils.aem_cntrl.domain.AemFiles.LogFile;
 import com._4point.aem.aem_utils.aem_cntrl.domain.AemInstallerImpl;
 import com._4point.aem.aem_utils.aem_cntrl.domain.DefaultsImpl;
 import com._4point.aem.aem_utils.aem_cntrl.domain.WaitForLogImpl;
@@ -140,9 +142,14 @@ public class AemCntrlApplication implements CommandLineRunner, ExitCodeGenerator
 	Supplier<Path> defaultAemDirSupplier(AemCntrlAemConfiguration aemCntrlAemConfiguration) {
 		return ()->DefaultsImpl.aemDir();
 	}
+
+	@Bean
+	AemDir aemDir(Supplier<Path> defaultAemDirSupplier) {
+		return new AemDir(defaultAemDirSupplier);
+	}
 	
 	@Bean
-	WaitForLog waitForLog(Supplier<Path> defaultAemDirSupplier, TailerFactory tailerFactory) {
-		return new WaitForLogImpl(defaultAemDirSupplier, tailerFactory);
+	WaitForLog waitForLog(AemDir aemDir, TailerFactory tailerFactory) {
+		return new WaitForLogImpl(aemDir, tailerFactory, LogFile::under);
 	}
 }

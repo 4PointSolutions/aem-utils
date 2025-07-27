@@ -1,5 +1,7 @@
 package com._4point.aem.aem_utils.aem_cntrl.domain;
 
+import static org.hamcrest.MatcherAssert.assertThat; 
+import static org.hamcrest.Matchers.*;
 import static org.junit.jupiter.api.Assertions.*;
 
 import java.io.BufferedReader;
@@ -13,12 +15,22 @@ import java.util.Optional;
 import java.util.regex.Pattern;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.condition.EnabledOnOs;
+import org.junit.jupiter.api.condition.OS;
 import org.junit.jupiter.api.io.TempDir;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
+import org.junit.jupiter.params.provider.NullSource;
+import org.junit.jupiter.params.provider.ValueSource;
 
+import com._4point.aem.aem_utils.aem_cntrl.domain.AemFiles.AemDir;
+import com._4point.aem.aem_utils.aem_cntrl.domain.AemFiles.AemDir.AemDirType;
 import com._4point.aem.aem_utils.aem_cntrl.domain.AemFiles.LogFile;
 import com._4point.aem.aem_utils.aem_cntrl.domain.AemFiles.LogFile.FromOption;
 import com._4point.aem.aem_utils.aem_cntrl.domain.AemFiles.SlingProperties;
 import com._4point.aem.aem_utils.aem_cntrl.domain.Mocks.TailerMocker;
+import com._4point.aem.aem_utils.aem_cntrl.domain.ports.api.WaitForLog.WaitForLogException;
+import com._4point.testing.matchers.javalang.ExceptionMatchers;
 
 class AemFilesTest {
 
@@ -85,4 +97,84 @@ class AemFilesTest {
 		Optional<String> result = underTest.monitorLogFile(Pattern.compile(".*"), Duration.ofSeconds(1), FromOption.END);
 		assertFalse(result.isPresent(), "Expected no result, but got one");
 	}
+	
+	@ParameterizedTest
+	@CsvSource({ "/Adobe, ABSOLUTE", "./Adobe, RELATIVE", "../Adobe, RELATIVE", "Adobe, DEFAULT", ",NULL" })
+	void testAemDirType_of(Path aemDir, AemDirType expectedType) {
+		assertEquals(expectedType, AemDirType.of(aemDir));
+	}
+
+	@EnabledOnOs(OS.WINDOWS)
+	@Test
+	void testAemDirType_of_windows_withDriveLetter() {
+		Path aemDir = Path.of("C:\\Adobe");
+		assertEquals(AemDirType.ABSOLUTE, AemDirType.of(aemDir));
+	}
+
+	@ParameterizedTest
+	@ValueSource(strings = "aem")
+	@NullSource
+	void testToQualifiedPath_NullOrDefault(Path aemPath, @TempDir Path tempDir) throws Exception {
+		Path adobeDir = createMockAemDir(tempDir);
+		
+		AemDir underTest = new AemDir(()->adobeDir);
+		// Given
+		Path result = underTest.toQualified(aemPath);
+		
+		assertEquals(tempDir.resolve("adobe").resolve("aem"), result, "Expected the path to be qualified with the AEM directory");
+	}
+
+	@Test
+	void testToQualifiedPath_AbsoluteParent(@TempDir Path tempDir) throws Exception {
+		Path adobeDir = createMockAemDir(tempDir);
+		
+		AemDir underTest = new AemDir(()->adobeDir);
+		// Given
+		Path result = underTest.toQualified(adobeDir.toAbsolutePath());
+		
+		assertEquals(tempDir.resolve("adobe").resolve("aem"), result, "Expected the path to be qualified with the AEM directory");
+	}
+
+	@Test
+	void testToQualifiedPath_AbsoluteChild(@TempDir Path tempDir) throws Exception {
+		Path adobeDir = createMockAemDir(tempDir);
+		
+		AemDir underTest = new AemDir(()->adobeDir);
+		// Given
+		Path result = underTest.toQualified(adobeDir.resolve("aem").toAbsolutePath());
+		
+		assertEquals(tempDir.resolve("adobe").resolve("aem"), result, "Expected the path to be qualified with the AEM directory");
+	}
+	
+	@Test
+	void testToQualifiedPath_TooManyDirs(@TempDir Path tempDir) throws Exception {
+		Path adobeDir = createMockAemDir(tempDir);
+		Files.createDirectories(tempDir.resolve("adobe").resolve("aem_extra").resolve("crx-quickstart"));
+		
+		AemDir underTest = new AemDir(()->adobeDir);
+		// Given
+		WaitForLogException ex = assertThrows(WaitForLogException.class, () ->underTest.toQualified(null));
+
+		assertThat(ex, ExceptionMatchers.exceptionMsgContainsAll("Too many AEM directories found" , adobeDir.toString()));
+	}
+	
+	@Test
+	void testToQualifiedPath_NoDirs(@TempDir Path tempDir) throws Exception {
+		Path adobeDir = tempDir.resolve("adobe");
+		Files.createDirectories(adobeDir.resolve("aem"));
+		
+		AemDir underTest = new AemDir(()->adobeDir);
+		// Given
+		WaitForLogException ex = assertThrows(WaitForLogException.class, () ->underTest.toQualified(adobeDir.resolve("aem").toAbsolutePath()));
+
+		assertThat(ex, ExceptionMatchers.exceptionMsgContainsAll("No AEM directory found" , adobeDir.toString()));
+	}
+	
+	private Path createMockAemDir(Path rootDir) throws IOException {
+		Path adobeDir = rootDir.resolve("adobe");
+		Path crxQuickstartDir = adobeDir.resolve("aem").resolve("crx-quickstart");
+		Files.createDirectories(crxQuickstartDir);
+		return adobeDir;
+	}
+
 }
