@@ -30,6 +30,15 @@ import com._4point.aem.aem_utils.aem_cntrl.domain.ports.spi.MobileFormsSettings;
 import com._4point.aem.aem_utils.aem_cntrl.domain.ports.spi.Tailer;
 import com._4point.aem.aem_utils.aem_cntrl.domain.ports.spi.Tailer.TailerFactory;
 
+// Note: This test is sociable, meaning it interacts with the filesystem and other components.
+// This means it takes a little longer to run than a typical unit test.
+// Also, since it generates a (mostly) complete Spring Context, it generates a spurious
+// error message, which is expected in this case:
+//    Missing required subcommand
+//    Usage: aem-cntrl [COMMAND]
+//
+// Just ignore it.  Despite the error, the Spring Context is created and then the test will run successfully and complete as expected.
+
 @SpringBootTest()
 class AemInstallerImpl_SociableTest {
 

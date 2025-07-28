@@ -34,18 +34,6 @@ class WaitForLogImplTest {
 	
     private final TailerMocker tailerMocker = new TailerMocker();
     
-	// This is more of a Sociable test than a unit test
-//	@Test
-//	void testWaitForLog(@TempDir Path tempDir) throws Exception {
-//		// Given
-//		tailerMocker.programMocksToEmulateAem();;
-//		Path aemDir = createMockAemDir(tempDir);
-//		WaitForLogImpl waitForLog = new WaitForLogImpl(() -> aemDir, tailerMocker.tailerFactoryMock());
-//		// When
-//		waitForLog.waitForLog(RegexArgument.startup(), Duration.ofMinutes(10), FromOption.START, null);
-//	}
-
-	
 	// Test the three RegexArgument types (startup, shutdown, custom)
 	enum WaitForLogRegExArgumentTestScenario {
 		startup(RegexArgument.startup(), AemProcess.AEM_START_TARGET_PATTERN), 

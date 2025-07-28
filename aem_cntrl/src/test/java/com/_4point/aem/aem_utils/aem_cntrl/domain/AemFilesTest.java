@@ -170,7 +170,7 @@ class AemFilesTest {
 		assertThat(ex, ExceptionMatchers.exceptionMsgContainsAll("No AEM directory found" , adobeDir.toString()));
 	}
 	
-	private Path createMockAemDir(Path rootDir) throws IOException {
+	protected static Path createMockAemDir(Path rootDir) throws IOException {
 		Path adobeDir = rootDir.resolve("adobe");
 		Path crxQuickstartDir = adobeDir.resolve("aem").resolve("crx-quickstart");
 		Files.createDirectories(crxQuickstartDir);
