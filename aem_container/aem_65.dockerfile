@@ -101,7 +101,10 @@ FROM aem-base AS aem
 # Switch to AEM user 
 USER aem_user
 
+# Copy the AEM installed directory to the new image
 COPY --from=aem-install /opt/adobe /opt/adobe
+# Copy the aem_cntrl jar file to the /opt/adobe directory in the new image so we can use it later.
+COPY --from=aem-install /opt/aem_software/aem_cntrl-0.0.1-SNAPSHOT.jar /opt/adobe
 
 #NOTE: make sure to copy admin.password.file and license.properties files to the /opt/aem-config folder.
 # VOLUME ["/opt/aem-config/"]
