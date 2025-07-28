@@ -2,11 +2,13 @@
 
 ### Preparing to build image
 
-Copy all the files into a subdirectory of the directory containing the aem.dokerfile file called AemSoftware. 
-This should include:
+Copy all the installation files into a subdirectory called AemSoftware below the directory containing the appropriate aem.dockerfile files. 
+
+The installation files in AemSoftware should include:
 
 * the AEM GA Quickstart jar and license.properties
-* the service pack files (service pack and forms-addon)
+* (optionally) any service pack jar files 
+* the forms add-on jar file
 * the aem_cntrl jar
 * (optionally) the fluent forms jars
 * (optionally) an application.properties if you want to override any settings (like the trace level)
