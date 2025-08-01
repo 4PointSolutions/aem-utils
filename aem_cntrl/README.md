@@ -50,7 +50,7 @@ All files should be copied into a single directory before starting the install. 
 * The `aem_cntrl` .jar (`aem_cntrl-0.0.1-SNAPSHOT.jar`)
 
 ### Running the installer
-After all the installation files are copied into a single directmry, To run the installer execute the following command from that directory `jbang run --java=21 aem_cntrl-0.0.1-SNAPSHOT.jar install`
+After all the installation files are copied into a single directory, To run the installer execute the following command from that directory `jbang run --java=21 aem_cntrl-0.0.1-SNAPSHOT.jar install`
 
 ### Oracle Java Installation
 Adobe only officially supports the Oracle Java runtime.  If installing into a production environment 
