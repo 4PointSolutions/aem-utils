@@ -8,8 +8,8 @@ _TODO: Include more detailed instructions on AEM Control usage._
 
 ### JBang
 `aem_cntrl` makes use of jbang in order to manage the Java runtimes 
-(to ensure that Java 11 is used for AEM 6.5, regardless of the default
-Java version on the target system).
+(to ensure that Java 11 is used for AEM 6.5 and Java 21 is used for AEM 6.5 LTS, 
+regardless of the default Java version on the target system).
 
 JBang must be installed and on the PATH in order for `aem_cntrl` to work.
 
