@@ -34,7 +34,7 @@ It should generate a USAGE message.
 
 `aem_cntrl` installs AEM into a directory called AEM_mm_SPpp where mm is the major version (typically 65) and pp is the service pack version (e.g. 21). 
 This directory is located under `\Adobe` on Windows and `/opt/adobe` on Linux. 
-For example, it will install AEM with SP 12 into `/opt/adobe/AEM_65_SP21` on Linux and `\Adobe\AEM_65_SP21` on Windows.
+For example, it will install AEM with SP 21 into `/opt/adobe/AEM_65_SP21` on Linux and `\Adobe\AEM_65_SP21` on Windows.
 
 ### AEM Installation Files
 The AEM installation files must be obtained from Adobe via their Software Licensing Site 
@@ -45,7 +45,7 @@ All files should be copied into a single directory before starting the install. 
 * The base AEM install .jar (`AEM_6.5_Quickstart.jar` or `cq-quickstart-6.6.0.jar`)
 * The license.properties file containing your license information (`license.properties`)
 * The AEM Service Pack .zip (e.g. `aem-service-pkg-6.5.21.0.zip`) (this is optional)
-* The corresponding Forms Addo-on .zip (e.g. `adobe-aemfd-win-pkg-6.0.1244.zip` or `adobe-aemfd-linux-pkg-6.0.1244.zip`)
+* The corresponding Forms Add-on .zip (e.g. `adobe-aemfd-win-pkg-6.0.1244.zip` or `adobe-aemfd-linux-pkg-6.0.1244.zip`)
 * The FluentForms libraries (e.g. `fluentforms.core-0.0.3-SNAPSHOT.jar` and `rest-services.server-0.0.3-SNAPSHOT.jar`) (this is optional)
 * The `aem_cntrl` .jar (`aem_cntrl-0.0.1-SNAPSHOT.jar`)
 
