@@ -2,8 +2,6 @@
 
 An application that allows you to control AEM (start, stop, monitor and install).  
 
-_TODO: Include more detailed instructions on AEM Control usage._
-
 ## Pre-requisites
 
 ### JBang
@@ -28,7 +26,7 @@ An easy way to ensure the correct version of Java is used is to invoke the .jar 
 (which is already a prerequisite and should be on the PATH).  The following command can be used
 to run AEM Control `jbang run --java=21 aem_cntrl-0.0.1-SNAPSHOT.jar`.
 
-It should generate a USAGE message.
+It should generate a USAGE message. See the [man page](manpage.md) for more detailed information.
 
 ## Installing AEM and/or AEM Forms
 
