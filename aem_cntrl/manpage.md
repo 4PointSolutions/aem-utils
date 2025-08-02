@@ -23,11 +23,13 @@ Commands
 
 :  Installs an on-prem version of AEM with Service Packs and Forms Add-on. 
 
-##### Options
+#### Options
 &nbsp;&nbsp;&nbsp;&nbsp;*destDir* is the destination directory for the AEM installation. 
 If omitted, the default for Windows, is `\Adobe`. The default for Linux, is `/opt/adobe`. 
 
 &nbsp;&nbsp;&nbsp;&nbsp;*srcDir* is the source directory containing the AEM installation files.  It defaults to the current directory if not specified.
+
+&nbsp;
 
 **waitforlog** | **wflog** \[\[**-ad** | **--aemdir**]=*aemDirSpec*] 
 \[\[**-fe** | **--fromEnd**] | [**-fs** | **--fromStart**]] \[\[**-su** | **--startup**] | \[**-sd** | **--shutdown**] | \[\[**-re** | **--regex**]=*regEx*]] 
@@ -35,13 +37,13 @@ If omitted, the default for Windows, is `\Adobe`. The default for Linux, is `/op
 
 :  Waits for a specific message to appear in the AEM error.log file.  It can start looking for the line from the start of the log (in which case, it will terminate immediately if the line already appears in the log when the command is invoked), or from the end of the log (in which case, it will only terminate after when the line appears *after* the command is invoked).  It can wait for standard startup and shutdown messages or a custom regular expression provided on the command line.  A custom timeout value can also be specified.
 
-##### Options
+#### Options
 
 :  If the *aemDirSpec* is omitted, then it will default to the looking for a single AEM directory under the standard location.  The standard location for Windows is `\Adobe`. The standard location for Linux, is `/opt/adobe`.
 
 : If neither **--fromStart** nor **--fromEnd** options are provided, it defaults to **--fromEnd**.
 
-: One of **--fromStart**, **--fromEnd**, or **--regex** options must be provided.
+: One of **--startup**, **--shutdown**, or **--regex** options must be provided.
 
 : If no timeout is provided, it defaults to PT10M, i.e. a 10 minute timeout
 
@@ -50,6 +52,8 @@ If omitted, the default for Windows, is `\Adobe`. The default for Linux, is `/op
 &nbsp;&nbsp;&nbsp;&nbsp;*regEx* is a [Java regular expression](https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/regex/Pattern.html).
 
 &nbsp;&nbsp;&nbsp;&nbsp;*timeout* is a [Java Duration expression](https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/time/Duration.html#parse(java.lang.CharSequence))
+
+&nbsp;
 
 Specifying the AEM Directory
 -------
@@ -68,7 +72,7 @@ subdirectory (i.e. it is unable to find an AEM subdirectory or it locates multip
 EXAMPLES
 ====
 
-**NOTE** These examples use [jbang](https://www.jbang.dev/) to ensure that the correct version of Java is run.  Since jbang must be installed and on the executable PATH in order for it to function, we can use it to run the .jar.
+**NOTE** These examples use [jbang](https://www.jbang.dev/) to ensure that the correct version of Java is run.  Since jbang must be installed and on the executable PATH in order for `aem_cntrl` to function, we can use it to run the .jar.
 
 
 `jbang run --java=21 aem_cntrl-0.0.1-SNAPSHOT.jar install`
