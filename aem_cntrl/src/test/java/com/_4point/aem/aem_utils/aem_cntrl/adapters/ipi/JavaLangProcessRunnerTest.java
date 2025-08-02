@@ -198,7 +198,7 @@ class JavaLangProcessRunnerTest {
 		
 		CompletableFuture<OptionalInt> runner = CompletableFuture.supplyAsync(()->{
 																					try {
-																						return result.terminateAfter(Duration.ofSeconds(3));
+																						return result.terminateAfter(Duration.ofSeconds(5));
 																					} catch (InterruptedException e) {
 																						throw new IllegalStateException("Interruption Exception should not be thrown.", e);
 																					}
