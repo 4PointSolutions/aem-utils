@@ -4,9 +4,12 @@ import static org.junit.jupiter.api.Assertions.*;
 
 import java.nio.file.Path;
 import java.time.Duration;
+import java.util.List;
+import java.util.regex.Pattern;
 
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.FieldSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
@@ -29,8 +32,15 @@ class WaitForLogImpl_SociableTest {
 
 	@MockitoBean TailerFactory tailerFactoryMock;
 
-	@Test
-	void testWaitForLog(@Autowired WaitForLog waitForLog, @TempDir Path tempDir) throws Exception {
+	@SuppressWarnings("unused")
+	private static final List<WaitForLog.RegexArgument> regexArgs = 
+			List.of(WaitForLog.RegexArgument.startup(),
+					WaitForLog.RegexArgument.shutdown(), 
+					WaitForLog.RegexArgument.custom(Pattern.compile(".*Installed BMC XMLFormService of type BMC_NATIVE.*")));
+	
+	@ParameterizedTest
+	@FieldSource("regexArgs")
+	void testWaitForLog(WaitForLog.RegexArgument regexArg, @Autowired WaitForLog waitForLog, @TempDir Path tempDir) throws Exception {
 		TailerMocker tailerMocker = new TailerMocker(tailerFactoryMock);
 		// Given
 		// Setup tailer mock response
@@ -38,7 +48,7 @@ class WaitForLogImpl_SociableTest {
 		// create the AEM directory structure in the temp directory
 		Path adobeDir = AemFilesTest.createMockAemDir(tempDir);
 		// When
-		waitForLog.waitForLog(WaitForLog.RegexArgument.startup(), Duration.ofMinutes(10), WaitForLog.FromOption.START, adobeDir);
+		waitForLog.waitForLog(regexArg, Duration.ofMinutes(10), WaitForLog.FromOption.START, adobeDir);
 	}
 
 }

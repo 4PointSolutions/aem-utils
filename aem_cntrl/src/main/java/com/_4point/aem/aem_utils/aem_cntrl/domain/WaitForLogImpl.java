@@ -68,7 +68,7 @@ public class WaitForLogImpl implements WaitForLog {
          return switch (regexArgument) {
              case RegexStartup r -> "Startup";
              case RegexShutdown r -> "Shutdown";
-             case RegexCustom r -> "Custom Regex: " + r.regex();
+             case RegexCustom r -> "Custom Regex: '" + r.regex() + "'";
          };
      }
 }
