@@ -62,7 +62,7 @@ public class JavaLangProcessRunner<O, E> implements ProcessRunner {
 				.setErrorStreamHandler(s->s)
 				.build()
 				.run(command, dir);
-		log.atInfo().log("Running AEM with options");
+		log.atDebug().log("Running AEM to completion");
 		try {
 			Stream<String> stdoutStream = process.stdout().get();
 			CompletableFuture<Void> stdoutFuture = CompletableFuture.runAsync(()->stdoutStream.forEach(s->log.atDebug().log(s)), EXECUTOR_SERVICE);
@@ -92,6 +92,8 @@ public class JavaLangProcessRunner<O, E> implements ProcessRunner {
 		try {
 			Process process = new ProcessBuilder(command).directory(dir.toFile()).start();
 			
+			log.atDebug().log("Running AEM asynchronously");
+
 			@SuppressWarnings("unused")
 			CompletableFuture<Void> stdin = CompletableFuture.runAsync(()->copyFrom(inputStreamHandler, process.getOutputStream()), EXECUTOR_SERVICE);
 			CompletableFuture<O> stdout = CompletableFuture.supplyAsync(()->this.outputStreamHandler.apply(process.inputReader().lines()), EXECUTOR_SERVICE);

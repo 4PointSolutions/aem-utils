@@ -72,7 +72,6 @@ public class AemProcess {
 				}
 				return startResult;
 			} finally {
-				log.atInfo().log("Stopping AEM");
 				stopAem().thenAccept(lr->handleResult(lr, "shutdown"));;
 				// *INFO* [FelixStartLevel] org.apache.sling.commons.logservice BundleEvent STOPPING
 				logFile.monitorLogFile(AEM_STOP_TARGET_PATTERN, timeout, FromOption.END).orElseThrow(()->new AemProcessException("Failed to find string matching '%s' in log file before timeout (%d secs).".formatted(targetPattern, timeout.getSeconds())));
@@ -84,7 +83,7 @@ public class AemProcess {
 	}
 
 	private CompletableFuture<ListResult> startAem() throws InterruptedException, ExecutionException {
-		log.atInfo().log("Running AEM");
+		log.atInfo().log("Starting AEM");
 		return processRunner.runtoListResult(new String[] {aemQuickstartDir.resolve(RUN_START).toString()}, aemQuickstartDir);
 //		if (process.exitCode() != 0) {
 //			log.atError().addArgument(()->process.stdoutAsString()).log("Error occurred during AEM startup [STDOUT] {}");
@@ -96,7 +95,7 @@ public class AemProcess {
 	}
 
 	private CompletableFuture<ListResult> stopAem() throws InterruptedException, ExecutionException {
-		log.atInfo().log("Stopping AEM at callers request.");
+		log.atInfo().log("Stopping AEM");
 		return processRunner.runtoListResult(new String[] {aemQuickstartDir.resolve(RUN_STOP).toString()}, aemQuickstartDir);
 	}
 
@@ -190,6 +189,7 @@ public class AemProcess {
 		}
 
 		public AemProcess unpackQuickstart(TailerFactory tailerFactory)  {
+			log.atInfo().log("Unpacking Quickstart jar");
 			int exitCode = processRunner.runUntilCompletes(setupQuickstartProcessBuilder("-unpack"), aemQuickstartJarDir, Duration.ofMinutes(3));
 			log.atDebug().addArgument(exitCode).log("Unpacking exit code = {}.");
 			createBatFiles();
