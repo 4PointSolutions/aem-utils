@@ -65,6 +65,7 @@
 		<fp-hamcrest-matchers.version>0.0.4-SNAPSHOT</fp-hamcrest-matchers.version>
 		<lorem.version>2.2</lorem.version>
 		<wiremock.version>3.13.1</wiremock.version>
+		<archunit.version>1.4.1</archunit.version>
 	</properties>
 	<dependencies>
 	    <!-- Project Dependencies -->
@@ -110,6 +111,12 @@
 			<artifactId>wiremock-standalone</artifactId>
 			<version>${wiremock.version}</version>
   			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>com.tngtech.archunit</groupId>
+			<artifactId>archunit-junit5</artifactId>
+			<version>${archunit.version}</version>
+			<scope>test</scope>
 		</dependency>
 	</dependencies>
 
