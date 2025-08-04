@@ -10,11 +10,7 @@ import com.tngtech.archunit.lang.ArchRule;
 @AnalyzeClasses(packages = "com._4point.aem.aem_utils.aem_cntrl", importOptions = ImportOption.DoNotIncludeTests.class)
 class ArchUnitTest {
 	private static final String MAIN_PACKAGE = "com._4point.aem.aem_utils.aem_cntrl";
-//	@ArchTest
-//    public static final ArchRule myRule = classes()
-//        .that().resideInAPackage("..service..")
-//        .should().onlyBeAccessed().byAnyPackage("..controller..", "..service..");
-
+	
 	@ArchTest
 	public static final ArchRule hexagonlArchRule = layeredArchitecture()
     											.consideringAllDependencies()
@@ -31,12 +27,15 @@ class ArchUnitTest {
 											    .optionalLayer("JDK").definedBy("java..", "javax..")
 											    .optionalLayer("DomainOther").definedBy("org.slf4j..", "org.apache.commons.lang3..")
 											
+											    // Spring can access all layers because it provides implementations for all layers.
+											    // It needs access to the ports (interfaces) and adapters (implementations) so that it can tie everything together.
+											    .whereLayer("Domain").mayOnlyBeAccessedByLayers("Spring")
 											    .whereLayer("Domain").mayOnlyAccessLayers("Domain", "Domain.api", "Domain.ipi", "Domain.spi", "JDK", "DomainOther")
-											    .whereLayer("Domain.api").mayOnlyBeAccessedByLayers("Domain", "Spring", "Commands")
+											    .whereLayer("Domain.api").mayOnlyBeAccessedByLayers("Spring", "Domain", "Commands")
 											    .whereLayer("Domain.ipi").mayOnlyAccessLayers("Domain", "JDK")
-											    .whereLayer("Domain.ipi").mayOnlyBeAccessedByLayers("Domain", "Spring", "Adapters.ipi")
+											    .whereLayer("Domain.ipi").mayOnlyBeAccessedByLayers("Spring", "Domain", "Adapters.ipi")
 											    .whereLayer("Domain.spi").mayOnlyAccessLayers("Domain", "JDK")
-											    .whereLayer("Domain.spi").mayOnlyBeAccessedByLayers("Domain", "Spring", "Adapters.spi")
+											    .whereLayer("Domain.spi").mayOnlyBeAccessedByLayers("Spring", "Domain", "Adapters.spi")
 											    .whereLayer("Adapters.ipi").mayOnlyBeAccessedByLayers("Spring")
 											    .whereLayer("Adapters.spi").mayOnlyBeAccessedByLayers("Spring")
 											    .whereLayer("Adapters.spi.ports").mayOnlyBeAccessedByLayers("Spring", "Adapters.spi", "Adapters.spi.adapters")
