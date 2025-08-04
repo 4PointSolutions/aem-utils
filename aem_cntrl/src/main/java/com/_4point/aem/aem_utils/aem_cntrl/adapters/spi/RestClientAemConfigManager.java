@@ -75,16 +75,4 @@ public class RestClientAemConfigManager implements AemConfigManager {
 			throw new AemConfigManagerException("Error posting config settings to AEM", e);
 		}
 	}
-
-	@SuppressWarnings("serial")
-	public class AemConfigManagerException extends RuntimeException {
-
-		public AemConfigManagerException(String message, Throwable cause) {
-			super(message, cause);
-		}
-
-		public AemConfigManagerException(String message) {
-			super(message);
-		}
-	}
 }
