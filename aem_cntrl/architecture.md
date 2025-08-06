@@ -27,7 +27,7 @@ The Spring configuration classes ([AemCntrlAemConfiguration](/aem_cntrl/src/main
 and [AemCntrlApplication](/aem_cntrl/src/main/java/com/_4point/aem/aem_utils/aem_cntrl/AemCntrlApplication.java)) must access every layer in order 
 to wire together all the classes into the structure outlined above.
 
-In a hexagonal architeture the ports layers provide interfaces that allow one layer to interact with another. 
+In a hexagonal architecture the ports layers provide interfaces that allow one layer to interact with another. 
 Each non-port layer can be instantiated and tested separately (mocking the ports it uses) which makes each layer easier to test. 
 The Domain layer is easiest to test because (by definition) any interactions it has with the layer outside of it happen 
 through the port interfaces which can be easily mocked. 
@@ -35,4 +35,6 @@ The Adapters layer is a little harder to mock as it requires mocking of the exte
 This often makes the Adapter layer tests more like an integration test although it's usually possible to mock the outside resources using
 libraries like Wiremock, temporary file systems, etc.
 
-Adhereing to this predefined architecture makes the whole application more testable and therefore more reliable.
+Adhering to this predefined architecture makes the whole application more testable and therefore more reliable and maintainable. 
+It allows for the creation of what Martin Fowler calls "Sociable tests" that test the entire Domain layer which, by definition, includes the bulk
+of the application logic.
