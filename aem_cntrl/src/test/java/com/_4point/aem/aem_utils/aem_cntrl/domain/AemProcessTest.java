@@ -32,6 +32,7 @@ class AemProcessTest {
 																			 .setOutputStreamHandler(s->s)
 																			 .setErrorStreamHandler(s->s)
 																			 .build();
+	private static final ShimFiles SHIM_FILES = new ShimFiles(AEM_JAVA_VERSION, AEM_FILES_LOC, PROCESS_RUNNER);
 
 //	private static final Path AEM_FILES_LOC = Path.of("/Adobe", "AEM_65_LTS");		// Windows location
 //	private static final Path SAMPLE_AEM_QUICKSTART_PATH = Path.of("cq-quickstart-6.6.0.jar"); // AEM 6.5 LTS
@@ -39,13 +40,13 @@ class AemProcessTest {
 	
 	
 	
-	private final AemProcess underTest = new AemProcess(AEM_FILES_LOC.resolve(AEM_FILES_LOC), TAILER_FACTORY, PROCESS_RUNNER);
+	private final AemProcess underTest = new AemProcess(AEM_FILES_LOC.resolve(AEM_FILES_LOC), TAILER_FACTORY, SHIM_FILES);
 
 	@Disabled("Disabled because it's already been unpacked")
 	@Test
 	void testUnpackQuickstart() throws Exception {
 		assertFalse(Files.exists(AEM_FILES_LOC.resolve("crx-quickstart")));
-		AemProcess aemProcess = new AemProcess.UninitializedAemInstance(AEM_FILES_LOC.resolve(SAMPLE_AEM_QUICKSTART_PATH), AEM_JAVA_VERSION, PROCESS_RUNNER).unpackQuickstart(TAILER_FACTORY);
+		AemProcess aemProcess = new AemProcess.AemProcessFactory(TAILER_FACTORY, PROCESS_RUNNER, (jv, p) -> new ShimFiles(jv, p, PROCESS_RUNNER)).create(AEM_FILES_LOC.resolve(SAMPLE_AEM_QUICKSTART_PATH), AEM_JAVA_VERSION);
 		assertTrue(Files.exists(AEM_FILES_LOC.resolve("crx-quickstart")));
 		assertTrue(Files.exists(AEM_FILES_LOC.resolve(SystemUtils.IS_OS_WINDOWS ? "runStart.bat" : "runStart")));
 		assertTrue(Files.exists(AEM_FILES_LOC.resolve(SystemUtils.IS_OS_WINDOWS ? "runStop.bat" : "runStop")));

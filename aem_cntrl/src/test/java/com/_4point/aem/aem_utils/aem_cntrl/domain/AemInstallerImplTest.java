@@ -22,6 +22,7 @@ import com._4point.aem.aem_utils.aem_cntrl.adapters.spi.adapters.JacksonJsonData
 import com._4point.aem.aem_utils.aem_cntrl.adapters.spi.adapters.SpringRestClientRestClient;
 import com._4point.aem.aem_utils.aem_cntrl.adapters.spi.ports.AemConfiguration;
 import com._4point.aem.aem_utils.aem_cntrl.adapters.spi.ports.RestClient;
+import com._4point.aem.aem_utils.aem_cntrl.domain.ShimFiles.RuntimeFactory;
 import com._4point.aem.aem_utils.aem_cntrl.domain.ports.ipi.ProcessRunner;
 import com._4point.aem.aem_utils.aem_cntrl.domain.ports.spi.AemConfigManager;
 import com._4point.aem.aem_utils.aem_cntrl.domain.ports.spi.Tailer.TailerFactory;
@@ -53,8 +54,9 @@ class AemInstallerImplTest {
 																	 .setErrorStreamHandler(s->s)
 																	 .build();
 	private final AemConfigManager aemConfigManager = new RestClientAemConfigManager(restClient, JacksonJsonData::from);
+	private final RuntimeFactory shimFilesRuntimeFactory = (jv, p) -> new ShimFiles(jv, p, processRunner);
 	
-	private final AemInstallerImpl underTest = new AemInstallerImpl(tailerFactory, processRunner, aemConfigManager);
+	private final AemInstallerImpl underTest = new AemInstallerImpl(aemConfigManager, new AemProcess.AemProcessFactory(tailerFactory, processRunner, shimFilesRuntimeFactory));
 
 	// Performs install to a temp directory.
 	@Test

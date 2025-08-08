@@ -32,7 +32,9 @@ import com._4point.aem.aem_utils.aem_cntrl.commands.AemCntrlCommandLine;
 import com._4point.aem.aem_utils.aem_cntrl.domain.AemFiles.AemDir;
 import com._4point.aem.aem_utils.aem_cntrl.domain.AemFiles.LogFile;
 import com._4point.aem.aem_utils.aem_cntrl.domain.AemInstallerImpl;
+import com._4point.aem.aem_utils.aem_cntrl.domain.AemProcess;
 import com._4point.aem.aem_utils.aem_cntrl.domain.DefaultsImpl;
+import com._4point.aem.aem_utils.aem_cntrl.domain.ShimFiles;
 import com._4point.aem.aem_utils.aem_cntrl.domain.WaitForLogImpl;
 import com._4point.aem.aem_utils.aem_cntrl.domain.ports.api.AemInstaller;
 import com._4point.aem.aem_utils.aem_cntrl.domain.ports.api.WaitForLog;
@@ -46,9 +48,9 @@ import picocli.CommandLine.IFactory;
 @SpringBootApplication
 @EnableConfigurationProperties(AemCntrlAemConfiguration.class)
 public class AemCntrlApplication implements CommandLineRunner, ExitCodeGenerator {
-	public static final String APP_CONFIG_PREFIX = "aemcntrl";
-
 	private static final Logger log = LoggerFactory.getLogger(AemCntrlApplication.class);
+
+	public static final String APP_CONFIG_PREFIX = "aemcntrl";
 
 	private final IFactory factory;
 	private final AemCntrlCommandLine aemCntrlCommandLine;
@@ -134,8 +136,13 @@ public class AemCntrlApplication implements CommandLineRunner, ExitCodeGenerator
 	}
 
 	@Bean
-	AemInstaller aemInstaller(TailerFactory tailerFactory, ProcessRunner processRunner, AemConfigManager aemConfigManager) {
-		return new AemInstallerImpl(tailerFactory, processRunner, aemConfigManager);
+	ShimFiles.RuntimeFactory shimFilesRuntimeFactory(ProcessRunner processRunner) {
+		return (jv, p) -> new ShimFiles(jv, p, processRunner);
+	}
+	
+	@Bean
+	AemInstaller aemInstaller(TailerFactory tailerFactory, ProcessRunner processRunner, AemConfigManager aemConfigManager, ShimFiles.RuntimeFactory shimFilesRuntimeFactory) {
+		return new AemInstallerImpl(aemConfigManager, new AemProcess.AemProcessFactory(tailerFactory, processRunner, shimFilesRuntimeFactory));
 	}
 	
 	@Bean

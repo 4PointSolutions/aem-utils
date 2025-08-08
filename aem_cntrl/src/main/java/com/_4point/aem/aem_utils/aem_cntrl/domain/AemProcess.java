@@ -1,19 +1,12 @@
 package com._4point.aem.aem_utils.aem_cntrl.domain;
 
-import static java.nio.file.attribute.PosixFilePermission.*;
-
-import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.attribute.PosixFilePermission;
 import java.time.Duration;
 import java.util.Arrays;
-import java.util.EnumSet;
-import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.slf4j.Logger;
@@ -23,7 +16,6 @@ import com._4point.aem.aem_utils.aem_cntrl.domain.AemFiles.LogFile;
 import com._4point.aem.aem_utils.aem_cntrl.domain.AemFiles.LogFile.FromOption;
 import com._4point.aem.aem_utils.aem_cntrl.domain.ports.ipi.ProcessRunner;
 import com._4point.aem.aem_utils.aem_cntrl.domain.ports.ipi.ProcessRunner.ListResult;
-import com._4point.aem.aem_utils.aem_cntrl.domain.ports.ipi.ProcessRunner.ProcessRunnerException;
 import com._4point.aem.aem_utils.aem_cntrl.domain.ports.spi.Tailer.TailerFactory;
 
 
@@ -41,17 +33,15 @@ public class AemProcess {
 	// Regex that we look for to know that the AEM Forms Add-on is installed.
 	/* package */ static final Pattern AEM_FORMS_ADD_ON_START_TARGET_PATTERN = Pattern.compile(".*Installed BMC XMLFormService of type BMC_NATIVE.*");
 
-	private static final Path RUN_START = OperatingSystem.getOs().runStart();
-	private static final Path RUN_STOP = OperatingSystem.getOs().runStop();
 	
 	private final Path aemQuickstartDir;
 	private final TailerFactory tailerFactory;
-	private final ProcessRunner processRunner;
+	private final ShimFiles shimFiles;
 	
-	public AemProcess(Path aemQuickstartDir, TailerFactory tailerFactory, ProcessRunner processRunner) {
+	public AemProcess(Path aemQuickstartDir, TailerFactory tailerFactory, ShimFiles shimFiles) {
 		this.aemQuickstartDir = aemQuickstartDir;
 		this.tailerFactory = tailerFactory;
-		this.processRunner = processRunner;
+		this.shimFiles = shimFiles;
 	}
 
 	private String runUntilLogContains(Pattern targetPattern, Duration timeout, String...options) throws AemProcessException {		
@@ -60,7 +50,7 @@ public class AemProcess {
 
 	private String runUntilLogContains(Pattern targetPattern, Duration timeout, Runnable action, String...options) throws AemProcessException {		
 		try {
-			CompletableFuture<Void> process = startAem().thenAccept(lr->handleResult(lr, "startup"));
+			CompletableFuture<Void> process = shimFiles.startAem().thenAccept(lr->handleResult(lr, "startup"));
 			log.atInfo().log("AEM Started");
 			LogFile logFile = LogFile.under(aemQuickstartDir, tailerFactory);
 			try {
@@ -72,7 +62,7 @@ public class AemProcess {
 				}
 				return startResult;
 			} finally {
-				stopAem().thenAccept(lr->handleResult(lr, "shutdown"));;
+				shimFiles.stopAem().thenAccept(lr->handleResult(lr, "shutdown"));;
 				// *INFO* [FelixStartLevel] org.apache.sling.commons.logservice BundleEvent STOPPING
 				logFile.monitorLogFile(AEM_STOP_TARGET_PATTERN, timeout, FromOption.END).orElseThrow(()->new AemProcessException("Failed to find string matching '%s' in log file before timeout (%d secs).".formatted(targetPattern, timeout.getSeconds())));
 				log.atInfo().log("AEM Stopped");
@@ -80,23 +70,6 @@ public class AemProcess {
 		} catch (InterruptedException | ExecutionException e) {
 			throw new AemProcessException(e);
 		}
-	}
-
-	private CompletableFuture<ListResult> startAem() throws InterruptedException, ExecutionException {
-		log.atInfo().log("Starting AEM");
-		return processRunner.runtoListResult(new String[] {aemQuickstartDir.resolve(RUN_START).toString()}, aemQuickstartDir);
-//		if (process.exitCode() != 0) {
-//			log.atError().addArgument(()->process.stdoutAsString()).log("Error occurred during AEM startup [STDOUT] {}");
-//			log.atError().addArgument(()->process.stderrAsString()).log("Error occurred during AEM startup [STDERR] {}");
-//		} else {
-//			log.atDebug().addArgument(()->process.stdoutAsString()).log("AEM startup [STDOUT] {}");
-//			log.atDebug().addArgument(()->process.stderrAsString()).log("AEM startup [STDERR] {}");
-//		}
-	}
-
-	private CompletableFuture<ListResult> stopAem() throws InterruptedException, ExecutionException {
-		log.atInfo().log("Stopping AEM");
-		return processRunner.runtoListResult(new String[] {aemQuickstartDir.resolve(RUN_STOP).toString()}, aemQuickstartDir);
 	}
 
 	private void handleResult(ListResult process, String operation) {
@@ -165,35 +138,57 @@ public class AemProcess {
 		}
 	}
 	
-	// TODO: Create an initializedAemInstance class too (for one that's already been set up)
-	//       Create a static method that detects whether AEM has been initialzed and returns the correct initalized/uninitialized instance.
-	public static class UninitializedAemInstance {
-		private static final Set<PosixFilePermission> FILE_PERMISSIONS = EnumSet.of(OWNER_READ, OWNER_EXECUTE, GROUP_READ, GROUP_EXECUTE, OTHERS_READ, OTHERS_EXECUTE);
-		private final Path aemQuickstartJarFilename;
-		private final Path aemQuickstartJarDir;
-		private final JavaVersion aemJavaVersion;
+	public static class AemProcessFactory {
+		private final TailerFactory tailerFactory;
 		private final ProcessRunner processRunner;
-
+		private final ShimFiles.RuntimeFactory shimFilesFactory;
+	
 		
-		public UninitializedAemInstance(Path aemQuickstartJarPath, JavaVersion aemJavaVersion, ProcessRunner processRunner) {
-			this.aemQuickstartJarFilename = aemQuickstartJarPath.getFileName();
-			this.aemQuickstartJarDir = aemQuickstartJarPath.getParent();
-			this.aemJavaVersion = aemJavaVersion;
+		public AemProcessFactory(TailerFactory tailerFactory, ProcessRunner processRunner, ShimFiles.RuntimeFactory shimFilesFactory) {
+			this.tailerFactory = tailerFactory;
 			this.processRunner = processRunner;
+			this.shimFilesFactory = shimFilesFactory;
+		}
+
+		public AemProcess create(Path quickstartJarPath, JavaVersion aemJavaVersion) {
+			return create(quickstartJarPath.getParent(), quickstartJarPath.getFileName(), aemJavaVersion);
+		}
+		
+		private AemProcess create(Path aemQuickstartJarDir, Path aemQuickstartJarFilename, JavaVersion aemJavaVersion) {
 			if (Files.exists(aemQuickstartJarDir.resolve(AemFiles.CRX_QUICKSTART_DIR))) {
 				throw new IllegalArgumentException("Directory (%s) already contains initialized AEM instance.".formatted(aemQuickstartJarDir.toString()));
 			}
 			if (Files.isWritable(aemQuickstartJarDir.resolve(AemFiles.CRX_QUICKSTART_DIR))) {
 				throw new IllegalArgumentException("Directory (%s) is not writable.".formatted(aemQuickstartJarDir.toString()));
 			}
+			
+			new UninitializedAemInstance(aemJavaVersion, aemQuickstartJarDir, aemQuickstartJarFilename, processRunner).unpackQuickstart();
+			
+			final ShimFiles shimFiles = shimFilesFactory.apply(aemJavaVersion, aemQuickstartJarDir)
+													    .createBatFiles();
+
+			return new AemProcess(aemQuickstartJarDir, tailerFactory, shimFiles);
+		}
+	}
+
+	private static class UninitializedAemInstance {
+
+		private final Path aemQuickstartJarFilename;
+		private final Path aemQuickstartJarDir;
+		private final JavaVersion aemJavaVersion;
+		private final ProcessRunner processRunner;
+
+		public UninitializedAemInstance(JavaVersion aemJavaVersion, Path aemQuickstartJarDir, Path aemQuickstartJarFilename, ProcessRunner processRunner) {
+			this.aemQuickstartJarFilename = aemQuickstartJarFilename;
+			this.aemQuickstartJarDir = aemQuickstartJarDir;
+			this.aemJavaVersion = aemJavaVersion;
+			this.processRunner = processRunner;
 		}
 
-		public AemProcess unpackQuickstart(TailerFactory tailerFactory)  {
+		public void unpackQuickstart()  {
 			log.atInfo().log("Unpacking Quickstart jar");
 			int exitCode = processRunner.runUntilCompletes(setupQuickstartProcessBuilder("-unpack"), aemQuickstartJarDir, Duration.ofMinutes(3));
 			log.atDebug().addArgument(exitCode).log("Unpacking exit code = {}.");
-			createBatFiles();
-			return new AemProcess(aemQuickstartJarDir, tailerFactory, processRunner);
 		}
 
 		private String[] setupQuickstartProcessBuilder(String... options) {
@@ -202,32 +197,6 @@ public class AemProcess {
 			return OperatingSystem.getOs().jbangCommand(command);
 		}
 
-		private String getJavaEnv() {
-			try {
-				ListResult result = processRunner.runtoListResult(OperatingSystem.getOs().jbangCommand("jdk", "java-env", aemJavaVersion.getVersionString()), aemQuickstartJarDir).get();
-				return result.stdout().stream().collect(Collectors.joining("\n"));
-			} catch (ProcessRunnerException | InterruptedException | ExecutionException e) {
-				throw new AemProcessException(e);
-			}
-		}
-		
-		private void createBatFiles() {
-			try {
-				String javaEnv = getJavaEnv();
-				
-				writeScript(aemQuickstartJarDir.resolve(RUN_START), javaEnv + "\n" + aemQuickstartJarDir.resolve(AemFiles.START_SCRIPT).toString());
-				writeScript(aemQuickstartJarDir.resolve(RUN_STOP), javaEnv + "\n" + aemQuickstartJarDir.resolve(AemFiles.STOP_SCRIPT).toString());
-			} catch (IOException | UnsupportedOperationException e) {
-				throw new AemProcessException("Error while writing start/stop bat files to %s.".formatted(aemQuickstartJarDir), e);
-			}
-		}
-
-		private static void writeScript(Path runStart, String script) throws IOException, UnsupportedOperationException {
-			Files.writeString(runStart, script);
-			if (OperatingSystem.isUnix()) {
-				Files.setPosixFilePermissions(runStart, FILE_PERMISSIONS);
-			}
-		}
 	}
 	
 	@SuppressWarnings("serial")

@@ -10,25 +10,22 @@ import org.slf4j.LoggerFactory;
 import com._4point.aem.aem_utils.aem_cntrl.domain.AemFiles.SlingProperties;
 import com._4point.aem.aem_utils.aem_cntrl.domain.AemInstallationFiles.AemFileset;
 import com._4point.aem.aem_utils.aem_cntrl.domain.AemInstallationFiles.AemVersion;
+import com._4point.aem.aem_utils.aem_cntrl.domain.AemProcess.AemProcessFactory;
 import com._4point.aem.aem_utils.aem_cntrl.domain.FluentFormsFiles.FluentFormsFileset;
 import com._4point.aem.aem_utils.aem_cntrl.domain.ports.api.AemInstaller;
-import com._4point.aem.aem_utils.aem_cntrl.domain.ports.ipi.ProcessRunner;
 import com._4point.aem.aem_utils.aem_cntrl.domain.ports.spi.AemConfigManager;
 import com._4point.aem.aem_utils.aem_cntrl.domain.ports.spi.MobileFormsSettings;
-import com._4point.aem.aem_utils.aem_cntrl.domain.ports.spi.Tailer.TailerFactory;
 
 
 public class AemInstallerImpl implements AemInstaller {
 	private static final Logger log = LoggerFactory.getLogger(AemInstallerImpl.class);
-
-	private final TailerFactory tailerFactory;
-	private final ProcessRunner processRunner;
+	
 	private final AemConfigManager aemConfigManager;
+	private final AemProcessFactory aemProcessFactory;
 
-	public AemInstallerImpl(TailerFactory tailerFactory, ProcessRunner processRunner, AemConfigManager aemConfigManager) {
-		this.tailerFactory = tailerFactory;
-		this.processRunner = processRunner;
+	public AemInstallerImpl(AemConfigManager aemConfigManager, AemProcessFactory aemProcessFactory) {
 		this.aemConfigManager = aemConfigManager;
+		this.aemProcessFactory = aemProcessFactory;
 	}
 
 	/**
@@ -67,7 +64,7 @@ public class AemInstallerImpl implements AemInstaller {
 		log.atInfo().log("Copying License file");
 		aemFiles.copyLicensePropertiesToTarget(aemDir);
 		
-		AemProcess aemQuickstart = new AemProcess.UninitializedAemInstance(quickstartJarPath, aemVersionInfo.aemJavaVersion(), processRunner).unpackQuickstart(tailerFactory);
+		AemProcess aemQuickstart = aemProcessFactory.create(quickstartJarPath, aemVersionInfo.aemJavaVersion());
 		
 		log.atInfo().log("Running AEM to initialize AEM");
 		aemQuickstart.startQuickstartInitializeAem();
