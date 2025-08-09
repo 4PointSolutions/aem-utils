@@ -14,6 +14,7 @@ import org.slf4j.LoggerFactory;
 
 import com._4point.aem.aem_utils.aem_cntrl.domain.AemFiles.LogFile;
 import com._4point.aem.aem_utils.aem_cntrl.domain.AemFiles.LogFile.FromOption;
+import com._4point.aem.aem_utils.aem_cntrl.domain.ShimFiles.CreateType;
 import com._4point.aem.aem_utils.aem_cntrl.domain.ports.ipi.ProcessRunner;
 import com._4point.aem.aem_utils.aem_cntrl.domain.ports.ipi.ProcessRunner.ListResult;
 import com._4point.aem.aem_utils.aem_cntrl.domain.ports.spi.Tailer.TailerFactory;
@@ -165,7 +166,7 @@ public class AemProcess {
 			new UninitializedAemInstance(aemJavaVersion, aemQuickstartJarDir, aemQuickstartJarFilename, processRunner).unpackQuickstart();
 			
 			final ShimFiles shimFiles = shimFilesFactory.apply(aemJavaVersion, aemQuickstartJarDir)
-													    .createBatFiles();
+													    .createBatFiles(CreateType.NEW);
 
 			return new AemProcess(aemQuickstartJarDir, tailerFactory, shimFiles);
 		}

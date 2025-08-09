@@ -2,7 +2,9 @@ package com._4point.aem.aem_utils.aem_cntrl.domain;
 
 import static java.nio.file.attribute.PosixFilePermission.*;
 
+import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.nio.file.FileAlreadyExistsException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.attribute.PosixFilePermission;
@@ -35,6 +37,10 @@ public class ShimFiles {
 	@FunctionalInterface
 	public static interface RuntimeFactory extends BiFunction<JavaVersion, Path, ShimFiles> {};
 
+	public enum CreateType {
+		NEW, EXISTING, NEW_OR_EXISTING;
+	}
+	
 	private final JavaVersion aemJavaVersion;
 	private final Path aemQuickstartJarDir;
 	private final ProcessRunner processRunner;
@@ -54,15 +60,36 @@ public class ShimFiles {
 		}
 	}
 	
-	public ShimFiles createBatFiles() {
+	public ShimFiles createBatFiles(CreateType createType) {
 		try {
+			Path startScriptPath = aemQuickstartJarDir.resolve(RUN_START);
+			Path stopScriptPath = aemQuickstartJarDir.resolve(RUN_STOP);
+			
+			validateScriptFileExistence(createType, startScriptPath, stopScriptPath);
 			String javaEnv = getJavaEnv(aemQuickstartJarDir);
 			
-			writeScript(aemQuickstartJarDir.resolve(RUN_START), javaEnv + "\n" + aemQuickstartJarDir.resolve(AemFiles.START_SCRIPT).toString());
-			writeScript(aemQuickstartJarDir.resolve(RUN_STOP), javaEnv + "\n" + aemQuickstartJarDir.resolve(AemFiles.STOP_SCRIPT).toString());
+			writeScript(startScriptPath, javaEnv + "\n" + aemQuickstartJarDir.resolve(AemFiles.START_SCRIPT).toString());
+			writeScript(stopScriptPath, javaEnv + "\n" + aemQuickstartJarDir.resolve(AemFiles.STOP_SCRIPT).toString());
 			return this;
 		} catch (IOException | UnsupportedOperationException e) {
 			throw new AemProcessException("Error while writing start/stop bat files to %s.".formatted(aemQuickstartJarDir), e);
+		}
+	}
+
+	private static void validateScriptFileExistence(CreateType createType, Path startScriptPath, Path stopScriptPath)
+			throws FileAlreadyExistsException, FileNotFoundException {
+		boolean startScriptExists = Files.exists(startScriptPath);
+		boolean stopScriptExists = Files.exists(stopScriptPath);
+		boolean bothExist = startScriptExists && stopScriptExists;
+		boolean bothAbsent = !startScriptExists && !stopScriptExists;
+		boolean eitherExists = startScriptExists || stopScriptExists;
+		
+		if (createType == CreateType.NEW && eitherExists) {
+				throw new FileAlreadyExistsException("Cannot create start/stop bat files in %s because %s."
+								.formatted(startScriptPath.getParent(), bothExist ? "both files already exist" : (startScriptExists ? startScriptPath : startScriptPath) +  " already exists"));
+		} else if (createType == CreateType.EXISTING && !bothExist) {
+				throw new FileNotFoundException("Cannot create start/stop bat files in %s because %s."
+								.formatted(startScriptPath.getParent(), bothAbsent ? "neither file exists" : (startScriptExists ? startScriptPath : startScriptPath) + " does not exist"));
 		}
 	}
 
