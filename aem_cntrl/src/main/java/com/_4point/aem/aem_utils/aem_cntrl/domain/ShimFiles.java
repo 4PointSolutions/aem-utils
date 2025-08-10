@@ -18,7 +18,6 @@ import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com._4point.aem.aem_utils.aem_cntrl.domain.AemProcess.AemProcessException;
 import com._4point.aem.aem_utils.aem_cntrl.domain.ports.ipi.ProcessRunner;
 import com._4point.aem.aem_utils.aem_cntrl.domain.ports.ipi.ProcessRunner.ListResult;
 import com._4point.aem.aem_utils.aem_cntrl.domain.ports.ipi.ProcessRunner.ProcessRunnerException;
@@ -56,7 +55,7 @@ public class ShimFiles {
 			ListResult result = processRunner.runtoListResult(OperatingSystem.getOs().jbangCommand("jdk", "java-env", aemJavaVersion.getVersionString()), aemQuickstartJarDir).get();
 			return result.stdout().stream().collect(Collectors.joining("\n"));
 		} catch (ProcessRunnerException | InterruptedException | ExecutionException e) {
-			throw new AemProcessException(e);
+			throw new ShimFilesException(e);
 		}
 	}
 	
@@ -72,7 +71,7 @@ public class ShimFiles {
 			writeScript(stopScriptPath, javaEnv + "\n" + aemQuickstartJarDir.resolve(AemFiles.STOP_SCRIPT).toString());
 			return this;
 		} catch (IOException | UnsupportedOperationException e) {
-			throw new AemProcessException("Error while writing start/stop bat files to %s.".formatted(aemQuickstartJarDir), e);
+			throw new ShimFilesException("Error while writing start/stop bat files to %s.".formatted(aemQuickstartJarDir), e);
 		}
 	}
 
@@ -115,5 +114,25 @@ public class ShimFiles {
 	public CompletableFuture<ListResult> stopAem() throws InterruptedException, ExecutionException {
 		log.atInfo().log("Stopping AEM");
 		return processRunner.runtoListResult(new String[] {aemQuickstartJarDir.resolve(RUN_STOP).toString()}, aemQuickstartJarDir);
+	}
+	
+	@SuppressWarnings("serial")
+	public static class ShimFilesException extends RuntimeException {
+
+		public ShimFilesException() {
+			super();
+		}
+
+		public ShimFilesException(String message, Throwable cause) {
+			super(message, cause);
+		}
+
+		public ShimFilesException(String message) {
+			super(message);
+		}
+
+		public ShimFilesException(Throwable cause) {
+			super(cause);
+		}
 	}
 }

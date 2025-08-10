@@ -24,8 +24,8 @@ import org.junit.jupiter.params.provider.CsvSource;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import com._4point.aem.aem_utils.aem_cntrl.domain.AemProcess.AemProcessException;
 import com._4point.aem.aem_utils.aem_cntrl.domain.ShimFiles.CreateType;
+import com._4point.aem.aem_utils.aem_cntrl.domain.ShimFiles.ShimFilesException;
 import com._4point.aem.aem_utils.aem_cntrl.domain.ports.ipi.ProcessRunner;
 
 @ExtendWith(MockitoExtension.class)
@@ -160,7 +160,7 @@ class ShimFilesTest {
 					()->assertThat(Files.readString(tempDir.resolve(OperatingSystem.getOs().runStop())), containsString("Copy & paste the above commands in your CMD window"))
 					);
 		} else {
-			var e = assertThrows(AemProcessException.class, () -> underTest.createBatFiles(createType));
+			var e = assertThrows(ShimFilesException.class, () -> underTest.createBatFiles(createType));
 			switch (createType) {
 				case NEW -> assertThat(e, hasCauseMatching(
 						             		allOf(
