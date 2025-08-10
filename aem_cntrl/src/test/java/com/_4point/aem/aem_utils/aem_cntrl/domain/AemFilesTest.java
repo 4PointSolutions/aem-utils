@@ -24,12 +24,12 @@ import org.junit.jupiter.params.provider.NullSource;
 import org.junit.jupiter.params.provider.ValueSource;
 
 import com._4point.aem.aem_utils.aem_cntrl.domain.AemFiles.AemDir;
+import com._4point.aem.aem_utils.aem_cntrl.domain.AemFiles.AemDir.AemDirException;
 import com._4point.aem.aem_utils.aem_cntrl.domain.AemFiles.AemDir.AemDirType;
 import com._4point.aem.aem_utils.aem_cntrl.domain.AemFiles.LogFile;
 import com._4point.aem.aem_utils.aem_cntrl.domain.AemFiles.LogFile.FromOption;
 import com._4point.aem.aem_utils.aem_cntrl.domain.AemFiles.SlingProperties;
 import com._4point.aem.aem_utils.aem_cntrl.domain.Mocks.TailerMocker;
-import com._4point.aem.aem_utils.aem_cntrl.domain.ports.api.WaitForLog.WaitForLogException;
 import com._4point.testing.matchers.javalang.ExceptionMatchers;
 
 class AemFilesTest {
@@ -153,7 +153,7 @@ class AemFilesTest {
 		
 		AemDir underTest = new AemDir(()->adobeDir);
 		// Given
-		WaitForLogException ex = assertThrows(WaitForLogException.class, () ->underTest.toQualified(null));
+		AemDirException ex = assertThrows(AemDirException.class, () ->underTest.toQualified(null));
 
 		assertThat(ex, ExceptionMatchers.exceptionMsgContainsAll("Too many AEM directories found" , adobeDir.toString()));
 	}
@@ -165,7 +165,7 @@ class AemFilesTest {
 		
 		AemDir underTest = new AemDir(()->adobeDir);
 		// Given
-		WaitForLogException ex = assertThrows(WaitForLogException.class, () ->underTest.toQualified(adobeDir.resolve("aem").toAbsolutePath()));
+		AemDirException ex = assertThrows(AemDirException.class, () ->underTest.toQualified(adobeDir.resolve("aem").toAbsolutePath()));
 
 		assertThat(ex, ExceptionMatchers.exceptionMsgContainsAll("No AEM directory found" , adobeDir.toString()));
 	}

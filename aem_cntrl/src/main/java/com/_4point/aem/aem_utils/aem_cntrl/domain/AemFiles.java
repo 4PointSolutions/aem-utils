@@ -17,7 +17,6 @@ import java.util.stream.Stream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com._4point.aem.aem_utils.aem_cntrl.domain.ports.api.WaitForLog.WaitForLogException;
 import com._4point.aem.aem_utils.aem_cntrl.domain.ports.spi.Tailer;
 import com._4point.aem.aem_utils.aem_cntrl.domain.ports.spi.Tailer.TailerFactory;
 
@@ -234,13 +233,13 @@ public class AemFiles {
 	        try {
 	        	List<Path> aemDirs = locateAemDirs(aemParentDir).toList();
 	        	if (aemDirs.size() == 0) {
-	        		throw new WaitForLogException("No AEM directory found in " + aemParentDir);
+	        		throw new AemDirException("No AEM directory found in " + aemParentDir);
 	        	} else if (aemDirs.size() > 1) {
-	        		throw new WaitForLogException("Too many AEM directories found in " + aemParentDir + ". Please be more specific in your AEM directory specification.");
+	        		throw new AemDirException("Too many AEM directories found in " + aemParentDir + ". Please be more specific in your AEM directory specification.");
 	        	}
 	        	return aemDirs.getFirst();
 	        } catch (IOException e) {
-	            throw new WaitForLogException("Error locating AEM directories in " + aemParentDir, e);
+	            throw new AemDirException("Error locating AEM directories in " + aemParentDir, e);
 	        }
 		}
 		
@@ -254,5 +253,22 @@ public class AemFiles {
 	        return Files.isDirectory(p) && Files.exists(p.resolve(AemFiles.CRX_QUICKSTART_DIR));
 		}
 
+		@SuppressWarnings("serial")
+		public static class AemDirException extends RuntimeException {
+			public AemDirException(String message) {
+				super(message);
+			}
+
+			public AemDirException(Throwable cause) {
+				super(cause);
+			}
+
+			public AemDirException(String message, Throwable cause) {
+				super(message, cause);
+			}
+
+			public AemDirException() {
+			}
+		}
 	}
 }
