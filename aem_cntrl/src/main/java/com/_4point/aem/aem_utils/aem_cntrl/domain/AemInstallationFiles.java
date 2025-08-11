@@ -98,6 +98,10 @@ public class AemInstallationFiles extends InstallationFiles {
 			return findFilesMatching(dir, FILENAME_PATTERN);
 		}
 
+		public static Path findQuickstart(Path dir) {
+			return thereCanBeOnlyOne(findFiles(dir), "AEM Quickstart");
+		}
+		
 		public enum AemBaseRelease {
 			AEM65_ORIG(AEM65_ORIG_FILENAME_PATTERN, JavaVersion.VERSION_11), // AEM 6.5 original quickstart file (AEM_6.5_Quickstart.jar)
 			AEM65_LTS(AEM65_LTS_FILENAME_PATTERN, JavaVersion.VERSION_21);	 // AEM 6.5 LTS quickstart file (cq-quickstart-6.6.0.jar)

@@ -1,10 +1,13 @@
 package com._4point.aem.aem_utils.aem_cntrl.domain;
 
+import static com._4point.aem.aem_utils.aem_cntrl.domain.AemInstallationFiles.AemQuickstart.findQuickstart;
+import static com._4point.aem.aem_utils.aem_cntrl.domain.AemInstallationFiles.AemQuickstart.versionInfo;
+
 import java.nio.file.Path;
-import java.util.List;
 
 import com._4point.aem.aem_utils.aem_cntrl.domain.AemFiles.AemDir;
 import com._4point.aem.aem_utils.aem_cntrl.domain.AemInstallationFiles.AemQuickstart.VersionInfo;
+import com._4point.aem.aem_utils.aem_cntrl.domain.InstallationFiles.InstallationFileException;
 import com._4point.aem.aem_utils.aem_cntrl.domain.ShimFiles.CreateType;
 import com._4point.aem.aem_utils.aem_cntrl.domain.ports.api.Shim;
 
@@ -23,13 +26,13 @@ public class ShimImpl implements Shim {
 		Path finalAemDir = aemDir.toQualified(unqualifiedAemDir);									// find the aem directory
 
 		// Determine AEM Version and Java Version
-		List<Path> quickstarts = AemInstallationFiles.AemQuickstart.findFiles(finalAemDir);
-		if (quickstarts.isEmpty()) {
-			throw new Shim.ShimException("No AEM Quickstart found in directory: " + finalAemDir);
-		} else if (quickstarts.size() > 1) {
-			throw new Shim.ShimException("Multiple AEM Quickstarts found in directory: " + finalAemDir);
+		VersionInfo versionInfo;
+		try {
+			versionInfo = versionInfo(findQuickstart(finalAemDir));
+		} catch (InstallationFileException e) {
+			throw new Shim.ShimException(e.getMessage() + " Directory: %s".formatted(finalAemDir), e);
 		}
-		VersionInfo versionInfo = AemInstallationFiles.AemQuickstart.versionInfo(quickstarts.getFirst());
+		
 		// Call ShimFiles factory to create ShimFiles instance
 		ShimFiles shimFiles = shimFilesFactory.apply(versionInfo.aemRelease().aemJavaVersion, finalAemDir);
 	

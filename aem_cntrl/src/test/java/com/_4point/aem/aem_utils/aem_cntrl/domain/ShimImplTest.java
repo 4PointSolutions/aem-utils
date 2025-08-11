@@ -1,5 +1,7 @@
 package com._4point.aem.aem_utils.aem_cntrl.domain;
 
+import static com._4point.testing.matchers.javalang.ExceptionMatchers.exceptionMsgContainsAll;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
@@ -86,7 +88,8 @@ class ShimImplTest {
 		// When/Then
 		Shim.ShimException e = assertThrows(Shim.ShimException.class,
 				() -> underTest.shim(Shim.Operation.ADD, Path.of("unqualifiedAemDir")));
-		assertEquals("No AEM Quickstart found in directory: " + tempDir, e.getMessage());
+
+		assertThat(e, exceptionMsgContainsAll("Found no AEM Quickstart file", tempDir.toString()));
 		verify(aemDirMock, times(1)).toQualified(any(Path.class));
 		verifyNoInteractions(shimFilesFactoryMock);
 	}
@@ -105,7 +108,8 @@ class ShimImplTest {
 		// When/Then
 		Shim.ShimException e = assertThrows(Shim.ShimException.class,
 				() -> underTest.shim(Shim.Operation.ADD, Path.of("unqualifiedAemDir")));
-		assertEquals("Multiple AEM Quickstarts found in directory: " + tempDir, e.getMessage());
+
+		assertThat(e, exceptionMsgContainsAll("Found multiple AEM Quickstart files", tempDir.toString()));
 		verify(aemDirMock, times(1)).toQualified(any(Path.class));
 		verifyNoInteractions(shimFilesFactoryMock);
 	}

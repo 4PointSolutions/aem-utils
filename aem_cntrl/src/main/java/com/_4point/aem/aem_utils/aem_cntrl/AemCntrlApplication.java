@@ -35,8 +35,10 @@ import com._4point.aem.aem_utils.aem_cntrl.domain.AemInstallerImpl;
 import com._4point.aem.aem_utils.aem_cntrl.domain.AemProcess;
 import com._4point.aem.aem_utils.aem_cntrl.domain.DefaultsImpl;
 import com._4point.aem.aem_utils.aem_cntrl.domain.ShimFiles;
+import com._4point.aem.aem_utils.aem_cntrl.domain.ShimImpl;
 import com._4point.aem.aem_utils.aem_cntrl.domain.WaitForLogImpl;
 import com._4point.aem.aem_utils.aem_cntrl.domain.ports.api.AemInstaller;
+import com._4point.aem.aem_utils.aem_cntrl.domain.ports.api.Shim;
 import com._4point.aem.aem_utils.aem_cntrl.domain.ports.api.WaitForLog;
 import com._4point.aem.aem_utils.aem_cntrl.domain.ports.ipi.ProcessRunner;
 import com._4point.aem.aem_utils.aem_cntrl.domain.ports.spi.AemConfigManager;
@@ -158,5 +160,10 @@ public class AemCntrlApplication implements CommandLineRunner, ExitCodeGenerator
 	@Bean
 	WaitForLog waitForLog(AemDir aemDir, TailerFactory tailerFactory) {
 		return new WaitForLogImpl(aemDir, tailerFactory, LogFile::under);
+	}
+	
+	@Bean
+	Shim shim(AemDir aemDir, ShimFiles.RuntimeFactory shimFilesRuntimeFactory) {
+		return new ShimImpl(aemDir, shimFilesRuntimeFactory);
 	}
 }
