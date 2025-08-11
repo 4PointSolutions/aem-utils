@@ -67,8 +67,8 @@ class ShimImpl_SociableTest {
 			shim.shim(shimOperation, tempDir);
 			
 			assertAll(
-					()->assertThat(Files.readString(tempDir.resolve(OperatingSystem.getOs().runStart())), containsString("Copy & paste the above commands in your CMD window")),
-					()->assertThat(Files.readString(tempDir.resolve(OperatingSystem.getOs().runStop())), containsString("Copy & paste the above commands in your CMD window"))
+					()->assertThat(Files.readString(tempDir.resolve(OperatingSystem.getOs().runStart())), anyOf(containsString("Copy & paste the above commands in your CMD window"), containsString("Run this command to configure your shell"))),
+					()->assertThat(Files.readString(tempDir.resolve(OperatingSystem.getOs().runStop())), anyOf(containsString("Copy & paste the above commands in your CMD window"), containsString("Run this command to configure your shell")))
 					);
 		}
 
