@@ -55,6 +55,22 @@ If omitted, the default for Windows, is `\Adobe`. The default for Linux, is `/op
 
 &nbsp;
 
+**shim** \[\[**-ad** | **--aemdir**]=*aemDirSpec*] 
+\[\[**-a** | **--add**] | \[**-u** | **--update**] | [**-au** | **--add_update**] ]
+
+:  Creates or updates the aem_nctrl AEM shim files. These shim files are typically created during installation however with this command they can be 
+created independently from the install command.  .
+
+#### Options
+
+:  If the *aemDirSpec* is omitted, then it will default to the looking for a single AEM directory under the standard location.  The standard location for Windows is `\Adobe`. The standard location for Linux, is `/opt/adobe`.
+
+: One of **--add**, **--update**, or **--add_update** options must be provided.  **--add** will create the shim files.  It will fail if the files already exist. **--update** will update existing shim files.  It will fail if the files do _not_ already exist.  **--add_update** will create new shim files or update existing ones regardless of whether there are previously existing ones.
+
+&nbsp;&nbsp;&nbsp;&nbsp;*aemDirSpec* is an Aem Directory Specification.  See *aemDirSpec* under [Specifying the AEM Directory](specifying_the_aem_directory).
+
+&nbsp;
+
 Specifying the AEM Directory
 -------
 
