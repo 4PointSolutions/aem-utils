@@ -41,8 +41,8 @@ class ShimCommandTests {
 		@Test
 		void testWaitForLog_Startup() throws Exception {
 			doNothing().when(shimMock).shim(Operation.ADD, null);
-			assertEquals(CommandLine.ExitCode.OK, exitCodeGenerator.getExitCode(), "Exit code should be 0 for successful shim with --add argument.");
 			verify(shimMock).shim(Operation.ADD, null);
+			assertEquals(CommandLine.ExitCode.OK, exitCodeGenerator.getExitCode(), "Exit code should be 0 for successful shim with --add argument.");
 		}
 	}
 
@@ -55,8 +55,8 @@ class ShimCommandTests {
 		@Test
 		void testWaitForLog_Startup() throws Exception {
 			doNothing().when(shimMock).shim(Operation.UPDATE, null);
-			assertEquals(CommandLine.ExitCode.OK, exitCodeGenerator.getExitCode(), "Exit code should be 0 for successful shim with --add argument.");
 			verify(shimMock).shim(Operation.UPDATE, null);
+			assertEquals(CommandLine.ExitCode.OK, exitCodeGenerator.getExitCode(), "Exit code should be 0 for successful shim with --add argument.");
 		}
 	}
 
@@ -69,8 +69,8 @@ class ShimCommandTests {
 		@Test
 		void testWaitForLog_Startup() throws Exception {
 			doNothing().when(shimMock).shim(Operation.ADD_UPDATE, null);
-			assertEquals(CommandLine.ExitCode.OK, exitCodeGenerator.getExitCode(), "Exit code should be 0 for successful shim with --add argument.");
 			verify(shimMock).shim(Operation.ADD_UPDATE, null);
+			assertEquals(CommandLine.ExitCode.OK, exitCodeGenerator.getExitCode(), "Exit code should be 0 for successful shim with --add argument.");
 		}
 	}
 
@@ -83,8 +83,8 @@ class ShimCommandTests {
 		@Test
 		void testWaitForLog_Startup() throws Exception {
 			doNothing().when(shimMock).shim(Operation.ADD_UPDATE, Path.of("AemDir"));
-			assertEquals(CommandLine.ExitCode.OK, exitCodeGenerator.getExitCode(), "Exit code should be 0 for successful shim with --add argument.");
 			verify(shimMock).shim(Operation.ADD_UPDATE, Path.of("AemDir"));
+			assertEquals(CommandLine.ExitCode.OK, exitCodeGenerator.getExitCode(), "Exit code should be 0 for successful shim with --add argument.");
 		}
 	}
 
