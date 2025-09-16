@@ -149,13 +149,14 @@ class AemFilesTest {
 	@Test
 	void testToQualifiedPath_TooManyDirs(@TempDir Path tempDir) throws Exception {
 		Path adobeDir = createMockAemDir(tempDir);
-		Files.createDirectories(tempDir.resolve("adobe").resolve("aem_extra").resolve("crx-quickstart"));
+		Path extraDir = tempDir.resolve("adobe").resolve("aem_extra");
+		Files.createDirectories(extraDir.resolve("crx-quickstart"));
 		
 		AemDir underTest = new AemDir(()->adobeDir);
 		// Given
 		AemDirException ex = assertThrows(AemDirException.class, () ->underTest.toQualified(null));
 
-		assertThat(ex, ExceptionMatchers.exceptionMsgContainsAll("Too many AEM directories found" , adobeDir.toString()));
+		assertThat(ex, ExceptionMatchers.exceptionMsgContainsAll("Too many AEM directories found" , adobeDir.toString(), extraDir.toString()));
 	}
 	
 	@Test

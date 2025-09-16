@@ -12,6 +12,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.slf4j.Logger;
@@ -235,7 +236,8 @@ public class AemFiles {
 	        	if (aemDirs.size() == 0) {
 	        		throw new AemDirException("No AEM directory found in " + aemParentDir);
 	        	} else if (aemDirs.size() > 1) {
-	        		throw new AemDirException("Too many AEM directories found in " + aemParentDir + ". Please be more specific in your AEM directory specification.");
+	        		String aemDirsString = aemDirs.stream().map(Path::toString).collect(Collectors.joining("\n"));
+	        		throw new AemDirException("Too many AEM directories found in " + aemParentDir + ". Please be more specific in your AEM directory specification.\n" + aemDirsString);
 	        	}
 	        	return aemDirs.getFirst();
 	        } catch (IOException e) {
