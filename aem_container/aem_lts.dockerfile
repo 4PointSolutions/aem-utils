@@ -96,7 +96,7 @@ RUN cd /opt/aem_software ; jbang run --java=21 aem_cntrl-0.0.1-SNAPSHOT.jar inst
 #
 # Build final image
 #
-FROM aem-base AS aem_lts
+FROM aem-base AS aem_lts_sp1
 
 # Switch to AEM user 
 USER aem_user
@@ -130,7 +130,7 @@ java -Xms1024m -Xmx2048m \
 -Djava.awt.headless=true \
 -Dsling.run.modes=author,crx3,crx3tar \
 -Djava.locale.providers=CLDR,JRE,SPI \
--jar crx-quickstart/app/cq-quickstart-6.6.0-standalone-quickstart.jar \
+-jar crx-quickstart/app/cq-quickstart-6.6.1-standalone-quickstart.jar \
 start \
 -c crx-quickstart \
 -i launchpad \
