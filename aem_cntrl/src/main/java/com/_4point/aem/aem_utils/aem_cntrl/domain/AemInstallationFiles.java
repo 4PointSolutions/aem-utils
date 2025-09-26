@@ -11,6 +11,8 @@ import java.util.regex.Pattern;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com._4point.aem.aem_utils.aem_cntrl.domain.AemInstallationFiles.AemQuickstart.AemBaseRelease;
+
 public class AemInstallationFiles extends InstallationFiles {
 	private static final Logger log = LoggerFactory.getLogger(AemInstallationFiles.class);
 	
@@ -31,7 +33,9 @@ public class AemInstallationFiles extends InstallationFiles {
 			validateVersionInfo(quickstartVersionInfo, servicePackVersionInfo, formsAddonVersionInfo);
 			return new AemVersion(quickstartVersionInfo.majorVersion(), 
 								  quickstartVersionInfo.minorVersion(),
-								  servicePackVersionInfo.map(AemServicePack.VersionInfo::servicePack).orElse(0),
+								  quickstartVersionInfo.aemRelease == AemBaseRelease.AEM65_LTS 
+								  		? quickstartVersionInfo.servicePack 
+								  		: servicePackVersionInfo.map(AemServicePack.VersionInfo::servicePack).orElse(0),
 								  quickstartVersionInfo.aemRelease.aemJavaVersion);
 		}
 		
@@ -88,8 +92,8 @@ public class AemInstallationFiles extends InstallationFiles {
 	public static class AemQuickstart extends InstallationFile {
 		// Handle AEM 6.5 formatted quickstart name (AEM_6.5_Quickstart.jar) or AEM LTS quickstart name (cq-quickstart-6.6.0.jar)
 		private static final Pattern AEM65_ORIG_FILENAME_PATTERN = Pattern.compile("AEM_(?<majorVersion>\\d)\\.(?<minorVersion>\\d)(?<patchVersion>)_Quickstart\\.jar");	// Note: patchVersion match group is intentionally empty
-		private static final Pattern AEM65_LTS_FILENAME_PATTERN = Pattern.compile("cq-quickstart-(?<majorVersion>\\d)\\.(?<minorVersion>\\d)(\\.(?<patchVersion>\\d))\\.jar");
-		private static final Pattern FILENAME_PATTERN = Pattern.compile("((AEM_)|(cq-quickstart-))(?<majorVersion>\\d)\\.(?<minorVersion>\\d)((\\.(?<patchVersion>\\d))|(_Quickstart))\\.jar");
+		private static final Pattern AEM65_LTS_FILENAME_PATTERN = Pattern.compile("cq-quickstart-(?<majorVersion>\\d)\\.(?<minorVersion>\\d)(\\.(?<patchVersion>\\d+))\\.jar");
+		private static final Pattern FILENAME_PATTERN = Pattern.compile("((AEM_)|(cq-quickstart-))(?<majorVersion>\\d)\\.(?<minorVersion>\\d)((\\.(?<patchVersion>\\d+))|(_Quickstart))\\.jar");
 		
 		// This is a private constructor to prevent instantiation
 		private AemQuickstart() {}
@@ -115,7 +119,7 @@ public class AemInstallationFiles extends InstallationFiles {
 			}
 		}
 		
-		public record VersionInfo(int majorVersion, int minorVersion, AemBaseRelease aemRelease) {}
+		public record VersionInfo(int majorVersion, int minorVersion, int servicePack, AemBaseRelease aemRelease) {}
 		
 		public static VersionInfo versionInfo(Path path) {
 			String filename = path.getFileName().toString();
@@ -137,7 +141,7 @@ public class AemInstallationFiles extends InstallationFiles {
 				int minorVersion = Integer.parseInt(matcher.group("minorVersion"));
 				String patchVersion = matcher.group("patchVersion");
 				AemBaseRelease aemRelease = patchVersion.isEmpty() ? AemBaseRelease.AEM65_ORIG : AemBaseRelease.AEM65_LTS;
-				return Optional.of(new VersionInfo(majorVersion, minorVersion, aemRelease));
+				return Optional.of(new VersionInfo(majorVersion, minorVersion, aemRelease == AemBaseRelease.AEM65_LTS ? Integer.parseInt(patchVersion) : 0, aemRelease));
 			}
 			return Optional.empty();
 		}

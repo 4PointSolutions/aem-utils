@@ -13,6 +13,7 @@ import org.apache.commons.lang3.SystemUtils;
 public enum MockInstallFiles {
 	SAMPLE_AEM_ORIG_QUICKSTART_PATH("AEM_6.5_Quickstart.jar", ""),
 	SAMPLE_AEM_LTS_QUICKSTART_PATH("cq-quickstart-6.6.0.jar", ""),
+	SAMPLE_AEM_LTS_QUICKSTART_SP19_PATH("cq-quickstart-6.6.19.jar", ""),
 	SAMPLE_AEM_SERVICE_PACK_PATH("aem-service-pkg-6.5.19.0.zip", "crx-quickstart/install"),
 	SAMPLE_AEM_FORMS_ADDON_PATH("adobe-aemfd-" + getAbbrev() + "-pkg-6.0.1120.zip", "crx-quickstart/install"),
 	SAMPLE_LICENSE_PROPERTIES_PATH("license.properties", ""),

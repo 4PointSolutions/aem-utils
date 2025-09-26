@@ -5,6 +5,7 @@ import static com._4point.aem.aem_utils.aem_cntrl.domain.MockInstallFiles.*;
 import static org.hamcrest.MatcherAssert.assertThat; 
 import static org.hamcrest.Matchers.*;
 
+import java.io.IOException;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.Optional;
@@ -28,6 +29,8 @@ class AemInstallationFilesTest {
 
 	@SuppressWarnings("unused")
 	private static final List<MockInstallFiles> AEM_BASE_VERSION_PATHS = List.of(SAMPLE_AEM_ORIG_QUICKSTART_PATH, SAMPLE_AEM_LTS_QUICKSTART_PATH);
+	@SuppressWarnings("unused")
+	private static final List<MockInstallFiles> AEM_WITH_SP_VERSION_PATHS = List.of(SAMPLE_AEM_ORIG_QUICKSTART_PATH, SAMPLE_AEM_LTS_QUICKSTART_SP19_PATH);
 
 	@Test
 	void testCreateAemDir(@TempDir Path rootDir) {
@@ -143,10 +146,11 @@ class AemInstallationFilesTest {
 		assertThat(ex, ExceptionMatchers.exceptionMsgContainsAll(description, "Found multiple", "should only be one"));
 	}
 
-	@Test
-	void testLocateAemFiles(@TempDir Path rootDir) throws Exception {
-		Path testQuickstartFilePath = SAMPLE_AEM_ORIG_QUICKSTART_PATH.createMockFile(rootDir);
-		Path testServicePackFilePath = SAMPLE_AEM_SERVICE_PACK_PATH.createMockFile(rootDir);
+	@ParameterizedTest
+	@FieldSource("AEM_WITH_SP_VERSION_PATHS")
+	void testLocateAemFiles(MockInstallFiles quickstart, @TempDir Path rootDir) throws Exception {
+		Path testQuickstartFilePath = quickstart.createMockFile(rootDir);
+		Optional<Path> testServicePackFilePath = createSpFile(quickstart, rootDir);
 		Path testFormsAddonFilePath = SAMPLE_AEM_FORMS_ADDON_PATH.createMockFile(rootDir);
 		
 		AemFileset result = AemInstallationFiles.locateAemFiles(rootDir);
@@ -154,15 +158,32 @@ class AemInstallationFilesTest {
 		
 		assertAll(
 				()->assertEquals(testQuickstartFilePath, result.quickstart()),
-				()->assertEquals(testServicePackFilePath, result.servicePack().get()),
+				()->assertEquals(testServicePackFilePath, result.servicePack()),
 				()->assertEquals(testFormsAddonFilePath, result.formsAddOn()),
-				()->assertEquals("6.5_SP19", aemVersion.aemVersionWithSp())
+				()->assertEquals(calcExpectedAemVersionWithSp(quickstart), aemVersion.aemVersionWithSp())
 				);
 	}
+
+	private Optional<Path> createSpFile(MockInstallFiles quickstart, Path rootDir) throws IOException {
+		return switch(quickstart) {
+			case SAMPLE_AEM_ORIG_QUICKSTART_PATH -> Optional.of(SAMPLE_AEM_SERVICE_PACK_PATH.createMockFile(rootDir));
+			case SAMPLE_AEM_LTS_QUICKSTART_SP19_PATH -> Optional.empty();
+			default -> throw new IllegalStateException("Unexpected value: " + quickstart);
+		};
+	}
+
+	private String calcExpectedAemVersionWithSp(MockInstallFiles quickstart) {
+		return switch(quickstart) {
+			case SAMPLE_AEM_ORIG_QUICKSTART_PATH -> "6.5_SP19";
+			case SAMPLE_AEM_LTS_QUICKSTART_SP19_PATH -> "6.6_SP19";
+			default -> throw new IllegalStateException("Unexpected value: " + quickstart);
+		};
+	}
 	
-	@Test
-	void testLocateAemFiles_NoServicePack(@TempDir Path rootDir) throws Exception {
-		Path testQuickstartFilePath = SAMPLE_AEM_ORIG_QUICKSTART_PATH.createMockFile(rootDir);
+	@ParameterizedTest
+	@FieldSource("AEM_BASE_VERSION_PATHS")
+	void testLocateAemFiles_NoServicePackFile(MockInstallFiles quickstart, @TempDir Path rootDir) throws Exception {
+		Path testQuickstartFilePath = quickstart.createMockFile(rootDir);
 		// Omitted: Path testServicePackFilePath = SAMPLE_AEM_SERVICE_PACK_PATH.createTestFile(rootDir);
 		Path testFormsAddonFilePath = SAMPLE_AEM_FORMS_ADDON_PATH.createMockFile(rootDir);
 		
@@ -173,22 +194,33 @@ class AemInstallationFilesTest {
 				()->assertEquals(testQuickstartFilePath, result.quickstart()),
 				()->assertTrue(result.servicePack().isEmpty(), "Expected no service pack to be present, but found one."),
 				()->assertEquals(testFormsAddonFilePath, result.formsAddOn()),
-				()->assertEquals("6.5_SP0", aemVersion.aemVersionWithSp())
+				()->assertEquals(calcExpectedAemVersionNoSp(quickstart), aemVersion.aemVersionWithSp())
 				);
+	}
+
+	private String calcExpectedAemVersionNoSp(MockInstallFiles quickstart) {
+		return switch(quickstart) {
+			case SAMPLE_AEM_ORIG_QUICKSTART_PATH -> "6.5_SP0";
+			case SAMPLE_AEM_LTS_QUICKSTART_PATH -> "6.6_SP0";
+			default -> throw new IllegalStateException("Unexpected value: " + quickstart);
+		};
 	}
 	
 	@ParameterizedTest
 	@CsvSource(textBlock = 
 			"""
-			AEM_6.5_Quickstart.jar,6,5,AEM65_ORIG
-			AEM_7.4_Quickstart.jar,7,4,AEM65_ORIG
-			cq-quickstart-6.6.0.jar,6,6,AEM65_LTS
+			AEM_6.5_Quickstart.jar,6,5,0,AEM65_ORIG
+			AEM_7.4_Quickstart.jar,7,4,0,AEM65_ORIG
+			cq-quickstart-6.6.0.jar,6,6,0,AEM65_LTS
+			cq-quickstart-6.6.1.jar,6,6,1,AEM65_LTS
+			cq-quickstart-6.6.19.jar,6,6,19,AEM65_LTS
 			""")
-	void testAemQuickstartVersionInfo(Path filename, int expectedMajorVersion, int expectedMinorVersion, AemBaseRelease expectedAemBaseRelease) {
+	void testAemQuickstartVersionInfo(Path filename, int expectedMajorVersion, int expectedMinorVersion, int expectedServicePack, AemBaseRelease expectedAemBaseRelease) {
 		AemInstallationFiles.AemQuickstart.VersionInfo versionInfo = AemInstallationFiles.AemQuickstart.versionInfo(filename);
 		assertAll(
 				()->assertEquals(expectedMajorVersion,versionInfo.majorVersion()),
 				()->assertEquals(expectedMinorVersion,versionInfo.minorVersion()),
+				()->assertEquals(expectedServicePack,versionInfo.servicePack()),
 				()->assertEquals(expectedAemBaseRelease, versionInfo.aemRelease())
 				);
 	}
