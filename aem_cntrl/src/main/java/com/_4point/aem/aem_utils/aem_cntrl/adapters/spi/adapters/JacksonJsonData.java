@@ -1,19 +1,17 @@
 package com._4point.aem.aem_utils.aem_cntrl.adapters.spi.adapters;
 
-import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Consumer;
-import java.util.function.Supplier;
 import java.util.stream.Stream;
-import java.util.stream.StreamSupport;
 
 import com._4point.aem.aem_utils.aem_cntrl.adapters.spi.ports.JsonData;
-import com.fasterxml.jackson.core.JsonPointer;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ObjectNode;
+
+import tools.jackson.core.JacksonException;
+import tools.jackson.core.JsonPointer;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.node.ObjectNode;
 
 /**
  * This class is used to store Json Data.
@@ -52,7 +50,7 @@ public class JacksonJsonData implements JsonData {
 	public static JsonData from(String string) {
 		try {
 			return new JacksonJsonData(string, mapper.readTree(string));
-		} catch (JsonProcessingException e) {
+		} catch (JacksonException e) {
 			throw new JsonDataException("Error while parsing JsonData string.", e);
 		}
 	}
@@ -148,11 +146,7 @@ public class JacksonJsonData implements JsonData {
 	}	
 
 	private Stream<String> childNames(JsonNode targetNode) {
-		return iteratorToStream(targetNode::fieldNames);
-	}
-
-	private <T> Stream<T> iteratorToStream(Supplier<Iterator<T>> iterator) {
-		return StreamSupport.stream(((Iterable<T>)()->(iterator.get())).spliterator(), false);
+		return targetNode.propertyNames().stream();
 	}
 
 	/**
@@ -164,7 +158,7 @@ public class JacksonJsonData implements JsonData {
 	@Override
 	public Optional<String> at(JsonDataPointer jsonDataPtr) {
 		JsonNode node = rootNode.at(((JacksonJsonDataPointer)jsonDataPtr).jsonPointer);
-		return node.isValueNode() ? Optional.of(node.asText()) : Optional.empty();
+		return node.isValueNode() ? Optional.of(node.asString()) : Optional.empty();
 	}
 	
 	/**
@@ -198,7 +192,7 @@ public class JacksonJsonData implements JsonData {
 	@Override
 	public Optional<JsonData> subsetAt(JsonDataPointer jsonDataPtr) {
 		JsonNode node = rootNode.at(((JacksonJsonDataPointer)jsonDataPtr).jsonPointer);
-		return node.isContainerNode() ? Optional.of(JacksonJsonData.from(node.toPrettyString())) : Optional.empty();
+		return node.isContainer() ? Optional.of(JacksonJsonData.from(node.toPrettyString())) : Optional.empty();
 	}
 	
 	/**
@@ -223,10 +217,9 @@ public class JacksonJsonData implements JsonData {
 		JsonNode node = rootNode.at(((JacksonJsonDataPointer)jsonDataPtr).jsonPointer);
 		if (!node.isArray()) { return Stream.empty(); }
 		// We have an array, convert it to a list of JsonData
-		Iterable<JsonNode> iterable = () -> node.elements();
-		return StreamSupport.stream(iterable.spliterator(), false)	// get stream of JsonNodes
-							.map(JsonNode::toPrettyString)			// convert to Strings
-							.map(JacksonJsonData::from);					// convert back to JsonData
+		return node.valueStream()
+					.map(JsonNode::toPrettyString)			// convert to Strings
+					.map(JacksonJsonData::from);			// convert back to JsonData
 	}
 	
 	/**
@@ -363,7 +356,7 @@ public class JacksonJsonData implements JsonData {
 		op.accept((ObjectNode)insertionNode);
 		try {
 			return JacksonJsonData.from(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(deepCopy));
-		} catch (JsonProcessingException e) {
+		} catch (JacksonException e) {
 			throw new JsonDataException("Error whiole inserting into Json.", e);
 		}
 	}

@@ -13,11 +13,13 @@ import java.util.concurrent.CompletableFuture;
 import java.util.stream.Stream;
 
 import org.junit.jupiter.api.condition.OS;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.function.Executable;
 import org.junit.jupiter.api.io.TempDir;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
@@ -40,6 +42,7 @@ import com._4point.aem.aem_utils.aem_cntrl.domain.ports.spi.Tailer.TailerFactory
 // Just ignore it.  Despite the error, the Spring Context is created and then the test will run successfully and complete as expected.
 
 @SpringBootTest()
+@ExtendWith(MockitoExtension.class)
 class AemInstallerImpl_SociableTest {
 
 	private static final String JBANG_ENV_RESPONSE = """
@@ -74,7 +77,7 @@ class AemInstallerImpl_SociableTest {
 		
 		// Mock the setting of protected mode for HTML5 forms
 		when(aemConfigManagerMock.mobileFormsSettings()).thenReturn(mobileFormsSettingsMock);
-		doNothing().when(mobileFormsSettingsMock).protectedMode(true); 
+		doNothing().when(mobileFormsSettingsMock).protectedMode(false); 
 		doNothing().when(aemConfigManagerMock).mobileFormsSettings(mobileFormsSettingsMock); 
 		
 		// Run test

@@ -10,11 +10,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.ExitCodeGenerator;
 import org.springframework.boot.SpringApplication;
-import org.springframework.boot.WebApplicationType;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.boot.autoconfigure.web.client.RestClientSsl;
-import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.boot.restclient.autoconfigure.RestClientSsl;
 import org.springframework.context.annotation.Bean;
 import org.springframework.http.client.JdkClientHttpRequestFactory;
 import org.springframework.web.client.RestClient.Builder;
@@ -64,9 +62,7 @@ public class AemCntrlApplication implements CommandLineRunner, ExitCodeGenerator
 	}
 
 	public static void main(String[] args) {
-		System.exit(SpringApplication.exit(new SpringApplicationBuilder(AemCntrlApplication.class)
-													.web(WebApplicationType.NONE)
-													.run(args)));
+		System.exit(SpringApplication.exit(SpringApplication.run(AemCntrlApplication.class, args)));
 	}
 
 	@Override

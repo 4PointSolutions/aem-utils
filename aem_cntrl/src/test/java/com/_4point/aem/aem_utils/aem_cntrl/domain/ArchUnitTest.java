@@ -34,7 +34,7 @@ class ArchUnitTest {
 											    .optionalLayer("SLF4J").definedBy("org.slf4j..")
 											    .optionalLayer("DomainOther").definedBy("org.apache.commons.lang3..")
 											    .optionalLayer("AdaptersSpiOther").definedBy("org.apache.commons.io.input..")
-											    .optionalLayer("AdaptersSpiAdaptersOther").definedBy("com.fasterxml.jackson..", "org.springframework..")
+											    .optionalLayer("AdaptersSpiAdaptersOther").definedBy("tools.jackson..", "org.springframework..")
 											    .optionalLayer("CommandsOther").definedBy("picocli..", "org.springframework..")
 											
 											    // Spring can access all layers because it provides implementations for all layers.
