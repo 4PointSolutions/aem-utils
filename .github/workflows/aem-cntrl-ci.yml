@@ -17,9 +17,9 @@ jobs:
       matrix:
         java: [ 25 ]
         experimental: [false]
-        include:
-          - java: 26-ea
-            experimental: true
+#        include:
+#          - java: 26-ea
+#            experimental: true
 
     steps:
     - uses: actions/checkout@v6
