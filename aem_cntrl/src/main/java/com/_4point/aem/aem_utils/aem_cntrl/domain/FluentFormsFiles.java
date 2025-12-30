@@ -21,7 +21,7 @@ public class FluentFormsFiles extends InstallationFiles {
 	}
 
 	public static class FluentFormsCore extends InstallationFile {
-		private static final Pattern FILENAME_PATTERN = Pattern.compile("fluentforms\\.core-(?<majorVersion>\\d)\\.(?<minorVersion>\\d)\\.(?<patchLevel>\\d)-SNAPSHOT.jar");	// TODO: Make SNAPSHOT extension optional
+		private static final Pattern FILENAME_PATTERN = Pattern.compile("fluentforms\\.core-(?<majorVersion>\\d)\\.(?<minorVersion>\\d)\\.(?<patchLevel>\\d)(-SNAPSHOT)?.jar");
 
 		public static List<Path> findFiles(Path dir) {
 			return findFilesMatching(dir, FILENAME_PATTERN);
@@ -29,7 +29,7 @@ public class FluentFormsFiles extends InstallationFiles {
 	}
 
 	public static class RestServices extends InstallationFile {
-		private static final Pattern FILENAME_PATTERN = Pattern.compile("rest-services\\.server-(?<majorVersion>\\d)\\.(?<minorVersion>\\d)\\.(?<patchLevel>\\d)-SNAPSHOT.jar");	// TODO: Make SNAPSHOT extension optional
+		private static final Pattern FILENAME_PATTERN = Pattern.compile("rest-services\\.server-(?<majorVersion>\\d)\\.(?<minorVersion>\\d)\\.(?<patchLevel>\\d)(-SNAPSHOT)?.jar");
 
 		public static List<Path> findFiles(Path dir) {
 			return findFilesMatching(dir, FILENAME_PATTERN);

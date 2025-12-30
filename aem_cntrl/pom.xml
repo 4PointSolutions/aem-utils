@@ -10,7 +10,7 @@
 	</parent>
 	<groupId>com.4point.aem.aem_utils</groupId>
 	<artifactId>aem_cntrl</artifactId>
-	<version>0.0.1-SNAPSHOT</version>
+	<version>0.0.2-SNAPSHOT</version>
 	<name>AEM Control</name>
 	<description>Command Line Utility for controlling an AEM instance</description>
 	<licenses>
@@ -52,7 +52,7 @@
 	</repositories>
 
 	<properties>
-		<java.version>21</java.version>
+		<java.version>25</java.version>
 
 		<!-- Project Dependencies -->
 		<picocli.version>4.7.7</picocli.version>
