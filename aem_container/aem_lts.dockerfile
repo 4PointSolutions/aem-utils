@@ -63,7 +63,10 @@ RUN adduser aem_user ; mkdir /opt/adobe ; chown aem_user /opt/adobe ; chgrp aem_
 USER aem_user
 
 # Install now to get them into a layer so we don't have to install later
-RUN jbang jdk install 21
+#   JDK 21 is required for AEM LTS
+#   JDK 25 is installed for aem_cntrl.
+#  Set JBang default java version to 25 (which forces the download of JDK 25) and then install JDK 21
+RUN export JBANG_DEFAULT_JAVA_VERSION=25 ; jbang jdk install 21 
 #
 # End of aem-base image
 #
@@ -87,8 +90,8 @@ COPY AemSoftware/* /opt/aem_software
 
 # RUN /bin/bash -c 'export PATH="$HOME/.jbang/bin:$HOME/.jbang/currentjdk/bin:$PATH" ; export "JAVA_HOME=$HOME/.jbang/currentjdk" ;  cd /opt/aem_software ; jbang run --java=21 aem-installer-0.0.1-SNAPSHOT.jar'
 
-# RUN /bin/bash -c 'cd /opt/aem_software ; jbang run --java=21 aem-installer-0.0.1-SNAPSHOT.jar'
-RUN cd /opt/aem_software ; jbang run --java=21 aem_cntrl-0.0.1-SNAPSHOT.jar install
+# RUN /bin/bash -c 'cd /opt/aem_software ; jbang run --java=25 aem-installer-0.0.2-SNAPSHOT.jar'
+RUN cd /opt/aem_software ; jbang run --java=25 aem_cntrl-0.0.2-SNAPSHOT.jar install
 #
 # End of aem-install image
 
@@ -104,7 +107,7 @@ USER aem_user
 # Copy the AEM installed directory to the new image
 COPY --from=aem-install /opt/adobe /opt/adobe
 # Copy the aem_cntrl jar file to the /opt/adobe directory in the new image so we can use it later.
-COPY --from=aem-install /opt/aem_software/aem_cntrl-0.0.1-SNAPSHOT.jar /opt/adobe
+COPY --from=aem-install /opt/aem_software/aem_cntrl-0.0.2-SNAPSHOT.jar /opt/adobe
 
 #NOTE: make sure to copy admin.password.file and license.properties files to the /opt/aem-config folder.
 # VOLUME ["/opt/aem-config/"]
