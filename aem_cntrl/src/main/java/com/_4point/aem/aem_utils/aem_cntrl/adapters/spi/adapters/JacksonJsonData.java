@@ -1,6 +1,5 @@
 package com._4point.aem.aem_utils.aem_cntrl.adapters.spi.adapters;
 
-import java.util.List;
 import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
@@ -56,62 +55,6 @@ public class JacksonJsonData implements JsonData {
 	}
 	
 	/**
-	 * Determines the name of the root object
-	 * 
-	 * throws an exception of the root is an array.
-	 * 
-	 * @return
-	 */
-	@Override
-	public String determineRootName() {
-		List<String> topLevelFieldNames = listChildren();
-		if (topLevelFieldNames.size() != 1) {
-			// Should only be one root object.
-			throw new IllegalStateException("Expected just one json root but found nodes %s".formatted(topLevelFieldNames.toString()));
-		}
-		return topLevelFieldNames.get(0);
-	}
-
-	
-	/**
-	 * Lists the names of the children of this object..
-	 * 
-	 * @param jsonPtr
-	 * @return
-	 */
-	@Override
-	public List<String> listChildren() {
-		return listChildNames(rootNode);
-	}	
-
-	/**
-	 * Lists the names of the children at this location.
-	 * 
-	 * @param jsonPtr
-	 * @return
-	 */
-	@Override
-	public List<String> listChildrenAt(String jsonPtr) {
-		return listChildrenAt(JacksonJsonDataPointer.of(jsonPtr));
-	}	
-
-	/**
-	 * Lists the names of the children at this location.
-	 * 
-	 * @param jsonPtr
-	 * @return
-	 */
-	@Override
-	public List<String> listChildrenAt(JsonDataPointer jsonDataPtr) {
-		JsonNode node = rootNode.at(((JacksonJsonDataPointer)jsonDataPtr).jsonPointer);
-		return listChildNames(node);
-	}	
-
-	private List<String> listChildNames(JsonNode targetNode) {
-		return childNames(targetNode).toList();
-	}
-
-	/**
 	 * Streams the names of the children of this object..
 	 * 
 	 * @param jsonPtr
@@ -120,17 +63,6 @@ public class JacksonJsonData implements JsonData {
 	@Override
 	public Stream<String> children() {
 		return childNames(rootNode);
-	}	
-
-	/**
-	 * Streams the names of the children at this location.
-	 * 
-	 * @param jsonPtr
-	 * @return
-	 */
-	@Override
-	public Stream<String> childrenAt(String jsonPtr) {
-		return childrenAt(JacksonJsonDataPointer.of(jsonPtr));
 	}	
 
 	/**
@@ -162,28 +94,6 @@ public class JacksonJsonData implements JsonData {
 	}
 	
 	/**
-	 * Returns the value of the JsonNode pointed at using a JsonPointer string.
-	 * 
-	 * @param jsonPtr
-	 * @return
-	 */
-	@Override
-	public Optional<String> at(String jsonPtr) {
-		return at(JacksonJsonDataPointer.of(jsonPtr));
-	}
-	
-	/**
-	 * Returns the JsonData of the JsonNode pointed at using a JsonPointer string.
-	 * 
-	 * @param jsonPtr
-	 * @return
-	 */
-	@Override
-	public Optional<JsonData> subsetAt(String jsonPtr) {
-		return subsetAt(JacksonJsonDataPointer.of(jsonPtr));
-	}
-	
-	/**
 	 * Returns the JsonData of the JsonNode pointed at using a JsonPointer.
 	 * 
 	 * @param jsonPtr
@@ -195,17 +105,6 @@ public class JacksonJsonData implements JsonData {
 		return node.isContainer() ? Optional.of(JacksonJsonData.from(node.toPrettyString())) : Optional.empty();
 	}
 	
-	/**
-	 * Returns a Stream of JsonData of the Array pointed at using a JsonPointer String
-	 * 
-	 * @param jsonPtr - String containing JsonPointer
-	 * @return
-	 */
-	@Override
-	public Stream<JsonData> arrayAt(String jsonPtr) {
-		return arrayAt(JacksonJsonDataPointer.of(jsonPtr));
-	}
-
 	/**
 	 * Returns a Stream of JsonData of the Array pointed at using a JsonPointer String
 	 * 
@@ -223,44 +122,6 @@ public class JacksonJsonData implements JsonData {
 	}
 	
 	/**
-	 * Returns a List of JsonData of the Array pointed at using a JsonPointer String
-	 * 
-	 * @param jsonPtr
-	 * @return
-	 */
-	@Override
-	public List<JsonData> listAt(String jsonPtr) {
-		return arrayAt(jsonPtr).toList();
-	}	
-
-	/**
-	 * Returns a List of JsonData of the Array pointed at using a JsonPointer
-	 * 
-	 * @param jsonDataPtr
-	 * @return
-	 */
-	@Override
-	public List<JsonData> listAt(JsonDataPointer jsonDataPtr) {
-		return arrayAt(jsonDataPtr).toList();
-	}	
-
-	/**
-	 * Returns true if there is a JsonNode pointed at by the JsonPointer string.
-	 * 
-	 * This routine works for normal Json data and Adaptive Form Json data.
-	 * 
-	 * If the JsonData is Adaptive Form Json data (i.e. it has the Adaptive Form wrapper), then it will locate the node
-	 * using the "afBound" data node as the root node.  If that is not desired use the at(jsonPtr, false) call instead. 
-	 * 
-	 * @param jsonPtr
-	 * @return
-	 */
-	@Override
-	public boolean hasNode(String jsonPtr) {
-		return hasNode(JacksonJsonDataPointer.of(jsonPtr));
-	}
-
-	/**
 	 * Returns true if there is a JsonNode pointed at by the JsonPointer string.
 	 * 
 	 * This routine works for normal Json data and Adaptive Form Json data.
@@ -275,40 +136,6 @@ public class JacksonJsonData implements JsonData {
 	public boolean hasNode(JsonDataPointer jsonDataPtr) {
 		return !rootNode.at(((JacksonJsonDataPointer)jsonDataPtr).jsonPointer).isMissingNode();
 	}
-
-	/**
-	 * Inserts a property containing an object somewhere into the JSON
-	 * 
-	 * @param jsonPointer
-	 * 		pointer to location where the property will be inserted
-	 * @param property
-	 * 		property to be inserted
-	 * @param value
-	 * 		json object of the property being inserted
-	 * @return
-	 * 		copy of the original JsonData with the property inserted.
-	 */
-	@Override
-	public JsonData insertJsonProperty(String jsonPointer, String property, JsonData value) {
-		return insertJsonProperty(JacksonJsonDataPointer.of(jsonPointer), property, value);
-	}
-
-	/**
-	 * Inserts a property with a String value somewhere into the JSON
-	 * 
-	 * @param jsonPointer
-	 * 		pointer to location where the property will be inserted
-	 * @param property
-	 * 		property to be inserted
-	 * @param value
-	 * 		value of the property being inserted
-	 * @return
-	 * 		copy of the original JsonData with the property inserted.
-	 */
-	@Override
-	public JsonData insertJsonProperty(String jsonPointer, String property, String value) {
-		return insertJsonProperty(JacksonJsonDataPointer.of(jsonPointer), property, value);
-	}	
 
 	/**
 	 * Inserts a property containing an object somewhere into the JSON
@@ -341,7 +168,6 @@ public class JacksonJsonData implements JsonData {
 	 */
 	@Override
 	public JsonData insertJsonProperty(JsonDataPointer jsonDataPointer, String property, String value) {
-		
 		return insert(((JacksonJsonDataPointer)jsonDataPointer).jsonPointer, n->n.put(property, value));
 	}	
 

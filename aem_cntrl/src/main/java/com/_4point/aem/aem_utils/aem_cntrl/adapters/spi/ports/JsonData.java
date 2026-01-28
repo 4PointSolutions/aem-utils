@@ -21,7 +21,14 @@ public interface JsonData {
 	 * 
 	 * @return
 	 */
-	String determineRootName();
+	default String determineRootName() {
+		List<String> topLevelFieldNames = listChildren();
+		if (topLevelFieldNames.size() != 1) {
+			// Should only be one root object.
+			throw new IllegalStateException("Expected just one json root but found nodes %s".formatted(topLevelFieldNames.toString()));
+		}
+		return topLevelFieldNames.get(0);
+	}
 
 	/**
 	 * Returns the value of the JsonNode pointed at using a JsonPointer string.
@@ -37,7 +44,9 @@ public interface JsonData {
 	 * @param jsonPtr
 	 * @return
 	 */
-	Optional<String> at(String jsonPtr);
+	default Optional<String> at(String jsonPtr){
+		return at(pointerOf(jsonPtr));
+	}
 
 	/**
 	 * Returns the JsonData of the JsonNode pointed at using a JsonPointer string.
@@ -45,7 +54,9 @@ public interface JsonData {
 	 * @param jsonPtr
 	 * @return
 	 */
-	Optional<JsonData> subsetAt(String jsonPtr);
+	default Optional<JsonData> subsetAt(String jsonPtr){
+		return subsetAt(pointerOf(jsonPtr));
+	}
 
 	/**
 	 * Returns the JsonData of the JsonNode pointed at using a JsonPointer.
@@ -61,7 +72,9 @@ public interface JsonData {
 	 * @param jsonPtr - String containing JsonPointer
 	 * @return
 	 */
-	Stream<JsonData> arrayAt(String jsonPtr);
+	default Stream<JsonData> arrayAt(String jsonPtr){
+		return arrayAt(pointerOf(jsonPtr));
+	}
 
 	/**
 	 * Returns a Stream of JsonData of the Array pointed at using a JsonPointer String
@@ -77,7 +90,9 @@ public interface JsonData {
 	 * @param jsonPtr
 	 * @return
 	 */
-	List<JsonData> listAt(String jsonPtr);
+	default List<JsonData> listAt(String jsonPtr){
+		return arrayAt(jsonPtr).toList();
+	}
 
 	/**
 	 * Returns a List of JsonData of the Array pointed at using a JsonPointer
@@ -85,7 +100,9 @@ public interface JsonData {
 	 * @param jsonDataPtr
 	 * @return
 	 */
-	List<JsonData> listAt(JsonDataPointer jsonDataPtr);
+	default List<JsonData> listAt(JsonDataPointer jsonDataPtr){
+		return arrayAt(jsonDataPtr).toList();
+	}
 
 	/**
 	 * Lists the names of the children at this location.
@@ -93,7 +110,9 @@ public interface JsonData {
 	 * @param jsonPtr
 	 * @return
 	 */
-	List<String> listChildrenAt(String jsonPtr);
+	default List<String> listChildrenAt(String jsonPtr) {
+		return listChildrenAt(pointerOf(jsonPtr));
+	}
 
 	/**
 	 * Lists the names of the children at this location.
@@ -101,7 +120,9 @@ public interface JsonData {
 	 * @param jsonPtr
 	 * @return
 	 */
-	List<String> listChildrenAt(JsonDataPointer jsonDataPtr);
+	default List<String> listChildrenAt(JsonDataPointer jsonDataPtr) {
+		return childrenAt(jsonDataPtr).toList();
+	}
 
 	/**
 	 * Lists the names of the children of this object..
@@ -109,7 +130,9 @@ public interface JsonData {
 	 * @param jsonPtr
 	 * @return
 	 */
-	List<String> listChildren();
+	default List<String> listChildren() {
+		return children().toList();
+	}
 
 	/**
 	 * Streams the names of the children at this location.
@@ -117,7 +140,9 @@ public interface JsonData {
 	 * @param jsonPtr
 	 * @return
 	 */
-	Stream<String> childrenAt(String jsonPtr);
+	default Stream<String> childrenAt(String jsonPtr){
+		return childrenAt(pointerOf(jsonPtr));
+	}
 
 	/**
 	 * Streams the names of the children at this location.
@@ -146,7 +171,9 @@ public interface JsonData {
 	 * @param jsonPtr
 	 * @return
 	 */
-	boolean hasNode(String jsonPtr);
+	default boolean hasNode(String jsonPtr){
+		return hasNode(pointerOf(jsonPtr));
+	}
 
 	/**
 	 * Returns true if there is a JsonNode pointed at by the JsonPointer string.
@@ -173,7 +200,9 @@ public interface JsonData {
 	 * @return
 	 * 		copy of the original JsonData with the property inserted.
 	 */
-	JsonData insertJsonProperty(String jsonPointer, String property, JsonData value);
+	default JsonData insertJsonProperty(String jsonPointer, String property, JsonData value){
+		return insertJsonProperty(pointerOf(jsonPointer), property, value);
+	}
 
 	/**
 	 * Inserts a property with a String value somewhere into the JSON
@@ -187,7 +216,9 @@ public interface JsonData {
 	 * @return
 	 * 		copy of the original JsonData with the property inserted.
 	 */
-	JsonData insertJsonProperty(String jsonPointer, String property, String value);
+	default JsonData insertJsonProperty(String jsonPointer, String property, String value){
+		return insertJsonProperty(pointerOf(jsonPointer), property, value);
+	}
 
 	/**
 	 * Inserts a property containing an object somewhere into the JSON
