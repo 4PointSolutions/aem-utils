@@ -1,4 +1,4 @@
-name: AEM Cntrl CI
+name: AEM Control CI
 
 on: 
   push:

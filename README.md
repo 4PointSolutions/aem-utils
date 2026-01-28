@@ -2,7 +2,8 @@
 
 A collection of 4Point AEM and AEM Forms Utilities.  This currently consists of the following projects:
 
-## AEM Control (aem_cntrl)
+## AEM Control (aem_cntrl) 
+[![AEM Control CI](https://github.com/4PointSolutions/aem-utils/actions/workflows/aem-cntrl-ci.yml/badge.svg)](https://github.com/4PointSolutions/aem-utils/actions/workflows/aem-cntrl-ci.yml)
 
 This is a command line utility that can be used to install and (eventually) control AEM.  It knows about AEM and when installing, it will set 
 up the correct Java environment before installing.  It installs to a AEM standard location based on the version and service pack being installed.
