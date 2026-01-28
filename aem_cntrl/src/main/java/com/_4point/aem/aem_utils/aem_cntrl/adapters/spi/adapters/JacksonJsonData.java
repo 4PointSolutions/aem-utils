@@ -9,8 +9,8 @@ import com._4point.aem.aem_utils.aem_cntrl.adapters.spi.ports.JsonData;
 
 import tools.jackson.core.JacksonException;
 import tools.jackson.core.JsonPointer;
+import tools.jackson.databind.json.JsonMapper;
 import tools.jackson.databind.JsonNode;
-import tools.jackson.databind.ObjectMapper;
 import tools.jackson.databind.node.ObjectNode;
 
 /**
@@ -26,7 +26,7 @@ public class JacksonJsonData implements JsonData {
 	// ObjectMapper is expensive to create but is threadsafe, so only create it once.
 	// See: https://stackoverflow.com/questions/57670466/objectmapper-best-practice-for-thread-safety-and-performance
 	// Also see: https://stackoverflow.com/questions/3907929/should-i-declare-jacksons-objectmapper-as-a-static-field
-	private static final ObjectMapper mapper = new ObjectMapper();
+	private static final JsonMapper mapper = JsonMapper.builder().build();
 
 	private final String jsonData;
 	private final JsonNode rootNode;
