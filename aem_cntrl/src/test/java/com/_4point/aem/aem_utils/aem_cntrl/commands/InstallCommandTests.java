@@ -32,7 +32,7 @@ class InstallCommandTests {
 			assertEquals(CommandLine.ExitCode.OK, exitCodeGenerator.getExitCode(), "Exit code should be 0 for successful installation without arguments.");
 		}
 	
-		@EnabledOnOs(OS.LINUX)
+		@EnabledOnOs({OS.LINUX, OS.MAC})
 		@Test
 		void testInstall_NoArgs_Linux() throws Exception {
 			doNothing().when(aemInstallerMock).installAem(any(Path.class), any(Path.class));
@@ -61,10 +61,19 @@ class InstallCommandTests {
 		@MockitoBean AemInstaller aemInstaller;
 		@Autowired ExitCodeGenerator exitCodeGenerator;
 
+		@EnabledOnOs(OS.WINDOWS)
 		@Test
-		void testInstall_SourceArg() throws Exception {
+		void testInstall_SourceArg_Windows() throws Exception {
 			doNothing().when(aemInstaller).installAem(any(Path.class), any(Path.class));
 			verify(aemInstaller, times(1)).installAem(eq(Path.of("\\Adobe")), eq(Path.of("SrcDir")));
+			assertEquals(CommandLine.ExitCode.OK, exitCodeGenerator.getExitCode(), "Exit code should be 0 for successful installation without destination directory.");
+		}
+
+		@EnabledOnOs({OS.LINUX, OS.MAC})
+		@Test
+		void testInstall_SourceArg_Unix() throws Exception {
+			doNothing().when(aemInstaller).installAem(any(Path.class), any(Path.class));
+			verify(aemInstaller, times(1)).installAem(eq(Path.of("/opt", "adobe")), eq(Path.of("SrcDir")));
 			assertEquals(CommandLine.ExitCode.OK, exitCodeGenerator.getExitCode(), "Exit code should be 0 for successful installation without destination directory.");
 		}
 	}
