@@ -10,7 +10,7 @@ import org.apache.commons.lang3.SystemUtils;
 public enum OperatingSystem {
 	WINDOWS(List.of("CMD.exe","/C", "jbang"), "runStart.bat", "runStop.bat"),
 	LINUX(List.of("jbang"), "runStart", "runStop"),
-	MACOS(List.of("jbang"), "runStart", "runStop");
+	MACOS(List.of("/opt/homebrew/bin/jbang"), "runStart", "runStop");
 
 	private final List<String> jbangCommand;
 	private final Path runStart;

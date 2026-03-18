@@ -115,9 +115,19 @@ class AemInstallerImpl_SociableTest {
 	}
 
 	private static String[] jbangCommand(String... args) {
-		return Stream.concat((OS.WINDOWS.isCurrentOs() ? Stream.of("CMD.exe", "/C", "jbang") : Stream.of("jbang")), Stream.of(args))
+		return Stream.concat(jbangCmd(), Stream.of(args))
 					 .map(arg->arg.contains(" ") ? "\"" + arg + "\"" : arg)
 					 .toArray(String[]::new);
+	}
+
+	private static Stream<? extends String> jbangCmd() {
+		return switch (OS.current()) {
+			case WINDOWS -> Stream.of("CMD.exe", "/C", "jbang");
+			case MAC -> Stream.of("/opt/homebrew/bin/jbang");
+			default -> Stream.of("jbang");
+		
+		};
+//				OS.WINDOWS.isCurrentOs() ? Stream.of("CMD.exe", "/C", "jbang") : Stream.of("jbang");
 	}
 	
 	private Executable verifyExists(Path aemDir, MockInstallFiles installFile) {
