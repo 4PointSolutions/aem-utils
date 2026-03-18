@@ -8,6 +8,8 @@ import java.time.Duration;
 import java.util.regex.Pattern;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.condition.EnabledOnOs;
+import org.junit.jupiter.api.condition.OS;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.ExitCodeGenerator;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -189,6 +191,7 @@ class WaitForLogCommandTests {
 		}
 	}
 
+	@EnabledOnOs({OS.WINDOWS})   // Only allowed on Windows since Unix allows anything to be in the filename
 	@SpringBootTest(args = {"wflog", "--startup", "--aemdir", "\\\\\\\\AemDir"})
 	static class WaitForLogCommandInvalidAemDirectoryTest {
 		

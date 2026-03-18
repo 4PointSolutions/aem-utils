@@ -6,6 +6,8 @@ import static org.mockito.Mockito.*;
 import java.nio.file.Path;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.condition.EnabledOnOs;
+import org.junit.jupiter.api.condition.OS;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.ExitCodeGenerator;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -88,6 +90,7 @@ class ShimCommandTests {
 		}
 	}
 
+	@EnabledOnOs({OS.WINDOWS})  // Only allowed on Windows since Unix allows anything to be in the filename
 	@SpringBootTest(args = {"shim", "--add_update", "--aemdir", "\\\\\\\\AemDir"})
 	static class ShimCommandBadAemDirTest {
 		
