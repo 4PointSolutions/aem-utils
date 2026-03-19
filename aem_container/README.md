@@ -22,7 +22,7 @@ If using the AEM LTS, alter the `aem_lts.dockerfile` CMD line (at the end of the
 
 or
 
-`docker buildx build --file aem_lts.dockerfile -t aem:aem65lts .`
+`docker buildx build --file aem_lts.dockerfile -t aem:aem65lts_sp1 .`
 
 * Command to build and run docker container locally
 
@@ -30,7 +30,7 @@ or
 
 or
 
-`docker run -i -t -p 4502:4502 --name aem65lts aem:aem65lts`
+`docker run -i -t -p 4502:4502 --name aem65lts aem:aem65lts_sp1`
 
 Note: On Macs, you can add `--platform linux/amd64` to the command to generate an x86_64 image since AEM only supports x86_64 Linux variants. 
 
