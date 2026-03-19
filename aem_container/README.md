@@ -32,6 +32,8 @@ or
 
 `docker run -i -t -p 4502:4502 --name aem65lts aem:aem65lts`
 
+Note: On Macs, you can add `--platform linux/amd64` to the command to generate an x86_64 image since AEM only supports x86_64 Linux variants. 
+
 ### Pushing to GitHub
 
 * Login to GitHub Container Registry
