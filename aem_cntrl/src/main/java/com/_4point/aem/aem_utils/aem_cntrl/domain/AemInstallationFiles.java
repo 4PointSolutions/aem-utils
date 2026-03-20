@@ -206,7 +206,7 @@ public class AemInstallationFiles extends InstallationFiles {
 		return switch (OperatingSystem.getOs()) {
 			case WINDOWS -> "win";
 			case LINUX -> "linux";
-			case MACOS -> "macos";
+			case MACOS -> "osx";
 		};
 	}
 }

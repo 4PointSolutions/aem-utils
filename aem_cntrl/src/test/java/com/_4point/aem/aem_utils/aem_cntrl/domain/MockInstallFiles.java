@@ -53,7 +53,7 @@ public enum MockInstallFiles {
 		} else if (SystemUtils.IS_OS_LINUX) {
 			return "linux";
 		} else if (SystemUtils.IS_OS_MAC) {
-			return "macos";
+			return "osx";
 		} else {
 			throw new IllegalStateException("Unsupported Operating System (%s)".formatted(SystemUtils.OS_NAME));
 		}
