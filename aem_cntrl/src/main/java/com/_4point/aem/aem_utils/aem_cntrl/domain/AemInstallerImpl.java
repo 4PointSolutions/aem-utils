@@ -80,7 +80,6 @@ public class AemInstallerImpl implements AemInstaller {
 				});
 
 		
-		// TODO: Modify sling,properties to include JSaafe e entry
 		log.atInfo().log("Copying Forms Addon file");
 		aemFiles.copyFormsAddOnToTarget(installDir);
 		log.atInfo().log("Running AEM to install Forms Addon");
