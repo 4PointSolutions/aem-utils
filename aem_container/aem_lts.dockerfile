@@ -99,7 +99,7 @@ RUN cd /opt/aem_software ; jbang run --java=25 aem_cntrl-0.0.2-SNAPSHOT.jar inst
 #
 # Build final image
 #
-FROM aem-base AS aem_lts_sp1
+FROM aem-base AS aem_lts_sp3
 
 # Switch to AEM user 
 USER aem_user
